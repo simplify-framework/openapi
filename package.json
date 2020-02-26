@@ -1,0 +1,33 @@
+{
+  "name": "lambda-codegen",
+  "description": "Openapi code generator from OpenAPI spec",
+  "version": "1.0.0",
+  "author": "Dinh Cuong, Duong  <cuong3ihut@gmail.com>",
+  "contributors": [],
+  "dependencies": {
+    "adm-zip": "^0.4.7",
+    "case": "^1.5.4",
+    "co": "^4.6.0",
+    "connect": "^3.6.5",
+    "hogan.js": "^3.0.2",
+    "js-yaml": "^3.10.0",
+    "mkdirp": "^0.5.1",
+    "node-fetch": "^2.0.0",
+    "openapi-sampler": "^1.0.0-beta.8",
+    "reftools": "0.0.20",
+    "rimraf": "^2.6.2",
+    "safe-json-stringify": "github:MikeRalphson/safe-json-stringify",
+    "swagger-tools": "^0.10.3",
+    "swagger2openapi": "^2.11.9",
+    "uuid": "^3.1.0",
+    "yargs": "^11.0.0"
+  },
+  "devDependencies": {
+    "openapi-codegen": "^1.5.0"
+  },
+  "scripts": {
+    "lambda": "node cg.js lambda -f -o",
+    "make-lambda": "npm run lambda ../output/lambda ../output/current.yaml && npm run build",
+    "build": "cd ../output/lambda && npm install"
+  }
+}

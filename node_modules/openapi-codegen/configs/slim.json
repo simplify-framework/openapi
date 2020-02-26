@@ -1,0 +1,12 @@
+{
+    "defaults": {
+    },
+    "partials": {
+    },
+    "transformations": [
+        { "input": "composer.json", "output": "composer.json" },
+        { "input": "README.mustache", "output": "README.md" },
+        { "input": "index.mustache", "output": "index.php" },
+        { "input": "model.mustache", "output": "model.php" }
+    ]
+}

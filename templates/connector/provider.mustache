@@ -1,0 +1,36 @@
+'use strict';
+
+{{#operations}}
+{{#operation}}
+
+/**
+ {{#summary}}
+ * {{{summary}}}
+ {{/summary}}
+ {{#notes}}
+ * {{{notes}}}
+ {{/notes}}
+ *
+{{#allParams}}
+ * {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
+{{/allParams}}
+{{^returnType}}
+ * no response value expected for this operation
+{{/returnType}}
+{{#returnType}}
+ * returns {{{returnType}}}
+{{/returnType}}
+ **/
+exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
+  return new Promise(function(resolve, reject) {
+  {{#returnType}}
+    reject({
+      "code": "ErrorOperationNotImplemetedException",
+      "message": "The '{{{operationId}}}' was not Implemented. [TODO: Imprement your service calls here]"
+    });
+  {{/returnType}}
+  });
+}
+
+{{/operation}}
+{{/operations}}

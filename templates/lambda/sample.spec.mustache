@@ -1,0 +1,20 @@
+var chai = require('chai');
+var rewire = require('rewire');
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised).should();
+
+{{#operations}}
+const {{classname}}Service = rewire('../../{{implFolder}}/{{classname}}');
+
+describe('({{implFolder}}) {{classname}}:', function () {
+    before('Prepare for {{classname}} test specs', function () {});
+{{#operation}}
+
+    it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', function () {
+        return {{classname}}Service.{{{operationId}}}('{{#allParams}}{{paramName}}{{#hasMore}}', '{{/hasMore}}{{/allParams}}').should.eventually.rejected;
+    });
+
+{{/operation}}
+    after('Cleanup {{classname}} test specs', function () {});
+});
+{{/operations}}

@@ -1,4 +1,5 @@
 **HOWTO generate a node base application base on OpenAPI Spec:**
+
 Forked from: https://github.com/swagger-api/swagger-codegen
 1. Edit ..\output\current.yaml
 2. Run `npm install && npm run make-lambda`
