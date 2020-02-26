@@ -4,17 +4,17 @@
 const util = require('util');
 const url = require('url');
 
-const yaml = require('js-yaml');
+const yaml = require('yaml');
 const uuidv4 = require('uuid/v4');
 const safeJson = require('safe-json-stringify');
 const Case = require('case');
 const stools = require('swagger-tools');
 const sampler = require('openapi-sampler');
 const deref = require('reftools/lib/dereference.js').dereference;
-const clone = require('reftools/lib/clone.js').clone;
-const walkSchema = require('swagger2openapi/walkSchema').walkSchema;
-const wsGetState = require('swagger2openapi/walkSchema').getDefaultState;
-const validator = require('swagger2openapi/validate').validateSync;
+const clone = require('reftools/lib/clone.js').circularClone;
+const walkSchema = require('oas-schema-walker').walkSchema;
+const wsGetState = require('oas-schema-walker').getDefaultState;
+const validator = require('oas-validator').validateSync;
 const downconverter = require('./lib/orange/downconvert.js');
 
 const schemaProperties = [
@@ -40,6 +40,16 @@ const schemaProperties = [
 // used by helper functions / convertToArray's toString method
 let arrayMode = 'length';
 let thisFunc = encodeURIComponent;
+
+function safeSample(schema, options, api) {
+    try {
+        return sampler.sample(schema, options, api);
+    }
+    catch (ex) {
+        console.warn('Sampler:', ex.message);
+    }
+    return {};
+}
 
 function convertArray(arr) {
     if (!arr) arr = [];
@@ -130,32 +140,32 @@ function specificationExtensions(obj) {
 function convertOperation(op, verb, path, pathItem, obj, api) {
     let operation = {};
     operation.httpMethod = verb.toUpperCase();
-    if (obj.httpMethodCase === 'original') operation.httpMethod = verb;
+    if (obj.httpMethodCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
-    operation.replacedPathName = path;
+    operation.replacedPathName = path; //?
     operation.operationTimeout = op['x-operation-timeout'] || 60000;
     operation.enableProtection = op['x-enable-protection'] || false;
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
     operation.nickname = operation.operationId;
-
     operation.description = op.description;
     operation.summary = op.summary;
-    operation.primaryParamName;
     operation.allParams = [];
     operation.pathParams = [];
     operation.queryParams = [];
     operation.headerParams = [];
     operation.formParams = [];
+    operation.primaryParamName = undefined;
     operation.summary = op.summary;
     operation.notes = op.description;
     if (!operation.notes) {
         operation.notes = { isEmpty: true };
         operation.notes.toString = function () { return '' };
     }
-    operation.isResponseBinary = false;
-    operation.isResponseFile = false;
+    //operation.hasMore = true; // last one gets reset to false
+    operation.isResponseBinary = false; //TODO
+    operation.isResponseFile = false; //TODO
     operation.baseName = 'Default';
     if (op.tags && op.tags.length) {
         operation.baseName = op.tags[0];
@@ -178,6 +188,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     let effParameters = (op.parameters || []).concat(pathItem.parameters || []);
     effParameters = effParameters.filter((param, index, self) => self.findIndex((p) => { return p.name === param.name && p.in === param.in; }) === index);
 
+    const paramList = [];
     for (let pa in effParameters) {
         operation.hasParams = true;
         let param = effParameters[pa];
@@ -189,6 +200,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         parameter.isFormParam = false;
         parameter.paramName = param.name;
         parameter.baseName = param.name;
+        paramList.push(param.name);
         parameter.required = param.required || false;
         parameter.optional = !parameter.required;
         if (parameter.required) operation.hasRequiredParams = true;
@@ -198,7 +210,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         for (let p of schemaProperties) {
             if (typeof param.schema[p] !== 'undefined') parameter[p] = param.schema[p];
         }
-        parameter.example = JSON.stringify(sampler.sample(param.schema, {}, api));
+        parameter.example = JSON.stringify(safeSample(param.schema, {}, api));
         parameter.isBoolean = (param.schema.type === 'boolean');
         parameter.isPrimitiveType = (!param.schema["x-oldref"]);
         parameter.dataFormat = param.schema.format;
@@ -208,8 +220,9 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         parameter.unescapedDescription = param.description;
         parameter.defaultValue = (param.schema && typeof param.schema.default !== 'undefined') ? param.schema.default : undefined;
         parameter.isFile = false;
-        parameter.isEnum = false;
+        parameter.isEnum = false; // TODO?
         parameter.vendorExtensions = specificationExtensions(param);
+
         if (param.schema && param.schema.nullable) {
             parameter.vendorExtensions["x-nullable"] = true;
         }
@@ -262,6 +275,11 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         }*/
     } // end of effective parameters
 
+    operation.operationId = op.operationId || Case.camel((op.tags ? op.tags[0] : '') + (paramList ? '_' + paramList.join('_') + '_' : '') + verb);
+    operation.operationIdLowerCase = operation.operationId.toLowerCase();
+    operation.operationIdSnakeCase = Case.snake(operation.operationId);
+    operation.nickname = operation.operationId;
+
     operation.bodyParams = [];
     if (op.requestBody) {
         operation.openapi.requestBody = op.requestBody;
@@ -285,7 +303,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         operation.bodyParam.dataType = typeMap('object', operation.bodyParam.required, {}); // can be changed below
         operation.bodyParam.description = op.requestBody.description || '';
         operation.bodyParam.schema = {};
-        operation.bodyParam.isEnum = false;
+        operation.bodyParam.isEnum = false; // TODO?
         operation.bodyParam.vendorExtensions = specificationExtensions(op.requestBody);
         if (op.requestBody.content) {
             let contentType = Object.values(op.requestBody.content)[0];
@@ -300,7 +318,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
                 obj.hasConsumes = true;
             }
             operation.bodyParam.schema = contentType.schema;
-            operation.bodyParam.example = JSON.stringify(sampler.sample(contentType.schema, {}, api));
+            operation.bodyParam.example = JSON.stringify(safeSample(contentType.schema, {}, api));
             for (let p in schemaProperties) {
                 if (typeof contentType.schema[p] !== 'undefined') operation.bodyParam[p] = contentType.schema[p];
             }
@@ -312,7 +330,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         operation.bodyParam["%dataType%"] = operation.bodyParam.dataType; // bug in typescript-fetch template?
         operation.bodyParam.jsonSchema = safeJson({ schema: operation.bodyParam.schema }, null, 2);
         operation.bodyParams.push(operation.bodyParam);
-        operation.bodyParam.isFile = false;
+        operation.bodyParam.isFile = false; // TODO
         operation.allParams.push(clone(operation.bodyParam));
     }
     operation.tags = op.tags;
@@ -321,89 +339,92 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
 
     operation.responses = [];
     for (let r in op.responses) {
-        let response = op.responses[r];
-        let entry = {};
-        entry.code = r;
-        entry.isDefault = (r === 'default');
-        entry.nickname = 'response' + r;
-        entry.message = response.description;
-        entry.description = response.description || '';
-        entry.simpleType = true;
-        entry.schema = {};
-        entry.jsonSchema = safeJson({ schema: entry.schema }, null, 2);
-        if (response.content) {
-            entry.baseType = 'object';
-            entry.dataType = typeMap(entry.baseType, false, {});
-            let contentType = Object.values(response.content)[0];
-            let mt = {};
-            mt.mediaType = Object.keys(response.content)[0];
-            operation.produces.push(mt);
-            operation.hasProduces = true;
-            let tmp = obj.produces.find(function (e, i, a) {
-                return (e.mediaType === mt.mediaType);
-            });
-            if (!tmp) {
-                obj.produces.push(clone(mt)); // so convertArray works correctly
-                obj.hasProduces = true;
-            }
-            if (contentType && contentType.schema) {
-                entry.schema = contentType.schema;
-                entry.jsonSchema = safeJson({ schema: entry.schema }, null, 2);
-                entry.baseType = contentType.schema.type;
-                entry.isPrimitiveType = true;
-                entry.dataType = typeMap(contentType.schema.type, false, entry.schema);
-                if (contentType.schema["x-oldref"]) {
-                    entry.dataType = contentType.schema["x-oldref"].replace('#/components/schemas/', '');
-                    entry.isPrimitiveType = false;
+        if (!r.startsWith('x-')) {
+            let response = op.responses[r];
+            let entry = {};
+            entry.code = r;
+            entry.isDefault = (r === 'default');
+            entry.nickname = 'response' + r;
+            entry.message = response.description;
+            entry.description = response.description || '';
+            entry.simpleType = true;
+            entry.schema = {};
+            entry.jsonSchema = safeJson({ schema: entry.schema }, null, 2);
+            if (response.content) {
+                entry.baseType = 'object';
+                entry.dataType = typeMap(entry.baseType, false, {});
+                let contentType = Object.values(response.content)[0];
+                let mt = {};
+                mt.mediaType = Object.keys(response.content)[0];
+                operation.produces.push(mt);
+                operation.hasProduces = true;
+                let tmp = obj.produces.find(function (e, i, a) {
+                    return (e.mediaType === mt.mediaType);
+                });
+                if (!tmp) {
+                    obj.produces.push(clone(mt)); // so convertArray works correctly
+                    obj.hasProduces = true;
                 }
-            }
-            if (contentType && contentType.example) {
-                entry.hasExamples = true;
-                if (!entry.examples) entry.examples = [];
-                entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(contentType.example, null, 2) });
-            }
-            if (contentType && contentType.examples) {
-                for (let ex in contentType.examples) {
-                    const example = contentType.examples[ex];
-                    if (example.value) {
-                        entry.hasExamples = true;
-                        if (!entry.examples) entry.examples = [];
-                        entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(example.value, null, 2) });
+                if (contentType && contentType.schema) {
+                    entry.schema = contentType.schema;
+                    entry.jsonSchema = safeJson({ schema: entry.schema }, null, 2);
+                    entry.baseType = contentType.schema.type;
+                    entry.isPrimitiveType = true;
+                    entry.dataType = typeMap(contentType.schema.type, false, entry.schema);
+                    if (contentType.schema["x-oldref"]) {
+                        entry.dataType = contentType.schema["x-oldref"].replace('#/components/schemas/', '');
+                        entry.isPrimitiveType = false;
                     }
                 }
-            }
-
-            if (!entry.hasExamples && entry.schema) {
-                let example = sampler.sample(entry.schema, {}, api);
-                if (example) {
+                if (contentType && contentType.example) {
                     entry.hasExamples = true;
                     if (!entry.examples) entry.examples = [];
-                    entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(example, null, 2) });
+                    entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(contentType.example, null, 2) });
                 }
+                if (contentType && contentType.examples) {
+                    for (let ex in contentType.examples) {
+                        const example = contentType.examples[ex];
+                        if (example.value) {
+                            entry.hasExamples = true;
+                            if (!entry.examples) entry.examples = [];
+                            entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(example.value, null, 2) });
+                        }
+                    }
+                }
+
+                if (!entry.hasExamples && entry.schema) {
+                    let example = safeSample(entry.schema, {}, api);
+                    if (example) {
+                        entry.hasExamples = true;
+                        if (!entry.examples) entry.examples = [];
+                        entry.examples.push({ contentType: mt.mediaType, example: JSON.stringify(example, null, 2) });
+                    }
+                }
+
+                operation.examples = (operation.examples || []).concat(entry.examples || []);
+
+                operation.returnType = entry.dataType;
+                operation.returnBaseType = entry.baseType;
+                operation.returnTypeIsPrimitive = entry.isPrimitiveType;
+                operation.returnContainer = ((entry.baseType === 'object') || (entry.baseType === 'array'));
+
             }
-
-            operation.examples = (operation.examples || []).concat(entry.examples || []);
-
-            operation.returnType = entry.dataType;
-            operation.returnBaseType = entry.baseType;
-            operation.returnTypeIsPrimitive = entry.isPrimitiveType;
-            operation.returnContainer = ((entry.baseType === 'object') || (entry.baseType === 'array'));
-
+            entry.responseHeaders = []; // TODO responseHeaders
+            entry.responseHeaders = convertArray(entry.responseHeaders);
+            entry.examples = convertArray(entry.examples);
+            entry.openapi = {};
+            entry.openapi.links = response.links;
+            operation.responses.push(entry);
+            operation.responses = convertArray(operation.responses);
         }
-        entry.responseHeaders = [];
-        entry.responseHeaders = convertArray(entry.responseHeaders);
-        entry.examples = convertArray(entry.examples);
-        entry.openapi = {};
-        entry.openapi.links = response.links;
-        operation.responses.push(entry);
-    }
 
-    if (obj.sortParamsByRequiredFlag) {
-        operation.allParams = operation.allParams.sort(function (a, b) {
-            if (a.required && !b.required) return -1;
-            if (b.required && !a.required) return +1;
-            return 0;
-        });
+        if (obj.sortParamsByRequiredFlag) {
+            operation.allParams = operation.allParams.sort(function (a, b) {
+                if (a.required && !b.required) return -1;
+                if (b.required && !a.required) return +1;
+                return 0;
+            });
+        }
     }
     operation.queryParams = convertArray(operation.queryParams);
     operation.headerParams = convertArray(operation.headerParams);
@@ -482,6 +503,72 @@ function convertToApis(source, obj, defaults) {
     return apis;
 }
 
+function convertToPaths(source, obj, defaults) {
+    let paths = [];
+    for (let p in source.paths) {
+        for (let m in source.paths[p]) {
+            if ((m !== 'parameters') && (m !== 'summary') && (m !== 'description') && (!m.startsWith('x-'))) {
+                let op = source.paths[p][m];
+                let tagName = 'Default';
+                if (op.tags && op.tags.length > 0) {
+                    tagName = op.tags[0];
+                }
+                let entry = paths.find(function (e, i, a) {
+                    return (e.name === p);
+                });
+                if (!entry) {
+                    const split = p.replace(/^\//, '').split(/\//g);
+                    const dirname = split.slice(0, -1).join('/');
+                    const filename = split.slice(-1).join('');
+                    // Generates class name from path using the rules
+                    // * the slashes are stripped out
+                    // * each path part is capitalised
+                    // * each parameter is changed to By<param>
+                    // i.e.
+                    // /users => Users
+                    // /users/{id} => UsersById
+                    // /users/{id}/delete => UsersByIdDelete
+                    const className = split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
+
+                    entry = {};
+                    entry.name = p;
+                    //if (defaults.language === 'typescript') {
+                    //    entry.classname = Case.pascal(entry.name);
+                    //}
+                    //else {
+                    entry.classname = className + 'Api';
+                    //}
+                    entry.classDirName = dirname;
+                    entry.classFilename = filename;
+                    entry.classVarName = tagName; // see issue #21
+                    entry.packageName = obj.packageName; //! this may not be enough / sustainable. Or many props at wrong level :(
+                    entry.operations = {};
+                    entry.operations.operation = [];
+                    paths.push(entry);
+                }
+                let operation = convertOperation(op, m, p, source.paths[p], obj, source);
+                entry.operations.operation.push(operation);
+            }
+        }
+    }
+    for (let t in source.tags) {
+        let tag = source.tags[t];
+        let entry = paths.find(function (e, i, a) {
+            return (e.name === t);
+        });
+        if (entry) {
+            entry.classname = tag.name + 'Api';
+            entry.description = tag.description;
+            entry.externalDocs = tag.externalDocs;
+        }
+    }
+    for (let path of paths) {
+        path.operations.operation = convertArray(path.operations.operation);
+    }
+    paths = convertArray(paths);
+    return paths;
+}
+
 // TODO add html and possibly termcap (https://www.npmjs.com/package/hermit) renderers
 const markdownPPs = {
     nop: function (markdown) {
@@ -520,7 +607,7 @@ const typeMaps = {
         if (result === 'boolean') result = 'bool';
         if (result === 'object') result = 'struct{}';
         if (result === 'array') {
-            result = '[100]';
+            result = '[100]'; //!
             if (schema.items && schema.items.type) {
                 result += typeMap(schema.items.type, false, schema.items);
             }
@@ -570,6 +657,7 @@ function getBase() {
     base.interfacePrefix = ''; /* Prefix interfaces with a community standard or widely accepted prefix. */
     base.returnICollection = false; /* Return ICollection<T> instead of the concrete type. */
     base.optionalProjectFile = false; /* Generate {PackageName}.csproj. */
+    base.variableNamingConvention = 'original'; /* {camelCase, PascalCase, snake_case, original, UPPERCASE} */
     base.modelPropertyNaming = 'original'; /* {camelCase, PascalCase, snake_case, original, UPPERCASE} */
     base.targetFramework = 4; /* The target .NET framework version. */
     base.modelNamePrefix = ''; /* Prefix that will be prepended to all model names. Default is the empty string. */
@@ -603,12 +691,11 @@ function getBase() {
 
 function getPrime(api, defaults) {
     let prime = {};
-    
+    prime.projectBundle = api.info.title;
     prime.provider = api['x-service-provider'];
     prime.classname = api.info.title.toLowerCase().split(' ').join('_').split('-').join('_');
-    prime.projectName = prime.classname;
     prime.serviceName = prime.classname.toUpperCase();
-    prime.projectBundle = api.info.title;
+    prime.projectName = prime.classname;
     prime.appVersion = api.info.version;
     prime.apiVersion = api.info.version;
     prime.packageVersion = api.info.version;
@@ -695,12 +782,16 @@ function transform(api, defaults, callback) {
         obj.swagger = defaults.swagger;
     }
     else {
-        obj.swagger = downconverter(api);
+        const container = {};
+        container.spec = api;
+        container.source = defaults.source;
+        let conv = new downconverter(container);
+        obj.swagger = conv.convert();
     }
 
-    obj["swagger-yaml"] = yaml.safeDump(obj.swagger, { lineWidth: -1 }); // set to original if converted v2.0
+    obj["swagger-yaml"] = yaml.stringify(obj.swagger); // set to original if converted v2.0
     obj["swagger-json"] = JSON.stringify(obj.swagger, null, 2); // set to original if converted 2.0
-    obj["openapi-yaml"] = yaml.safeDump(api, { lineWidth: -1 });
+    obj["openapi-yaml"] = yaml.stringify(api);
     obj["openapi-json"] = JSON.stringify(api, null, 2);
 
     // openapi3 extensions
@@ -802,6 +893,7 @@ function transform(api, defaults, callback) {
 
     obj.apiInfo = {};
     obj.apiInfo.apis = convertToApis(api, obj, defaults);
+    obj.apiInfo.paths = convertToPaths(api, obj, defaults);
 
     obj.produces = convertArray(obj.produces);
     obj.consumes = convertArray(obj.consumes);
@@ -844,29 +936,54 @@ function transform(api, defaults, callback) {
                     if (entry.name) {
                         entry.baseName = entry.name.toLowerCase();
                     }
+
+                    if (obj.variableNamingConvention === 'original') {
+                        if (obj.modelPropertyNaming === 'snake_case') {
+                            entry.name = Case.snake(entry.name);
+                        }
+                    } else {
+                        if (obj.variableNamingConvention === 'snake_case') {
+                            entry.baseName = entry.name;
+                            entry.name = Case.snake(entry.name);
+                        }
+                    }
+
+                    if (reserved.indexOf(entry.name) >= 0) {
+                        entry.name = Case.pascal(entry.name);
+                    }
+
                     entry.getter = Case.camel('get_' + entry.name);
                     entry.setter = Case.camel('set_' + entry.name);
                     entry.description = schema.description || '';
                     entry.unescapedDescription = entry.description;
-                    entry.type = schema.type;
+                    if (entry.name && !schema.type && schema["x-oldref"]) {
+                        entry.type = obj.modelPackage + '\\' + schema["x-oldref"].replace('#/components/schemas/', '');
+                    } else {
+                        entry.type = schema.type;
+                    }
                     entry.required = (parent.required && parent.required.indexOf(entry.name) >= 0) || false;
                     entry.isNotRequired = !entry.required;
                     entry.readOnly = !!schema.readOnly;
                     entry.type = typeMap(entry.type, entry.required, schema);
-                    entry.datatype = entry.type; //?
+                    entry.dataType = entry.type; //camelCase for imported files
+                    entry.datatype = entry.type; //lower for other files
                     entry.jsonSchema = safeJson(schema, null, 2);
                     for (let p in schemaProperties) {
                         if (typeof schema[p] !== 'undefined') entry[p] = schema[p];
                     }
                     entry.isEnum = !!schema.enum;
-                    entry.isPrimitiveType = ((schema.type !== 'object') && (schema.type !== 'array'));
+                    entry.isListContainer = schema.type === 'array';
+                    entry.isMapContainer = schema.type === 'object';
+                    entry.isPrimitiveType = !entry.isListContainer && !entry.isMapContainer;
                     entry.isNotContainer = entry.isPrimitiveType;
                     if (entry.isEnum) entry.isNotContainer = false;
                     entry.isContainer = !entry.isNotContainer;
                     if ((schema.type === 'object') && schema.properties && schema.properties["x-oldref"]) {
                         entry.complexType = schema.properties["x-oldref"].replace('#/components/schemas/', '');
                     }
-
+                    if ((schema.type === 'array') && schema.items && schema.items["x-oldref"]) {
+                        entry.itemsComplexType = schema.items["x-oldref"].replace('#/components/schemas/', '');
+                    }
                     entry.dataFormat = schema.format;
                     entry.defaultValue = schema.default;
 
@@ -874,8 +991,9 @@ function transform(api, defaults, callback) {
                         model.allowableValues = {};
                         model.allowableValues.enumVars = [];
                         model["allowableValues.values"] = schema.enum;
+                        model.allowableValues.values = schema.enum;
                         for (let v of schema.enum) {
-                            let e = { name: v, value: '"' + v + '"' }; // insane, why aren't the quotes in the template?
+                            let e = { name: v, nameInCamelCase: Case.camel(v), value: '"' + v + '"' }; // insane, why aren't the quotes in the template?
                             model.allowableValues.enumVars.push(e);
                         }
                         model.allowableValues.enumVars = convertArray(model.allowableValues.enumVars);
@@ -923,4 +1041,3 @@ module.exports = {
     getPrime: getPrime,
     transform: transform
 };
-
