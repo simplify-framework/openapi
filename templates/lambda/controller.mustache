@@ -2,14 +2,14 @@
 
 var utils = require('../utils/writer.js');
 {{#operations}}
-var {{classname}} = require('../{{implFolder}}/{{classname}}');
+var {{className}} = require('../{{implementation}}/{{className}}');
 {{#operation}}
 
-module.exports.{{nickname}} = function {{nickname}} (req, res, next) {
+module.exports.{{operationName}} = function {{operationName}} (req, res, next) {
   {{#allParams}}
   var {{paramName}} = req.swagger.params['{{baseName}}'].value;
   {{/allParams}}
-  {{classname}}.{{nickname}}({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+  {{className}}.{{operationName}}({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
     .then(function (response) {
       utils.writeJson(res, response);
     }, function (error) {

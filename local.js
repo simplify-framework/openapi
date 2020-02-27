@@ -1,4 +1,5 @@
-// @ts-check
+// @ts-nocheck
+
 'use strict';
 
 const fs = require('fs');
@@ -73,7 +74,7 @@ function main(o, config, configName, callback) {
                         let fnTemplate = Hogan.compile(directory);
                         let filename = fnTemplate.render(model);
                         ff.mkdirp.sync(path.join(outputDir, subDir, filename));
-                    }                    
+                    }
                 }
                 for (let action of actions) {
                     if (verbose) console.log('Rendering ' + action.output);
@@ -101,7 +102,33 @@ function main(o, config, configName, callback) {
                     ff.createFile(path.join(outputDir, subDir, 'LICENSE'), ff.readFileSync(tpl({}, '_common', 'UNLICENSE'), 'utf8'), 'utf8');
                 }
                 let outer = model;
-
+                if (config.perService) {
+                    let toplevel = clone(model);
+                    delete toplevel.apiInfo;
+                    for (let ps of config.perService) {
+                        let fnTemplate = Hogan.compile(ps.output);
+                        let template = Hogan.compile(ff.readFileSync(tpl(config, configName, ps.input), 'utf8'));
+                        //const uniqueArray = Array.from(new Set(model.apiInfo.apis.map((item) => { return model.apiInfo.apis.find(obj => obj.name === item.name) })))
+                        let services = {}
+                        model.apiInfo.apis.map((item) => {
+                            if (!services[item.name]) {
+                                services[item.name] = []
+                            }
+                            services[item.name].push(item)
+                        })
+                        var setOfServices = {
+                            services: Object.keys(services).map((key, index) => {
+                                return {
+                                    name: key,
+                                    service: services[key]
+                                }
+                            })
+                        }                              
+                        let cServices = Object.assign({}, config.defaults, ps.defaults || {}, toplevel, setOfServices);
+                        let filename = fnTemplate.render(cServices, config.partials);
+                        ff.createFile(path.join(outputDir, subDir, filename), template.render(cServices, config.partials), 'utf8');
+                    }
+                }
                 if (config.perApi) {
                     let toplevel = clone(model);
                     delete toplevel.apiInfo;

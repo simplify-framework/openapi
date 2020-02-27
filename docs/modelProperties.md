@@ -29,7 +29,7 @@
 |licenseName||Unlicense|The name of the license|
 |licenseUrl||http://www.apache.org/licenses/LICENSE-2.0.html|The URL of the license|
 |sourceFolder||./out/nodejs|source folder for generated code|
-|implFolder||./out/nodejs|folder for generated implementation code|
+|implementation||./out/nodejs|folder for generated implementation code|
 |localVariablePrefix|||prefix for generated code members and local variables|
 |serializableModel||true|boolean - toggle "implements Serializable" for generated models|
 |bigDecimalAsString||false|Treat BigDecimal values as Strings to avoid precision loss.|

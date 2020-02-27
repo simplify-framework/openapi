@@ -1,0 +1,225 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: API Gateway resource stack creation using Minify CLI
+Parameters:
+  DeploymentStage:
+    Type: String
+    Default: 'demo'
+Resources:  
+  {{ApiName}}:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: ''
+      Name: {{ApiName}}
+      Body:
+        swagger: '2.0'
+        info:
+          version: '2017-04-20T04:08:08Z'
+          title: LambdaCalc        
+        basePath: "/test"
+        schemes:
+        - https
+        paths:
+          "/calc":
+            get:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              parameters:
+              - name: operand2
+                in: query
+                required: true
+                type: string
+              - name: operator
+                in: query
+                required: true
+                type: string
+              - name: operand1
+                in: query
+                required: true
+                type: string
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    "$ref": "#/definitions/Result"
+                  headers:
+                    operand_1:
+                      type: string
+                    operand_2:
+                      type: string
+                    operator:
+                      type: string
+              x-amazon-apigateway-request-validator: Validate query string parameters and
+                headers
+              x-amazon-apigateway-integration:                
+                responses:
+                  default:
+                    statusCode: '200'
+                    responseParameters:
+                      method.response.header.operator: integration.response.body.op
+                      method.response.header.operand_2: integration.response.body.b
+                      method.response.header.operand_1: integration.response.body.a
+                    responseTemplates:
+                      application/json: |-
+                        #set($res = $input.path('$'))
+                        {
+                            "result": "$res.a, $res.b, $res.op => $res.c",
+                          "a" : "$res.a",
+                          "b" : "$res.b",
+                          "op" : "$res.op",
+                          "c" : "$res.c"
+                        }
+                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                requestTemplates:
+                  application/json: "{\n    \"a\":  \"$input.params('operand1')\",\n    \"b\":
+                    \ \"$input.params('operand2')\", \n    \"op\": \"$input.params('operator')\"
+                    \  \n}"
+                type: aws
+            post:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              parameters:
+              - in: body
+                name: Input
+                required: true
+                schema:
+                  "$ref": "#/definitions/Input"
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    "$ref": "#/definitions/Result"
+              x-amazon-apigateway-request-validator: Validate body
+              x-amazon-apigateway-integration:                
+                responses:
+                  default:
+                    statusCode: '200'
+                    responseTemplates:
+                      application/json: |-
+                        #set($inputRoot = $input.path('$'))
+                        {
+                          "a" : $inputRoot.a,
+                          "b" : $inputRoot.b,
+                          "op" : $inputRoot.op,
+                          "c" : $inputRoot.c
+                        }
+                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                type: aws
+          "/calc/{operand1}/{operand2}/{operator}":
+            get:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              parameters:
+              - name: operand2
+                in: path
+                required: true
+                type: string
+              - name: operator
+                in: path
+                required: true
+                type: string
+              - name: operand1
+                in: path
+                required: true
+                type: string
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    "$ref": "#/definitions/Result"
+              x-amazon-apigateway-integration:                
+                responses:
+                  default:
+                    statusCode: '200'
+                    responseTemplates:
+                      application/json: |-
+                        #set($inputRoot = $input.path('$'))
+                        {
+                          "input" : {
+                            "a" : $inputRoot.a,
+                            "b" : $inputRoot.b,
+                            "op" : "$inputRoot.op"
+                          },
+                          "output" : {
+                            "c" : $inputRoot.c
+                          }
+                        }
+                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
+                passthroughBehavior: when_no_templates
+                httpMethod: POST
+                requestTemplates:
+                  application/json: "{\n   \"a\": \"$input.params('operand1')\",\n   \"b\":
+                    \"$input.params('operand2')\",\n   \"op\": #if($input.params('operator')=='%2F')\"/\"#{else}\"$input.params('operator')\"#end\n
+                    \  \n}"
+                contentHandling: CONVERT_TO_TEXT
+                type: aws
+        definitions:
+          Input:
+            type: object
+            required:
+            - a
+            - b
+            - op
+            properties:
+              a:
+                type: number
+              b:
+                type: number
+              op:
+                type: string
+                description: binary op of ['+', 'add', '-', 'sub', '*', 'mul', '%2F', 'div']
+            title: Input
+          Output:
+            type: object
+            properties:
+              c:
+                type: number
+            title: Output
+          Result:
+            type: object
+            properties:
+              input:
+                "$ref": "#/definitions/Input"
+              output:
+                "$ref": "#/definitions/Output"
+            title: Result
+        x-amazon-apigateway-request-validators:
+          Validate body:
+            validateRequestParameters: false
+            validateRequestBody: true
+          Validate query string parameters and headers:
+            validateRequestParameters: true
+            validateRequestBody: false
+      FailOnWarnings: true
+  {{ApiName}}APIGateWayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: The Development stage deployment of your API.
+      StageName:
+        !Ref DeploymentStage
+      RestApiId:
+        !Ref {{ServiceName}}
+Outputs:
+  RootUrl:
+    Description: Root URL of the API gateway
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - !Ref {{ServiceName}}
+        - ".execute-api."
+        - !Ref AWS::Region
+        - ".amazonaws.com/"
+        - !Ref DeploymentStage
+  ApiName:
+    Description: API Friendly name
+    Value: {{ServiceName}}

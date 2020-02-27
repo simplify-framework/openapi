@@ -1,4 +1,3 @@
-// @ts-check
 'use strict';
 
 const util = require('util');
@@ -148,7 +147,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
-    operation.nickname = operation.operationId;
+    operation.operationName = operation.operationId;
     operation.description = op.description;
     operation.summary = op.summary;
     operation.allParams = [];
@@ -278,7 +277,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.operationId = op.operationId || Case.camel((op.tags ? op.tags[0] : '') + (paramList ? '_' + paramList.join('_') + '_' : '') + verb);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
-    operation.nickname = operation.operationId;
+    operation.operationName = operation.operationId;
 
     operation.bodyParams = [];
     if (op.requestBody) {
@@ -344,7 +343,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
             let entry = {};
             entry.code = r;
             entry.isDefault = (r === 'default');
-            entry.nickname = 'response' + r;
+            entry.operationName = 'response' + r;
             entry.message = response.description;
             entry.description = response.description || '';
             entry.simpleType = true;
@@ -450,7 +449,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.openapi.callbacks = op.callbacks;
 
     //let container = {};
-    //container.baseName = operation.nickname;
+    //container.baseName = operation.operationName;
     //container.operation = operation;
     //obj.operations.push(container);
     return operation;
@@ -471,10 +470,10 @@ function convertToApis(source, obj, defaults) {
                 });
                 if (!entry) {
                     entry = {};
-                    entry.name = tagName;
-                    entry.classname = tagName;
-                    entry.classFilename = tagName;
-                    entry.classVarName = tagName; // see issue #21
+                    entry.name = source.paths[p]['x-swagger-router-controller'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
+                    entry.className = source.paths[p]['x-swagger-router-controller'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
+                    entry.classFilename = tagName.toCamelCase().split(' ').join('').split('-').join('');
+                    entry.classVarName = tagName.toCamelCase().split(' ').join('').split('-').join(''); // see issue #21
                     entry.packageName = obj.packageName; //! this may not be enough / sustainable. Or many props at wrong level :(
                     entry.operations = {};
                     entry.operations.operation = [];
@@ -689,13 +688,30 @@ function getBase() {
     return base;
 }
 
+String.prototype.toCamelCase = function () {
+    return this.replace(/(?:^\w|[A-Z]|\b\w)/g, function (word, index) {
+        return index === 0 ? word.toLowerCase() : word.toUpperCase();
+    }).replace(/\s+/g, '');
+};
+
+String.prototype.toPascalCase = function () {
+    return this
+        .replace(new RegExp(/[-_]+/, 'g'), ' ')
+        .replace(new RegExp(/[^\w\s]/, 'g'), '')
+        .replace(
+            new RegExp(/\s+(.)(\w+)/, 'g'),
+            ($1, $2, $3) => `${$2.toUpperCase() + $3.toLowerCase()}`
+        )
+        .replace(new RegExp(/\s/, 'g'), '')
+        .replace(new RegExp(/\w/), s => s.toUpperCase());
+};
+
 function getPrime(api, defaults) {
     let prime = {};
     prime.projectBundle = api.info.title;
-    prime.provider = api['x-service-provider'];
-    prime.classname = api.info.title.toLowerCase().split(' ').join('_').split('-').join('_');
-    prime.serviceName = prime.classname.toUpperCase();
-    prime.projectName = prime.classname;
+    prime.ServiceName = api['x-service-name'].toPascalCase().split(' ').join('').split('-').join('');
+    prime.ApiName = api['x-service-name'].toPascalCase().split(' ').join('').split('-').join('');    
+    prime.projectName = api.info.title.toPascalCase().split(' ').join('').split('-').join('');
     prime.appVersion = api.info.version;
     prime.apiVersion = api.info.version;
     prime.packageVersion = api.info.version;
@@ -746,7 +762,7 @@ function getPrime(api, defaults) {
     prime.baseNamespace = prime.packageName;
     prime.sourceFolder = './out/' + defaults.configName; /* source folder for generated code */
     prime.templateDir = './templates/' + defaults.configName;
-    prime.implFolder = prime.sourceFolder; /* folder for generated implementation code */
+    prime.implementation = prime.sourceFolder; /* folder for generated implementation code */
     prime.library = ''; /* library template (sub-template) */
     prime.packageGuid = uuidv4(); /* The GUID that will be associated with the C# project */
     prime.optionalEmitDefaultValues = false; /* Set DataMember's EmitDefaultValue. */

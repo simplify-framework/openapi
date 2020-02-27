@@ -8,7 +8,8 @@
   },
   "scripts": {
     "lint": "npx eslint *.js test/*.js lib/",
-    "test": "npx mocha --delay"
+    "test": "npx mocha --delay",
+    "make": "node cg.js lambda ../output/current.yaml -f -o ../output/lambda"
   },
   "repository": {
     "type": "git",
