@@ -12,11 +12,10 @@ var {{className}} = require('../{{implementation}}/{{className}}');
  {{/summary}}
  {{#notes}}
  * {{{notes}}}
- {{/notes}}
- *
- * HTTP: {{httpMethod}} {{path}}
+ {{/notes}} 
+ * curl -X {{httpMethod}} http://localhost:{{serverPort}}{{path}}
 {{#allParams}}
- * {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
+ * - {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
 {{/allParams}}
 {{^returnType}}
  * no response value expected for this operation

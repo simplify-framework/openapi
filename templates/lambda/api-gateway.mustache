@@ -94,6 +94,8 @@ Resources:
                 name: search
                 required: false
               {{/httpMethodHasBody}}
+              security:
+              - sigv4: []
               responses:
                 '200':
                   description: 200 response
