@@ -12,7 +12,13 @@ var jsyaml = require('js-yaml');
 // swaggerRouter configuration
 var options = {
   swaggerUi: path.join(__dirname, '/swagger.json'),
-  controllers: path.join(__dirname, './controllers'),
+  controllers: [
+    {{#services}}
+    {{#service}}
+    path.join(__dirname, './{{apiName}}/{{serviceName}}/controllers'),
+    {{/service}}
+    {{/services}}
+  ],  
   useStubs: process.env.NODE_ENV === 'development',
   ignoreMissingHandlers: true
 };

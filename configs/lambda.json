@@ -9,7 +9,7 @@
         ]
     },
     "directories": [
-        "tests/{{implementation}}", "specs", "controllers", "utils", "{{implementation}}"
+        "{{apiName}}/{{serviceName}}/tests", "specs", "tests/{{serviceName}}", "{{apiName}}/{{serviceName}}/controllers", "utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
     ],
     "transformations": [
         { "input": "app.mustache", "output": "app.js" },
@@ -22,16 +22,17 @@
         { "input": "Dockerfile.mustache", "output": "Dockerfile" },
         { "input": "docker-entrypoint.mustache", "output": "docker-entrypoint.sh" },
         { "input": "docker-compose.mustache", "output": "docker-compose.yml" },        
-        { "input": "writer.mustache", "output": "utils/writer.js" },        
-        { "input": "setup.env.mustache", "output": "tests/setup.env.js" }
+        { "input": "writer.mustache", "output": "utils/writer.js" }
     ],
-    "perService": [
-        { "input": "api-gateway.mustache", "output": "api-gateway.yaml" },
-        { "input": "lambda.mustache", "output": "lambda.yaml" }
+    "perGateway": [
+        { "input": "api-gateway.mustache", "output": "{{apiName}}/api-gateway.yaml" }
     ],
-    "perApi": [
-        { "input": "controller.mustache", "output": "controllers/{{name}}.js" },
-        { "input": "service.mustache", "output": "{{implementation}}/{{name}}.js" },                
-        { "input": "sample.spec.mustache", "output": "tests/{{implementation}}/{{name}}.spec.js" }
+    "perService": [        
+        { "input": "setup.env.mustache", "output": "tests/{{serviceName}}/setup.env.js" }
+    ],
+    "perOperation": [
+        { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}.js" },                
+        { "input": "sample.spec.mustache", "output": "{{apiName}}//{{serviceName}}/tests/{{className}}.spec.js" },
+        { "input": "controller.mustache", "output": "{{apiName}}/{{serviceName}}/controllers/{{className}}.js" }
     ]
 }

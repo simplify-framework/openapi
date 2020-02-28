@@ -139,11 +139,13 @@ function specificationExtensions(obj) {
 function convertOperation(op, verb, path, pathItem, obj, api) {
     let operation = {};
     operation.httpMethod = verb.toUpperCase();
+    operation.httpMethodCase = verb.toLowerCase();
+    operation.httpMethodHasBody = operation.httpMethodCase == 'post' || operation.httpMethodCase == 'put' || operation.httpMethodCase == 'patch'
     if (obj.httpMethodCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
     operation.replacedPathName = path; //?
     operation.operationTimeout = op['x-operation-timeout'] || 60000;
-    operation.enableProtection = op['x-enable-protection'] || false;
+    operation.enableProtection = op['x-enable-protection'] || false;    
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
@@ -470,7 +472,7 @@ function convertToApis(source, obj, defaults) {
                 });
                 if (!entry) {
                     entry = {};
-                    entry.name = source.paths[p]['x-swagger-router-controller'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
+                    entry.serviceName = source.paths[p]['x-lambda-service-name'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.className = source.paths[p]['x-swagger-router-controller'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.classFilename = tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.classVarName = tagName.toCamelCase().split(' ').join('').split('-').join(''); // see issue #21
@@ -708,9 +710,8 @@ String.prototype.toPascalCase = function () {
 
 function getPrime(api, defaults) {
     let prime = {};
-    prime.projectBundle = api.info.title;
-    prime.ServiceName = api['x-service-name'].toPascalCase().split(' ').join('').split('-').join('');
-    prime.ApiName = api['x-service-name'].toPascalCase().split(' ').join('').split('-').join('');    
+    prime.projectBundle = api.info.title;    
+    prime.apiName = api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join('');    
     prime.projectName = api.info.title.toPascalCase().split(' ').join('').split('-').join('');
     prime.appVersion = api.info.version;
     prime.apiVersion = api.info.version;
@@ -804,7 +805,7 @@ function transform(api, defaults, callback) {
         let conv = new downconverter(container);
         obj.swagger = conv.convert();
     }
-
+    delete obj.swagger.securityDefinitions
     obj["swagger-yaml"] = yaml.stringify(obj.swagger); // set to original if converted v2.0
     obj["swagger-json"] = JSON.stringify(obj.swagger, null, 2); // set to original if converted 2.0
     obj["openapi-yaml"] = yaml.stringify(api);

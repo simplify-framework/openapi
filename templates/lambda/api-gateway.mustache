@@ -4,210 +4,288 @@ Parameters:
   DeploymentStage:
     Type: String
     Default: 'demo'
-Resources:  
-  {{ApiName}}:
+Resources:
+  {{apiName}}:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Description: ''
-      Name: {{ApiName}}
+      Description: '{{apiName}} Definitions'
+      Name: {{apiName}}
       Body:
         swagger: '2.0'
         info:
           version: '2017-04-20T04:08:08Z'
-          title: LambdaCalc        
-        basePath: "/test"
+          title: {{apiName}}        
+        host:
+          Fn::Join:
+          - ''
+          - - apigateway.
+            - Ref: AWS::Region
+            - ".amazonaws.com"
+        basePath:
+          Fn::Join:
+          - ''
+          - - "/"
+            - Ref: DeploymentStage
         schemes:
         - https
-        paths:
-          "/calc":
-            get:
-              consumes:
-              - application/json
-              produces:
-              - application/json
-              parameters:
-              - name: operand2
-                in: query
-                required: true
-                type: string
-              - name: operator
-                in: query
-                required: true
-                type: string
-              - name: operand1
-                in: query
-                required: true
-                type: string
-              responses:
-                '200':
-                  description: 200 response
-                  schema:
-                    "$ref": "#/definitions/Result"
-                  headers:
-                    operand_1:
-                      type: string
-                    operand_2:
-                      type: string
-                    operator:
-                      type: string
-              x-amazon-apigateway-request-validator: Validate query string parameters and
-                headers
-              x-amazon-apigateway-integration:                
-                responses:
-                  default:
-                    statusCode: '200'
-                    responseParameters:
-                      method.response.header.operator: integration.response.body.op
-                      method.response.header.operand_2: integration.response.body.b
-                      method.response.header.operand_1: integration.response.body.a
-                    responseTemplates:
-                      application/json: |-
-                        #set($res = $input.path('$'))
-                        {
-                            "result": "$res.a, $res.b, $res.op => $res.c",
-                          "a" : "$res.a",
-                          "b" : "$res.b",
-                          "op" : "$res.op",
-                          "c" : "$res.c"
-                        }
-                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
-                passthroughBehavior: when_no_match
-                httpMethod: POST
-                requestTemplates:
-                  application/json: "{\n    \"a\":  \"$input.params('operand1')\",\n    \"b\":
-                    \ \"$input.params('operand2')\", \n    \"op\": \"$input.params('operator')\"
-                    \  \n}"
-                type: aws
-            post:
-              consumes:
-              - application/json
-              produces:
-              - application/json
-              parameters:
-              - in: body
-                name: Input
-                required: true
-                schema:
-                  "$ref": "#/definitions/Input"
-              responses:
-                '200':
-                  description: 200 response
-                  schema:
-                    "$ref": "#/definitions/Result"
-              x-amazon-apigateway-request-validator: Validate body
-              x-amazon-apigateway-integration:                
-                responses:
-                  default:
-                    statusCode: '200'
-                    responseTemplates:
-                      application/json: |-
-                        #set($inputRoot = $input.path('$'))
-                        {
-                          "a" : $inputRoot.a,
-                          "b" : $inputRoot.b,
-                          "op" : $inputRoot.op,
-                          "c" : $inputRoot.c
-                        }
-                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                type: aws
-          "/calc/{operand1}/{operand2}/{operator}":
-            get:
-              consumes:
-              - application/json
-              produces:
-              - application/json
-              parameters:
-              - name: operand2
-                in: path
-                required: true
-                type: string
-              - name: operator
-                in: path
-                required: true
-                type: string
-              - name: operand1
-                in: path
-                required: true
-                type: string
-              responses:
-                '200':
-                  description: 200 response
-                  schema:
-                    "$ref": "#/definitions/Result"
-              x-amazon-apigateway-integration:                
-                responses:
-                  default:
-                    statusCode: '200'
-                    responseTemplates:
-                      application/json: |-
-                        #set($inputRoot = $input.path('$'))
-                        {
-                          "input" : {
-                            "a" : $inputRoot.a,
-                            "b" : $inputRoot.b,
-                            "op" : "$inputRoot.op"
-                          },
-                          "output" : {
-                            "c" : $inputRoot.c
-                          }
-                        }
-                uri: arn:aws:apigateway:eu-central-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-central-1:560617725743:function:api-lambda-systemSwitcherLambdaFunction-NW05WWDK7U8M/invocations
-                passthroughBehavior: when_no_templates
-                httpMethod: POST
-                requestTemplates:
-                  application/json: "{\n   \"a\": \"$input.params('operand1')\",\n   \"b\":
-                    \"$input.params('operand2')\",\n   \"op\": #if($input.params('operator')=='%2F')\"/\"#{else}\"$input.params('operator')\"#end\n
-                    \  \n}"
-                contentHandling: CONVERT_TO_TEXT
-                type: aws
-        definitions:
-          Input:
-            type: object
-            required:
-            - a
-            - b
-            - op
-            properties:
-              a:
-                type: number
-              b:
-                type: number
-              op:
-                type: string
-                description: binary op of ['+', 'add', '-', 'sub', '*', 'mul', '%2F', 'div']
-            title: Input
-          Output:
-            type: object
-            properties:
-              c:
-                type: number
-            title: Output
-          Result:
-            type: object
-            properties:
-              input:
-                "$ref": "#/definitions/Input"
-              output:
-                "$ref": "#/definitions/Output"
-            title: Result
         x-amazon-apigateway-request-validators:
           Validate body:
             validateRequestParameters: false
             validateRequestBody: true
           Validate query string parameters and headers:
             validateRequestParameters: true
-            validateRequestBody: false
+            validateRequestBody: false        
+        x-amazon-apigateway-request-validator: Validate query string parameters and headers        
+        paths:
+          {{#services}}
+          {{#service}}
+          {{#operations}}          
+          "{{path}}":
+            {{#hasOptions}}
+            options:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: 200 response
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Headers:
+                      type: string
+              security:
+              - sigv4: []                  
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: '{"statusCode": 200}'
+                passthroughBehavior: when_no_match
+                type: mock            
+            {{/hasOptions}}
+            {{^hasOptions}}
+            {{/hasOptions}}
+            {{#operation}}            
+            {{httpMethodCase}}:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              {{#httpMethodHasBody}}
+              parameters:
+              - in: body
+                name: RequestSchema
+                required: false
+                schema:
+                  "$ref": "#/definitions/RequestSchema"
+              {{/httpMethodHasBody}}
+              {{^httpMethodHasBody}}
+              parameters:
+              - in: query
+                name: search
+                required: false
+              {{/httpMethodHasBody}}
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    "$ref": "#/definitions/ResponseSchema"                                    
+              x-amazon-apigateway-request-validator: Validate body
+              x-amazon-apigateway-integration:                
+                responses:
+                  default:
+                    statusCode: '200'                
+                uri:
+                  Fn::Join:
+                  - ''
+                  - - 'arn:aws:apigateway:'
+                    - !Ref AWS::Region
+                    - ":lambda:path/2015-03-31/functions/"
+                    - !GetAtt {{serviceName}}LambdaFunction.Arn
+                    - "/invocations"                
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy            
+            {{/operation}}          
+          {{/operations}}
+          {{/service}}
+          {{/services}}
+        securityDefinitions:
+          sigv4:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: awsSigv4            
+        definitions:
+          RequestSchema:
+            type: object
+            required:
+            - request
+            properties:
+              request:
+                type: string
+            title: Request Schema
+          ResponseSchema:
+            type: object
+            required:
+            - response
+            properties:
+              response:
+                type: string
+            title: Response Schema        
       FailOnWarnings: true
-  {{ApiName}}APIGateWayDeployment:
+  {{apiName}}APIGateWayDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
       Description: The Development stage deployment of your API.
       StageName:
         !Ref DeploymentStage
       RestApiId:
-        !Ref {{ServiceName}}
+        !Ref {{apiName}}
+{{#services}}
+  {{serviceName}}LambdaFunction:
+    Type: AWS::Lambda::Function
+    Metadata:
+      aws:asset:path: "./src"
+      aws:asset:property: Code
+    Properties:
+      Handler: index.handler      
+      Environment:
+        Variables:
+          ENVIRONMENT:
+            !Ref DeploymentStage          
+      Role:
+        Fn::GetAtt:
+        - {{serviceName}}LambdaExecutionRole
+        - Arn
+      Runtime: nodejs10.x
+      Timeout: '25'
+      Code:
+        ZipFile: |
+          var aws = require('aws-sdk')
+          var response = require('cfn-response')
+          exports.handler = function(event, context) {
+              console.log("REQUEST RECEIVED:\n" + JSON.stringify(event))
+              // For Delete requests, immediately send a SUCCESS response.
+              if (event.RequestType == "Delete") {
+                  response.send(event, context, "SUCCESS")
+                  return
+              }
+              var responseStatus = "FAILED"
+              var responseData = {}
+              var functionName = event.ResourceProperties.FunctionName
+              var lambda = new aws.Lambda()
+              lambda.invoke({ FunctionName: functionName }, function(err, invokeResult) {
+                  if (err) {
+                      responseData = {Error: "Invoke call failed"}
+                      console.log(responseData.Error + ":\n", err)
+                  }
+                  else responseStatus = "SUCCESS"
+                  response.send(event, context, responseStatus, responseData)
+              })
+          }
+      #  S3Bucket: SystemMonitoring-SystemMonitoring-deployment
+      #  S3Key: SystemMonitoring-SystemMonitoring-systemMonitoring-build.zip
+  {{serviceName}}LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:      
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+  {{serviceName}}lambdaexecutionpolicy:
+    DependsOn:
+    - {{serviceName}}LambdaExecutionRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: lambda-execution-policy
+      Roles:
+      - !Ref {{serviceName}}LambdaExecutionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+          - Fn::Sub:
+            - arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${lambda}:log-stream:*
+            - region:
+                !Ref AWS::Region
+              account:
+                !Ref AWS::AccountId
+              lambda:
+                !Ref {{serviceName}}LambdaFunction
+  {{apiName}}SecretManager:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Secret manager for {{serviceName}}LambdaFunction
+      GenerateSecretString:
+        SecretStringTemplate: '{"type":"auto"}'
+        GenerateStringKey: password
+        ExcludeLowercase: false
+        ExcludeNumbers: false
+        ExcludePunctuation: false
+        ExcludeUppercase: false
+        PasswordLength: 16
+  {{serviceName}}ResourcesPolicy:
+    DependsOn:
+    - {{serviceName}}LambdaExecutionRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: lambda-resource-access-policy
+      Roles:
+      - !Ref {{serviceName}}LambdaExecutionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - secretsmanager:GetSecretValue
+          Resource:
+          - Fn::Sub:
+            - arn:aws:secretsmanager:${region}:${account}:secret:${secretname}-${env}-*
+            - region:
+                !Ref AWS::Region
+              account:
+                !Ref AWS::AccountId
+              secretname:
+                !Ref {{apiName}}SecretManager
+              env:
+                !Ref DeploymentStage  
+  {{serviceName}}LambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref {{serviceName}}LambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - !Ref AWS::Region
+          - ":"
+          - !Ref AWS::AccountId
+          - ":"
+          - !Ref {{apiName}}
+          - "/*/*/*"  
+  {{/services}}
 Outputs:
   RootUrl:
     Description: Root URL of the API gateway
@@ -215,11 +293,11 @@ Outputs:
       Fn::Join:
       - ''
       - - https://
-        - !Ref {{ServiceName}}
+        - !Ref {{apiName}}
         - ".execute-api."
         - !Ref AWS::Region
         - ".amazonaws.com/"
         - !Ref DeploymentStage
-  ApiName:
+  apiName:
     Description: API Friendly name
-    Value: {{ServiceName}}
+    Value: !Ref {{apiName}}

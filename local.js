@@ -34,7 +34,6 @@ function main(o, config, configName, callback) {
     let outputDir = config.outputDir || './out/';
     let verbose = config.defaults.verbose;
     config.defaults.configName = configName;
-
     adaptor.transform(o, config.defaults, function (err, model) {
         if (config.generator) {
             model.generator = config.generator;
@@ -53,7 +52,43 @@ function main(o, config, configName, callback) {
             if (verbose) console.log('Processing partial ' + partial);
             config.partials[p] = ff.readFileSync(tpl(config, configName, partial), 'utf8');
         }
-
+        let services = {}
+        model.apiInfo.apis.map((item) => {
+            if (!services[item.serviceName]) {
+                services[item.serviceName] = []
+            }
+            services[item.serviceName].push(item)
+        })
+        var setOfServices = {
+            services: Object.keys(services).map((serviceName, index) => {
+                var operations = {}
+                services[serviceName].map(s => {
+                    var operation = s.operations.operation.length > 0 ? s.operations.operation[0] : ''
+                    if (!operations[operation.path]) {
+                        operations[operation.path] = {
+                            className: s.className,
+                            data: []
+                        }
+                    }
+                    operations[operation.path].data.push(operation)
+                })
+                return {
+                    serviceName: serviceName,
+                    service: {
+                        operations: Object.keys(operations).map((opPath, index) => {
+                            var ops = operations[opPath].data
+                            var hasOptions = ops.some(op => op.httpMethodCase == 'post' || op.httpMethodCase == 'put' || op.httpMethodCase == 'patch')
+                            return {
+                                path: opPath,
+                                className: operations[opPath].className,
+                                hasOptions: hasOptions,
+                                operation: ops
+                            }
+                        })
+                    }
+                }
+            })
+        }
         let actions = [];
         for (let t in config.transformations) {
             let tx = config.transformations[t];
@@ -70,16 +105,33 @@ function main(o, config, configName, callback) {
         ff.mkdirp(path.join(outputDir, subDir), function () {
             ff.rimraf(path.join(outputDir, subDir) + '/*', function () {
                 if (config.directories) {
-                    for (let directory of config.directories) {
-                        let fnTemplate = Hogan.compile(directory);
-                        let filename = fnTemplate.render(model);
-                        ff.mkdirp.sync(path.join(outputDir, subDir, filename));
+                    setOfServices.services.map(item => {
+                        let params = Object.assign({}, model, item)
+                        for (let directory of config.directories) {
+                            let fnTemplate = Hogan.compile(directory);
+                            let filename = fnTemplate.render(params);
+                            ff.mkdirp.sync(path.join(outputDir, subDir, filename));
+                        }
+                    })
+                }
+                let outer = model;
+                if (config.perGateway) {
+                    let toplevel = clone(model);
+                    delete toplevel.apiInfo;
+                    for (let gw of config.perGateway) {
+                        let fnTemplate = Hogan.compile(gw.output);
+                        let template = Hogan.compile(ff.readFileSync(tpl(config, configName, gw.input), 'utf8'));
+                        let cServices = Object.assign({}, config.defaults, gw.defaults || {}, toplevel, setOfServices);
+                        let filename = fnTemplate.render(cServices, config.partials);
+                        ff.mkdirp.sync(path.join(outputDir, subDir));
+                        ff.createFile(path.join(outputDir, subDir, filename), template.render(cServices, config.partials), 'utf8');
                     }
                 }
                 for (let action of actions) {
                     if (verbose) console.log('Rendering ' + action.output);
                     let template = Hogan.compile(action.template);
-                    let content = template.render(model, config.partials);
+                    let cServices = Object.assign({}, model, setOfServices)
+                    let content = template.render(cServices, config.partials);
                     ff.createFile(path.join(outputDir, subDir, action.output), content, 'utf8');
                 }
                 if (config.touch) { // may not now be necessary
@@ -101,32 +153,18 @@ function main(o, config, configName, callback) {
                 else {
                     ff.createFile(path.join(outputDir, subDir, 'LICENSE'), ff.readFileSync(tpl({}, '_common', 'UNLICENSE'), 'utf8'), 'utf8');
                 }
-                let outer = model;
                 if (config.perService) {
                     let toplevel = clone(model);
                     delete toplevel.apiInfo;
                     for (let ps of config.perService) {
                         let fnTemplate = Hogan.compile(ps.output);
-                        let template = Hogan.compile(ff.readFileSync(tpl(config, configName, ps.input), 'utf8'));
-                        //const uniqueArray = Array.from(new Set(model.apiInfo.apis.map((item) => { return model.apiInfo.apis.find(obj => obj.name === item.name) })))
-                        let services = {}
-                        model.apiInfo.apis.map((item) => {
-                            if (!services[item.name]) {
-                                services[item.name] = []
-                            }
-                            services[item.name].push(item)
+                        setOfServices.services.forEach(svc => {                            
+                            let template = Hogan.compile(ff.readFileSync(tpl(config, configName, ps.input), 'utf8'));
+                            let cServices = Object.assign({}, config.defaults, ps.defaults || {}, toplevel, svc);
+                            let filename = fnTemplate.render(cServices, config.partials);
+                            ff.mkdirp.sync(path.join(outputDir, subDir));
+                            ff.createFile(path.join(outputDir, subDir, filename), template.render(cServices, config.partials), 'utf8');
                         })
-                        var setOfServices = {
-                            services: Object.keys(services).map((key, index) => {
-                                return {
-                                    name: key,
-                                    service: services[key]
-                                }
-                            })
-                        }                              
-                        let cServices = Object.assign({}, config.defaults, ps.defaults || {}, toplevel, setOfServices);
-                        let filename = fnTemplate.render(cServices, config.partials);
-                        ff.createFile(path.join(outputDir, subDir, filename), template.render(cServices, config.partials), 'utf8');
                     }
                 }
                 if (config.perApi) {
@@ -155,12 +193,11 @@ function main(o, config, configName, callback) {
                             let filename = fnTemplate.render(cPath, config.partials);
                             let dirname = path.dirname(filename);
                             if (verbose) console.log('Rendering ' + filename + ' (dynamic:' + pa.input + ')');
-                            ff.mkdirp.sync(path.join(outputDir, subDir, dirname));
+                            ff.mkdirp.sync(path.join(outputDir, subDir));
                             ff.createFile(path.join(outputDir, subDir, filename), template.render(cPath, config.partials), 'utf8');
                         }
                     }
                 }
-
                 if (config.perModel) {
                     let cModels = clone(model.models);
                     for (let pm of config.perModel) {
@@ -176,24 +213,22 @@ function main(o, config, configName, callback) {
                         }
                     }
                 }
-
-                if (config.perOperation) { // now may not be necessary
+                if (config.perOperation) {
                     for (let po of config.perOperation) {
-                        for (let api of outer.apiInfo.apis) {
-                            let cOperations = clone(api.operations);
-                            let fnTemplate = Hogan.compile(po.output);
+                        let toplevel = clone(model);
+                        delete toplevel.apiInfo;
+                        let fnTemplate = Hogan.compile(po.output);
+                        setOfServices.services.forEach(svc => {
                             let template = Hogan.compile(ff.readFileSync(tpl(config, configName, po.input), 'utf8'));
-                            for (let operation of cOperations.operation) {
-                                model.operations = [];
-                                model.operations.push(operation);
-                                let filename = fnTemplate.render(outer, config.partials);
-                                if (verbose) console.log('Rendering ' + filename + ' (dynamic:' + po.input + ')');
-                                ff.createFile(path.join(outputDir, subDir, filename), template.render(outer, config.partials), 'utf8');
+                            for (let operation of svc.service.operations) {
+                                let cServices = Object.assign({}, config.defaults, po.defaults || {}, toplevel, svc, operation);
+                                let filename = fnTemplate.render(cServices, config.partials);
+                                ff.mkdirp.sync(path.join(outputDir, subDir));
+                                ff.createFile(path.join(outputDir, subDir, filename), template.render(cServices, config.partials), 'utf8');
                             }
-                        }
+                        })
                     }
                 }
-
                 if (callback) callback(null, true);
             });
         });

@@ -1,9 +1,30 @@
 'use strict';
 
-var utils = require('../utils/writer.js');
+var utils = require('../../../utils/writer.js');
+{{#service}}
 {{#operations}}
 var {{className}} = require('../{{implementation}}/{{className}}');
 {{#operation}}
+
+/**
+ {{#summary}}
+ * {{{summary}}}
+ {{/summary}}
+ {{#notes}}
+ * {{{notes}}}
+ {{/notes}}
+ *
+ * HTTP: {{httpMethod}} {{path}}
+{{#allParams}}
+ * {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
+{{/allParams}}
+{{^returnType}}
+ * no response value expected for this operation
+{{/returnType}}
+{{#returnType}}
+ * returns {{{returnType}}}
+{{/returnType}}
+ **/
 
 module.exports.{{operationName}} = function {{operationName}} (req, res, next) {
   {{#allParams}}
@@ -24,3 +45,4 @@ module.exports.{{operationName}} = function {{operationName}} (req, res, next) {
 };
 {{/operation}}
 {{/operations}}
+{{/service}}
