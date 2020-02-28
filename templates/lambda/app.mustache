@@ -11,7 +11,7 @@ var jsyaml = require('js-yaml');
 
 // swaggerRouter configuration
 var options = {
-  swaggerUi: path.join(__dirname, '/swagger.json'),
+  swaggerUi: path.join(__dirname, 'specs/{{apiName}}/swagger.json'),
   controllers: [
     {{#services}}
     {{#service}}
@@ -24,7 +24,7 @@ var options = {
 };
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
-var specYAML = fs.readFileSync(path.join(__dirname,'specs/swagger.yaml'), 'utf8');
+var specYAML = fs.readFileSync(path.join(__dirname,'specs/{{apiName}}/swagger.yaml'), 'utf8');
 var swaggerDoc = jsyaml.safeLoad(specYAML);
 
 // Initialize the Swagger middleware

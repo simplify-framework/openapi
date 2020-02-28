@@ -27,34 +27,34 @@ async function list(provider, filter) {
 var argv = require('yargs')
     .usage('cg [options] {[path]configName} {openapi-definition}')
     .boolean('debug')
-    .alias('d','debug')
-    .describe('debug','Turn on debugging information in the model')
+    .alias('d', 'debug')
+    .describe('debug', 'Turn on debugging information in the model')
     .string('filter')
-    .describe('filter','Filter term to use with --list')
+    .describe('filter', 'Filter term to use with --list')
     .boolean('flat')
-    .alias('f','flat')
-    .describe('flat','Do not include config-name in output directory structure')
+    .alias('f', 'flat')
+    .describe('flat', 'Do not include config-name in output directory structure')
     .boolean('lint')
-    .alias('l','lint')
-    .describe('lint','Lint input definition')
+    .alias('l', 'lint')
+    .describe('lint', 'Lint input definition')
     .string('list')
-    .describe('list','List available templates for provider (og or sc)')
+    .describe('list', 'List available templates for provider (og or sc)')
     .string('output')
-    .alias('o','output')
-    .describe('output','Specify output directory')
-    .default('output','./out/')
+    .alias('o', 'output')
+    .describe('output', 'Specify output directory')
+    .default('output', './out/')
     .boolean('stools')
-    .alias('s','stools')
-    .describe('stools','Use swagger-tools to validate OpenAPI 2.0 definitions')
+    .alias('s', 'stools')
+    .describe('stools', 'Use swagger-tools to validate OpenAPI 2.0 definitions')
     .string('templates')
-    .alias('t','templates')
-    .describe('templates','Specify templates directory')
+    .alias('t', 'templates')
+    .describe('templates', 'Specify templates directory')
     .boolean('verbose')
-    .describe('verbose','Increase verbosity')
-    .alias('v','verbose')
+    .describe('verbose', 'Increase verbosity')
+    .alias('v', 'verbose')
     .boolean('zip')
-    .alias('z','zip')
-    .describe('zip','Create a .zip file instead of individual files')
+    .alias('z', 'zip')
+    .describe('zip', 'Create a .zip file instead of individual files')
     .version()
     .argv;
 
@@ -64,12 +64,12 @@ if (argv.list) {
 
 let configStr = argv._[0] || 'nodejs';
 let configName = path.basename(configStr);
-let remoteConfig = configName.indexOf(':')>-1;
+let remoteConfig = configName.indexOf(':') > -1;
 let configPath = path.dirname(configStr);
-if (!configPath || (configPath === '.')) configPath = path.resolve(__dirname,'configs');
-let configFile = path.join(configPath,configName)+'.json';
-let config = remoteConfig ? { defaults: {} } : yaml.parse(fs.readFileSync(configFile,'utf8'), {prettyErrors: true});
-let defName = argv._[1] || path.resolve(__dirname,'defs/petstore3.json');
+if (!configPath || (configPath === '.')) configPath = path.resolve(__dirname, 'configs');
+let configFile = path.join(configPath, configName) + '.json';
+let config = remoteConfig ? { defaults: {} } : yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
+let defName = argv._[1] || path.resolve(__dirname, 'defs/petstore3.json');
 
 let finish = remoteConfig ? finishRemote : finishLocal;
 
@@ -83,13 +83,13 @@ if (config.generator) {
 
 let zipFiles = {};
 
-function nop(arg, callback) { if (callback) callback(null,true); return true; }
+function nop(arg, callback) { if (callback) callback(null, true); return true; }
 
-function zipFile(filename,contents,encoding) {
+function zipFile(filename, contents, encoding) {
     zipFiles[filename] = contents;
 }
 
-function finishLocal(err,result) {
+function finishLocal(err, result) {
     if (argv.zip) {
         // create archive
         var zip = new admzip();
@@ -99,28 +99,28 @@ function finishLocal(err,result) {
             zip.addFile(f, new Buffer(zipFiles[f]), 'Created with OpenAPI-CodeGen');
         }
         // write everything to disk
-        zip.writeZip(path.join(config.outputDir,configName+'.zip'));
+        zip.writeZip(path.join(config.outputDir, configName + '.zip'));
     }
 }
 
-function finishRemote(err,result) {
-   configName = configName.split(':').pop();
-   if (argv.verbose) console.log('Making/cleaning output directories');
-   mkdirp(path.join(config.outputDir,configName),function(){
-       rimraf(path.join(config.outputDir,configName)+'/*',function(){
-           if (argv.zip) {
-              fs.writeFileSync(path.join(config.outputDir,configName,configName+'.zip'),result);
-           }
-           else {
-               const zip = new admzip(result);
-               if (argv.verbose) {
-                   console.log('Unzipping...');
-                   const zipEntries = zip.getEntries(); // an array of ZipEntry records
-                   zipEntries.forEach(function(zipEntry) {
-                       console.log(zipEntry.entryName);
-                   });
+function finishRemote(err, result) {
+    configName = configName.split(':').pop();
+    if (argv.verbose) console.log('Making/cleaning output directories');
+    mkdirp(path.join(config.outputDir, configName), function () {
+        rimraf(path.join(config.outputDir, configName) + '/*', function () {
+            if (argv.zip) {
+                fs.writeFileSync(path.join(config.outputDir, configName, configName + '.zip'), result);
+            }
+            else {
+                const zip = new admzip(result);
+                if (argv.verbose) {
+                    console.log('Unzipping...');
+                    const zipEntries = zip.getEntries(); // an array of ZipEntry records
+                    zipEntries.forEach(function (zipEntry) {
+                        console.log(zipEntry.entryName);
+                    });
                 }
-                zip.extractAllTo(config.outputDir,true);
+                zip.extractAllTo(config.outputDir, true);
             }
         });
     });
@@ -135,20 +135,20 @@ function despatch(obj, config, configName, callback) {
     }
 }
 
-function convert20(obj){
+function convert20(obj) {
     if (argv.verbose) console.log('Converting OpenAPI 2.0 definition');
-    swagger2openapi.convertObj(obj,{patch:true,warnOnly:true,direct:true},function(err,openapi){
+    swagger2openapi.convertObj(obj, { patch: true, warnOnly: true, direct: true }, function (err, openapi) {
         if (err) {
             console.error(util.inspect(err));
         }
         else {
             config.defaults.swagger = obj;
-            despatch(openapi,config,configName,finish);
+            despatch(openapi, config, configName, finish);
         }
     });
 }
 
-function convert12(api){
+function convert12(api) {
     if (argv.verbose) console.log('Converting Swagger 1.2 definition');
     let options = {};
     options.source = defName;
@@ -174,60 +174,60 @@ function convert12(api){
     var apiDeclarations = [];
     if (api.apis) {
         for (var component of api.apis) {
-            component.path = component.path.replace('.{format}','.json');
+            component.path = component.path.replace('.{format}', '.json');
             var lbase = base;
             if (component.path.startsWith('/')) {
                 let up = url.parse(base);
                 lbase = up.protocol + '//' + up.host;
             }
             if ((base.endsWith('/')) && (component.path.startsWith('/'))) {
-                lbase = base.substr(0,base.length-1);
+                lbase = base.substr(0, base.length - 1);
             }
-            if (component.path.indexOf('://')>=0) {
+            if (component.path.indexOf('://') >= 0) {
                 lbase = '';
             }
 
-            var u = (lbase+component.path);
+            var u = (lbase + component.path);
             if (!u.endsWith(extension)) u += extension;
             if (argv.verbose) console.log(u);
-            retrieve.push(fetch(u,options.fetchOptions)
-            .then(res => {
-                if (argv.verbose) console.log(res.status);
-                return res.text();
-            })
-            .then(data => {
-                apiDeclarations.push(yaml.parse(data));
-            })
-            .catch(err => {
-                console.error(util.inspect(err));
-            }));
+            retrieve.push(fetch(u, options.fetchOptions)
+                .then(res => {
+                    if (argv.verbose) console.log(res.status);
+                    return res.text();
+                })
+                .then(data => {
+                    apiDeclarations.push(yaml.parse(data));
+                })
+                .catch(err => {
+                    console.error(util.inspect(err));
+                }));
         }
     }
 
     co(function* () {
-      // resolve multiple promises in parallel
-      var res = yield retrieve;
-      var sVersion = 'v1_2';
-      stools.specs[sVersion].convert(api,apiDeclarations,true,function(err,converted){
-          if (err) {
-              console.error(util.inspect(err));
-          }
-          else {
-              if (converted.info && !converted.info.version) {
-                  converted.info.version = '1.0.0';
-              }
-              convert20(converted);
-          }
-      });
+        // resolve multiple promises in parallel
+        var res = yield retrieve;
+        var sVersion = 'v1_2';
+        stools.specs[sVersion].convert(api, apiDeclarations, true, function (err, converted) {
+            if (err) {
+                console.error(util.inspect(err));
+            }
+            else {
+                if (converted.info && !converted.info.version) {
+                    converted.info.version = '1.0.0';
+                }
+                convert20(converted);
+            }
+        });
     });
 }
 
 function main(s) {
     let o = yaml.parse(s, { prettyErrors: true });
-    if (argv.verbose) console.log('Loaded definition '+defName);
+    if (argv.verbose) console.log('Loaded definition ' + defName);
 
     if (o && o.openapi) {
-        despatch(o,config,configName,finish);
+        despatch(o, config, configName, finish);
     }
     else {
         if (o && o.swaggerVersion && o.swaggerVersion === '1.2') {
@@ -235,7 +235,7 @@ function main(s) {
         }
         else if (o && o.swagger && o.swagger === '2.0') {
             if (remoteConfig) {
-                despatch(o,config,configName,finish);
+                despatch(o, config, configName, finish);
             }
             else {
                 convert20(o);
@@ -249,7 +249,7 @@ function main(s) {
 
 if (argv.verbose) {
     config.defaults.verbose = true;
-    console.log('Loaded config '+configName);
+    console.log('Loaded config ' + configName);
 }
 if (argv.lint) config.defaults.lint = true;
 if (argv.debug) config.defaults.debug = true;
@@ -266,15 +266,15 @@ config.defaults.source = defName;
 let up = url.parse(defName);
 if (up.protocol && up.protocol.startsWith('http')) {
     fetch(defName)
-    .then(function (res) {
-        return res.text();
-    }).then(function (body) {
-        main(body);
-    }).catch(function (err) {
-        console.error(err.message);
-    });
+        .then(function (res) {
+            return res.text();
+        }).then(function (body) {
+            main(body);
+        }).catch(function (err) {
+            console.error(err.message);
+        });
 }
 else {
-   let s = fs.readFileSync(defName,'utf8');
-   main(s);
+    let s = fs.readFileSync(defName, 'utf8');
+    main(s);
 }

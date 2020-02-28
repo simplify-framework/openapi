@@ -9,26 +9,30 @@
         ]
     },
     "directories": [
-        "tests", "specs", "tests/{{apiName}}/{{serviceName}}", "{{apiName}}/{{serviceName}}/controllers", "utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
+        "tests", "specs/{{apiName}}", "tests/{{apiName}}/{{serviceName}}", "{{apiName}}/{{serviceName}}/controllers", "{{apiName}}/{{serviceName}}/utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
     ],
-    "transformations": [
-        { "input": "app.mustache", "output": "app.js" },
-        { "input": "index.mustache", "output": "index.js" },
-        { "input": "index-gcf.mustache", "output": "index-gcf.js" },
+    "transformations": [        
         { "input": "package.mustache", "output": "package.json" },
         { "input": "README.mustache", "output": "README.md" },
-        { "input": "swagger.mustache", "output": "specs/swagger.yaml" },
-        { "input": "openapi.mustache", "output": "specs/openapi.yaml" },
-        { "input": "Dockerfile.mustache", "output": "Dockerfile" },
-        { "input": "docker-entrypoint.mustache", "output": "docker-entrypoint.sh" },
-        { "input": "docker-compose.mustache", "output": "docker-compose.yml" },        
-        { "input": "writer.mustache", "output": "utils/writer.js" }
+        { "input": "app.mustache", "output": "app.js" },
+        { "input": "index.mustache", "output": "index.js" }
     ],
     "perGateway": [
-        { "input": "api-gateway.mustache", "output": "{{apiName}}/api-gateway.yaml" }
+        { "input": "api-gateway.mustache", "output": "{{apiName}}/api-gateway.yaml" },
+        { "input": "openapi.mustache", "output": "specs/{{apiName}}/openapi.yaml" },        
+        { "input": "swagger.mustache", "output": "specs/{{apiName}}/swagger.yaml" },
+        { "input": "swagger-ui.mustache", "output": "specs/{{apiName}}/swagger.json" },
+        { "input": "docker-compose.mustache", "output": "{{apiName}}/docker-compose.yml" }
     ],
     "perService": [        
-        { "input": "setup.env.mustache", "output": "tests/{{apiName}}/{{serviceName}}/setup.env.js" }
+        { "input": "setup.env.mustache", "output": "tests/{{apiName}}/{{serviceName}}/setup.env.js" },
+        { "input": "app.mustache", "output": "{{apiName}}/{{serviceName}}/app.js" },
+        { "input": "index.mustache", "output": "{{apiName}}/{{serviceName}}/index.js" },
+        { "input": "index-gcf.mustache", "output": "{{apiName}}/{{serviceName}}/index-gcf.js" },
+        { "input": "package.mustache", "output": "{{apiName}}/{{serviceName}}/package.json" },
+        { "input": "Dockerfile.mustache", "output": "{{apiName}}/{{serviceName}}/Dockerfile" },
+        { "input": "docker-entrypoint.mustache", "output": "{{apiName}}/{{serviceName}}/docker-entrypoint.sh" },        
+        { "input": "writer.mustache", "output": "{{apiName}}/{{serviceName}}/utils/writer.js" }
     ],
     "perOperation": [
         { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}.js" },                
