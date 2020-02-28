@@ -9,7 +9,7 @@
         ]
     },
     "directories": [
-        "{{apiName}}/{{serviceName}}/tests", "specs", "tests/{{serviceName}}", "{{apiName}}/{{serviceName}}/controllers", "utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
+        "tests", "specs", "tests/{{apiName}}/{{serviceName}}", "{{apiName}}/{{serviceName}}/controllers", "utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
     ],
     "transformations": [
         { "input": "app.mustache", "output": "app.js" },
@@ -28,11 +28,11 @@
         { "input": "api-gateway.mustache", "output": "{{apiName}}/api-gateway.yaml" }
     ],
     "perService": [        
-        { "input": "setup.env.mustache", "output": "tests/{{serviceName}}/setup.env.js" }
+        { "input": "setup.env.mustache", "output": "tests/{{apiName}}/{{serviceName}}/setup.env.js" }
     ],
     "perOperation": [
         { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}.js" },                
-        { "input": "sample.spec.mustache", "output": "{{apiName}}//{{serviceName}}/tests/{{className}}.spec.js" },
+        { "input": "test.spec.mustache", "output": "tests/{{apiName}}/{{serviceName}}/{{className}}.spec.js" },
         { "input": "controller.mustache", "output": "{{apiName}}/{{serviceName}}/controllers/{{className}}.js" }
     ]
 }

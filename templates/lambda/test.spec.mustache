@@ -2,9 +2,9 @@ var chai = require('chai');
 var rewire = require('rewire');
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised).should();
-
+{{#service}}
 {{#operations}}
-const {{className}}Service = rewire('../../{{implementation}}/{{className}}');
+const {{className}}Service = rewire('../../../{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}');
 
 describe('({{implementation}}) {{className}}:', function () {
     before('Prepare for {{className}} test specs', function () {});
@@ -18,3 +18,4 @@ describe('({{implementation}}) {{className}}:', function () {
     after('Cleanup {{className}} test specs', function () {});
 });
 {{/operations}}
+{{/service}}

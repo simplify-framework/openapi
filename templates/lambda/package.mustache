@@ -4,10 +4,10 @@
   "description": "{{{appDescription}}}",
   "main": "app.js",
   "scripts": {
-    "build": "nyc --reporter=html mocha --reporter mocha-simple-html-reporter --reporter-options output=index.html --require tests/setup.env.js --timeout 60000 \"./tests/**/*.spec.js*\"",
+    "build": "nyc --reporter=html mocha --reporter mocha-simple-html-reporter --reporter-options output=index.html --timeout 60000 \"./tests/**/*.spec.js*\"",
     "start": "node app.js",
-    "test": "nyc --reporter=text mocha --require tests/setup.env.js --timeout 60000 \"./tests/**/*.spec.js*\"",
-    "test-default": "nyc --reporter=text mocha --require tests/setup.env.js --timeout 60000 \"./tests/default/*.spec.js*\"",
+    "test": "nyc --reporter=text mocha --timeout 60000 \"./tests/**/*.spec.js*\"",
+    "test-default": "nyc --reporter=text mocha --timeout 60000 \"./tests/default/*.spec.js*\"",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "keywords": [
