@@ -48,7 +48,7 @@ servers:
   - url: /
 ```
 
-## Generate code by using command line:
+## Generate project code by using command line:
 
 `node cg.js serverless spec.yaml -f -o ../output/serverless`
 
