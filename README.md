@@ -4,7 +4,7 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
 *Node.js-based codegen for OpenAPI documents. This project was initially by tailoring from openapi-codegen to use the core code generation functionality to generate the lambda based node projects and AWS CloudFormation stack.*
 
-## Generate one solution in a serverless stack with:
+## Purpose to have one solution in a serverless stack with:
 + AWS API Gateway REST API
   + AWS Secret Manager
     + AWS Lambda function 1
@@ -43,3 +43,8 @@ paths:
 servers:
   - url: /
 ```
+
+## Generate code by using command line:
+
+`node cg.js serverless spec.yaml -f -o ../output/serverless`
+
