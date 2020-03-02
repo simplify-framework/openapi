@@ -1,4 +1,4 @@
-# AWS Minify CodeGen
+# AWS Simplify CodeGen
   
 Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
