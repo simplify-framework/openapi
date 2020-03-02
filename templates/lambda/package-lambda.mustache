@@ -1,0 +1,24 @@
+{
+  "name": "{{serviceName}}",
+  "version": "{{appVersion}}",
+  "description": "{{{appDescription}}}",
+  "main": "app.js",
+  "scripts": {
+    "deploy": "echo Publishing {{serviceName}}"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "body-parser": "^1.17.1",
+    "express": "^4.17.1",
+    "js-yaml": "^3.13.1",
+  {{#extraDependancies}}
+    "{{package}}":"{{version}}"{{#hasMore}},
+    {{/hasMore}}
+  {{/extraDependancies}}
+    "swagger-tools": "0.10.4"
+  },
+  "devDependencies": {
+  }
+}

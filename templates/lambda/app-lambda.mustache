@@ -1,0 +1,54 @@
+'use strict';
+
+var fs = require('fs'),
+    path = require('path');
+var express = require('express')
+var bodyParser = require('body-parser')
+var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+var app = express()
+var swaggerTools = require('swagger-tools');
+var jsyaml = require('js-yaml');
+
+// swaggerRouter configuration
+var options = {  
+  controllers: path.join(__dirname, './controllers'),
+  ignoreMissingHandlers: true
+};
+
+// The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
+var specYAML = fs.readFileSync(path.join(__dirname,'specs/swagger.yaml'), 'utf8');
+var swaggerDoc = jsyaml.safeLoad(specYAML);
+
+// Initialize the Swagger middleware
+swaggerTools.initializeMiddleware(swaggerDoc, function (middleware) {
+
+  app.use(bodyParser.json())
+  app.use(awsServerlessExpressMiddleware.eventContext())
+
+  // Interpret Swagger resources and attach metadata to request - must be first in swagger-tools middleware chain
+  app.use(middleware.swaggerMetadata());
+
+  // Validate Swagger requests
+  app.use(middleware.swaggerValidator());
+
+  // Route validated requests to appropriate controller
+  app.use(middleware.swaggerRouter(options));
+
+  // Global application error handler
+  app.use(function (err, req, res, next, statusCode) {
+    if (res.headersSent) {
+      return next(err);
+    } else {
+      res.status(statusCode || 500).json({
+        code: "ErrorServiceProviderSystemException",
+        message: err.message,
+        error: err
+      });
+    }
+  });
+
+  app.listen(3000, function () {
+    console.log("Server is started")
+  })
+
+});
