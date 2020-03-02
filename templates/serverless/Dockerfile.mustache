@@ -6,7 +6,7 @@ RUN chmod +x /home/nodeapp/docker-entrypoint.sh
 RUN apk --update add curl ca-certificates {{dockerPackages}} &&\
     addgroup -g 1001 nodeapp && \
     adduser -u 1001 -G nodeapp -s /bin/sh -D nodeapp && \
-    cd /home/nodeapp && npm install && date && npm run build &&\
+    cd /home/nodeapp && npm install && \
     rm -rf /var/lib/apt/lists/* &&\
     rm -rf /var/cache/apk/*
 

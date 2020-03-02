@@ -1,17 +1,17 @@
 version: '3.3'
 services:
-  {{projectBundle}}:
-    #logging:
-    #  driver: awslogs
-    #  options:
-    #    awslogs-region: ap-northeast-1
-    #    awslogs-group: {{projectBundle}}
-    #    awslogs-create-group: 'true'
-    #    awslogs-multiline-pattern: '(INFO|DEBUG|ERROR|WARNNING)'
+  {{#services}}
+  {{#service}}
+  {{serviceName}}:
     build:
-      context: ./
+      context: ./{{serviceName}}/
     environment:
-      - LOG_LEVEL=info
+      - LOG_LEVEL=info    
+    restart: always
+  {{/service}}
+  {{/services}}
+  {{projectBundle}}:
+    image: nginx
     ports:
-      - 3000:3000
+      - 3000:80
     restart: always
