@@ -11,6 +11,10 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
     + AWS Lambda function 2
 
 ## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
+- x-api-gateway-name: to define the API gateway Rest API stack name
+  - x-lambda-service-name: to define lambda function name that host the code
+  - x-swagger-router-controller: to decouple lambda code into controllers
+
 ```yaml
 openapi: 3.0.0
 info:
