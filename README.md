@@ -10,7 +10,7 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
     + AWS Lambda function 1
     + AWS Lambda function 2
 
-## From OpenAPI specs, add extra definitions:
+## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
 ```yaml
 openapi: 3.0.0
 info:
