@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "npx eslint *.js test/*.js lib/",
     "test": "npx mocha --delay",
-    "make": "node cg.js lambda ../output/current.yaml -f -o ../output/lambda"
+    "make": "node cg.js lambda spec.yaml -f -o ../output/serverless"
   },
   "repository": {
     "type": "git",

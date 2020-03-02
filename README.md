@@ -19,14 +19,27 @@ info:
 x-api-gateway-name: api-gateway-restapi-name
 paths:
   '/pets':
-    x-lambda-service-name: lambda-function-name-per-gateway
-    x-swagger-router-controller: routerControllerNamePerLambda
+    x-lambda-service-name: lambda-function-name-for-pets
+    x-swagger-router-controller: routerControllerNameForPets
     get:
       tags:
-        - Service Group
+        - Pets Service Group
       description: 'Get Pets Information'
       operationId: getPets
       responses:
         '200':
           description: Success
+  '/people':
+    x-lambda-service-name: lambda-function-name-for-people
+    x-swagger-router-controller: routerControllerNameForPeople
+    get:
+      tags:
+        - People Service Group
+      description: 'Get People Information'
+      operationId: getPeople
+      responses:
+        '200':
+          description: Success
+servers:
+  - url: /
 ```
