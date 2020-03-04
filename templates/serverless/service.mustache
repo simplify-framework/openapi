@@ -1,7 +1,5 @@
 'use strict';
-{{#service}}
 {{#operations}}
-{{#operation}}
 
 /**
  {{#summary}}
@@ -22,16 +20,12 @@
 {{/returnType}}
  **/
 exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
-  return new Promise(function(resolve, reject) {
-  {{#returnType}}
+  return new Promise(function(resolve, reject) {  
     reject({
       "code": "ErrorOperationNotImplemetedException",
       "message": "The '{{{operationId}}}' was not Implemented. [TODO: Imprement your service calls here]"
-    });
-  {{/returnType}}
+    });  
   });
 }
 
-{{/operation}}
 {{/operations}}
-{{/service}}

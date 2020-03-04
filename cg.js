@@ -15,7 +15,7 @@ const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const admzip = require('adm-zip');
 
-const processor = require('./local.js');
+const processor = require('./local-aws.js');
 const remote = require('./remote.js');
 
 async function list(provider, filter) {
@@ -165,10 +165,6 @@ function convert12(api) {
     }
     let base = aBase.join('/');
 
-    //if (options.source.endsWith('.json') || options.source.endsWith('.yaml')) {
-    //    extension = '';
-    //}
-
     var retrieve = [];
     var apiDeclarations = [];
     if (api.apis) {
@@ -203,8 +199,7 @@ function convert12(api) {
         }
     }
 
-    co(function* () {
-        // resolve multiple promises in parallel
+    co(function* () {        
         var res = yield retrieve;
         var sVersion = 'v1_2';
         stools.specs[sVersion].convert(api, apiDeclarations, true, function (err, converted) {
@@ -222,7 +217,7 @@ function convert12(api) {
 }
 
 function main(s) {
-    let o = yaml.parse(s, { prettyErrors: true });
+    let o = yaml.parse(s, { prettyErrors: true });    
     if (argv.verbose) console.log('Loaded definition ' + defName);
 
     if (o && o.openapi) {

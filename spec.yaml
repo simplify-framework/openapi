@@ -5,8 +5,7 @@ info:
 x-api-gateway-name: api-gateway-restapi-name
 paths:
   '/pets':
-    x-lambda-service-name: lambda-function-name-for-pets
-    x-swagger-router-controller: routerControllerNameForPets
+    x-lambda-service-name: lambda-function-name-for-pets    
     get:
       tags:
         - Pets Service Group
@@ -15,14 +14,76 @@ paths:
       responses:
         '200':
           description: Success
+    post:
+      tags:
+        - Pets Service Group
+      description: 'Create Pets Information'
+      operationId: createPet
+      responses:
+        '200':
+          description: Success
+  '/pets/{id}':
+    x-lambda-service-name: lambda-function-name-for-pets    
+    x-lambda-service-model-name: peopleManager
+    put:
+      tags:
+        - Pets Service Group
+      description: 'Update Pets Information'
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+            type: string
+      operationId: getPetById
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Pets Service Group
+      description: 'Create Pets Information By Id'
+      operationId: createById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+            type: string    
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Success
   '/people':
     x-lambda-service-name: lambda-function-name-for-people
-    x-swagger-router-controller: routerControllerNameForPeople
+    x-lambda-service-model-name: people-manager
     get:
       tags:
         - People Service Group
       description: 'Get People Information'
       operationId: getPeople
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Pets Service Group
+      description: 'Update Pets Information'
+      operationId: putPets
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - People Service Group
+      description: 'Create People Information By Id'
+      operationId: createPetById
       responses:
         '200':
           description: Success

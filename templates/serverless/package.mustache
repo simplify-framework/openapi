@@ -24,14 +24,12 @@
   "dependencies": {
     "aws-sdk": "^2.573.0",
     "aws-serverless-express": "^3.3.5",
-    "body-parser": "^1.17.1",
+    "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "js-yaml": "^3.13.1",
-  {{#extraDependancies}}
-    "{{package}}":"{{version}}"{{#hasMore}},
-    {{/hasMore}}
-  {{/extraDependancies}}
-    "swagger-tools": "0.10.4"
+    {{#extraDependancies}}
+    "{{package}}": "{{version}}",
+    {{/extraDependancies}}
+    "swagger-express-middleware": "git+https://github.com/APIDevTools/swagger-express-middleware.git"
   },
   "devDependencies": {
     "chai": "^4.2.0",

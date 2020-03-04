@@ -1,14 +1,12 @@
 version: '3.3'
 services:
-  {{#services}}
-  {{#service}}
+  {{#services}}  
   {{serviceName}}:
     build:
       context: ./{{serviceName}}/
     environment:
       - LOG_LEVEL=info    
-    restart: always
-  {{/service}}
+    restart: always  
   {{/services}}
   {{projectBundle}}:
     image: nginx

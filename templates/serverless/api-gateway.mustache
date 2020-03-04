@@ -37,10 +37,9 @@ Resources:
             validateRequestBody: false        
         x-amazon-apigateway-request-validator: Validate query string parameters and headers        
         paths:
-          {{#services}}
-          {{#service}}
-          {{#operations}}          
-          "{{path}}":
+          {{#services}}          
+          {{#servicePoints}}
+          "{{path}}":            
             {{#hasOptions}}
             options:
               consumes:
@@ -74,7 +73,7 @@ Resources:
             {{/hasOptions}}
             {{^hasOptions}}
             {{/hasOptions}}
-            {{#operation}}            
+            {{#operations}}            
             {{httpMethodCase}}:
               consumes:
               - application/json
@@ -116,10 +115,9 @@ Resources:
                     - "/invocations"                
                 passthroughBehavior: when_no_match
                 httpMethod: POST
-                type: aws_proxy            
-            {{/operation}}          
+                type: aws_proxy                      
           {{/operations}}
-          {{/service}}
+          {{/servicePoints}}
           {{/services}}
         securityDefinitions:
           sigv4:

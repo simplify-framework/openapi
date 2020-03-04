@@ -8,9 +8,6 @@
             { "package": "jwt-decode", "version": "^2.2.0"}
         ]
     },
-    "directories": [
-        "tests", "specs/{{apiName}}", "tests/{{apiName}}/{{serviceName}}", "{{apiName}}/{{serviceName}}/specs", "{{apiName}}/{{serviceName}}/controllers", "{{apiName}}/{{serviceName}}/utils", "{{apiName}}/{{serviceName}}/{{implementation}}", "{{apiName}}/{{serviceName}}", "{{apiName}}"
-    ],
     "transformations": [
         { "input": "package.mustache", "output": "package.json" },
         { "input": "README.mustache", "output": "README.md" },
@@ -34,9 +31,11 @@
         { "input": "docker-entrypoint.mustache", "output": "{{apiName}}/{{serviceName}}/docker-entrypoint.sh" },        
         { "input": "writer.mustache", "output": "{{apiName}}/{{serviceName}}/utils/writer.js" }
     ],
-    "perOperation": [
+    "perServiceModel": [
         { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}.js" },                
-        { "input": "test.spec.mustache", "output": "tests/{{apiName}}/{{serviceName}}/{{className}}.spec.js" },
-        { "input": "controller.mustache", "output": "{{apiName}}/{{serviceName}}/controllers/{{className}}.js" }
+        { "input": "test.spec.mustache", "output": "tests/{{apiName}}/{{serviceName}}/{{className}}.spec.js" }
+    ],
+    "perOperation": [
+        { "input": "controller.mustache", "output": "{{apiName}}/{{serviceName}}/controllers/{{operationId}}.js" }
     ]
 }
