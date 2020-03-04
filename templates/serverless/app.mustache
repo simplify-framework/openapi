@@ -7,7 +7,7 @@ var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
-let specYAML = path.join(__dirname, 'specs/openapi.yaml');
+let specYAML = path.join(__dirname, 'specs/{{apiName}}/openapi.yaml');
 const swagger = require('swagger-express-middleware');
 const Middleware = swagger.Middleware;
 
