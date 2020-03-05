@@ -15,7 +15,7 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
   - `x-micro-service-name`: to define lambda function name that host the code
   - `x-micro-service-model-name`: to redirect the related routing paths into a service group
 
-[![](https://mermaid.ink/img/eyJjb2RlIjoic3RhdGVEaWFncmFtXG5cdFsqXSAtLT4gYXBpR2F0ZXdheVxuICBhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZXRzOiAvbWljcm9TZXJ2aWNlRm9yUGV0c1xuXHRhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZW9wbGU6IC9taWNyb1NlcnZpY2VGb3JQZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gUGF0aEVycm9yczogL3Vua25vd25cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBQYXRoRXJyb3JzOiAvdW5rbm93blxuXG5cdG1pY3JvU2VydmljZUZvclBldHMgLS0-IGNyZWF0ZUJ5SWQ6IC9wZXRzL3tpZH1cbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gY3JlYXRlUGV0OiAvcGV0c1xuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBnZXRQZXRzOiAvcGV0c1xuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBwdXRQZXRCeUlkOiAvcGV0cy97aWR9ICgqKnByb3RlY3RlZCoqKVxuXG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gY3JlYXRlUGV0QnlJZDogL3Blb3BsZS97aWR9XG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gZ2V0UGVvcGxlOiAvcGVvcGxlXG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gcHV0UGV0czogL3BldHNcbiAgXG4gIGNyZWF0ZVBldCAtLT4gUGV0c1xuICBnZXRQZXRzIC0tPiBQZXRzXG4gIHB1dFBldEJ5SWQgLS0-IFBlb3BsZU1hbmFnZXJcbiAgY3JlYXRlQnlJZCAtLT4gUGVvcGxlTWFuYWdlclxuXG4gIGNyZWF0ZVBldEJ5SWQgLS0-IFBlb3BsZU1hbmFnZXJcbiAgZ2V0UGVvcGxlIC0tPiBQZW9wbGVNYW5hZ2VyXG4gIHB1dFBldHMgLS0-IFBlb3BsZU1hbmFnZXJcblxuXHRQYXRoRXJyb3JzIC0tPiBbKl1cbiAgUGVvcGxlTWFuYWdlciAtLT4gWypdXG4gIFBldHMgLS0-IFsqXVxuXHRcdFx0XHRcdCIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoic3RhdGVEaWFncmFtXG5cdFsqXSAtLT4gYXBpR2F0ZXdheVxuICBhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZXRzOiAvbWljcm9TZXJ2aWNlRm9yUGV0c1xuXHRhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZW9wbGU6IC9taWNyb1NlcnZpY2VGb3JQZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gUGF0aEVycm9yczogL3Vua25vd25cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBQYXRoRXJyb3JzOiAvdW5rbm93blxuXG5cdG1pY3JvU2VydmljZUZvclBldHMgLS0-IGNyZWF0ZUJ5SWQ6IC9wZXRzL3tpZH1cbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gY3JlYXRlUGV0OiAvcGV0c1xuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBnZXRQZXRzOiAvcGV0c1xuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBwdXRQZXRCeUlkOiAvcGV0cy97aWR9ICgqKnByb3RlY3RlZCoqKVxuXG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gY3JlYXRlUGV0QnlJZDogL3Blb3BsZS97aWR9XG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gZ2V0UGVvcGxlOiAvcGVvcGxlXG4gIG1pY3JvU2VydmljZUZvclBlb3BsZSAtLT4gcHV0UGV0czogL3BldHNcbiAgXG4gIGNyZWF0ZVBldCAtLT4gUGV0c1xuICBnZXRQZXRzIC0tPiBQZXRzXG4gIHB1dFBldEJ5SWQgLS0-IFBlb3BsZU1hbmFnZXJcbiAgY3JlYXRlQnlJZCAtLT4gUGVvcGxlTWFuYWdlclxuXG4gIGNyZWF0ZVBldEJ5SWQgLS0-IFBlb3BsZU1hbmFnZXJcbiAgZ2V0UGVvcGxlIC0tPiBQZW9wbGVNYW5hZ2VyXG4gIHB1dFBldHMgLS0-IFBlb3BsZU1hbmFnZXJcblxuXHRQYXRoRXJyb3JzIC0tPiBbKl1cbiAgUGVvcGxlTWFuYWdlciAtLT4gWypdXG4gIFBldHMgLS0-IFsqXVxuXHRcdFx0XHRcdCIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2V9)
+[![](https://mermaid.ink/img/eyJjb2RlIjoic3RhdGVEaWFncmFtXG5cdFsqXSAtLT4gYXBpR2F0ZXdheVxuICBhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZXRzOiAvbWljcm9TZXJ2aWNlRm9yUGV0c1xuXHRhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZW9wbGU6IC9taWNyb1NlcnZpY2VGb3JQZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gUGF0aEVycm9yczogL3Vua25vd25cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBQYXRoRXJyb3JzOiAvdW5rbm93blxuXG5cdG1pY3JvU2VydmljZUZvclBldHMgLS0-IGxpbmtQZXRUb1BlcnNvbjogL3BldHMve2lkfVxuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBjcmVhdGVQZXQ6IC9wZXRzXG4gIG1pY3JvU2VydmljZUZvclBldHMgLS0-IGdldFBldHM6IC9wZXRzXG4gIG1pY3JvU2VydmljZUZvclBldHMgLS0-IHVwZGF0ZVBldEJ5SWQ6IC9wZXRzL3tpZH0gKCoqcHJvdGVjdGVkKiopXG5cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBjcmVhdGVQZW9wbGU6IC9wZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBnZXRQZW9wbGU6IC9wZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBwdXRQZW9wbGU6IC9wZW9wbGVcbiAgXG4gIGNyZWF0ZVBldCAtLT4gUGV0c1xuICBnZXRQZXRzIC0tPiBQZXRzXG4gIHVwZGF0ZVBldEJ5SWQgLS0-IFBlb3BsZVBldHNcbiAgY3JlYXRlUGVvcGxlIC0tPiBQZW9wbGVQZXRzXG5cbiAgbGlua1BldFRvUGVyc29uIC0tPiBQZW9wbGVQZXRzXG4gIGdldFBlb3BsZSAtLT4gUGVvcGxlUGV0cyAgXG5cblx0UGF0aEVycm9ycyAtLT4gWypdXG4gIFBlb3BsZVBldHMgLS0-IFsqXVxuICBQZXRzIC0tPiBbKl1cblx0XHRcdFx0XHQiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ)](https://mermaid-js.github.io/mermaid-live-editor/#/edit/eyJjb2RlIjoic3RhdGVEaWFncmFtXG5cdFsqXSAtLT4gYXBpR2F0ZXdheVxuICBhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZXRzOiAvbWljcm9TZXJ2aWNlRm9yUGV0c1xuXHRhcGlHYXRld2F5IC0tPiBtaWNyb1NlcnZpY2VGb3JQZW9wbGU6IC9taWNyb1NlcnZpY2VGb3JQZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGV0cyAtLT4gUGF0aEVycm9yczogL3Vua25vd25cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBQYXRoRXJyb3JzOiAvdW5rbm93blxuXG5cdG1pY3JvU2VydmljZUZvclBldHMgLS0-IGxpbmtQZXRUb1BlcnNvbjogL3BldHMve2lkfVxuICBtaWNyb1NlcnZpY2VGb3JQZXRzIC0tPiBjcmVhdGVQZXQ6IC9wZXRzXG4gIG1pY3JvU2VydmljZUZvclBldHMgLS0-IGdldFBldHM6IC9wZXRzXG4gIG1pY3JvU2VydmljZUZvclBldHMgLS0-IHVwZGF0ZVBldEJ5SWQ6IC9wZXRzL3tpZH0gKCoqcHJvdGVjdGVkKiopXG5cbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBjcmVhdGVQZW9wbGU6IC9wZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBnZXRQZW9wbGU6IC9wZW9wbGVcbiAgbWljcm9TZXJ2aWNlRm9yUGVvcGxlIC0tPiBwdXRQZW9wbGU6IC9wZW9wbGVcbiAgXG4gIGNyZWF0ZVBldCAtLT4gUGV0c1xuICBnZXRQZXRzIC0tPiBQZXRzXG4gIHVwZGF0ZVBldEJ5SWQgLS0-IFBlb3BsZVBldHNcbiAgY3JlYXRlUGVvcGxlIC0tPiBQZW9wbGVQZXRzXG5cbiAgbGlua1BldFRvUGVyc29uIC0tPiBQZW9wbGVQZXRzXG4gIGdldFBlb3BsZSAtLT4gUGVvcGxlUGV0cyAgXG5cblx0UGF0aEVycm9ycyAtLT4gWypdXG4gIFBlb3BsZVBldHMgLS0-IFsqXVxuICBQZXRzIC0tPiBbKl1cblx0XHRcdFx0XHQiLCJtZXJtYWlkIjp7InRoZW1lIjoiZGVmYXVsdCJ9LCJ1cGRhdGVFZGl0b3IiOmZhbHNlfQ)
 
 ```yaml
 openapi: 3.0.0
@@ -44,8 +44,8 @@ paths:
         '200':
           description: Success
   '/pets/{id}':
-    x-micro-service-name: micro-service-for-pets    
-    x-micro-service-model-name: peopleManager
+    x-micro-service-name: micro-service-for-pets
+    x-micro-service-model-name: people-pets
     x-micro-service-hystrix-stream: true
     put:
       x-micro-service-circuit-protection: true
@@ -61,7 +61,7 @@ paths:
         required: true
         schema:
             type: string
-      operationId: putPetById
+      operationId: updatePetById
       responses:
         '200':
           description: Success
@@ -69,7 +69,7 @@ paths:
       tags:
         - Pets Service Group
       description: 'Create Pets Information By Id'
-      operationId: createById
+      operationId: linkPetToPerson
       parameters:
       - in: path
         name: id
@@ -95,7 +95,7 @@ paths:
           description: Success
   '/people':
     x-micro-service-name: micro-service-for-people
-    x-micro-service-model-name: people-manager
+    x-micro-service-model-name: people-pets
     get:
       tags:
         - People Service Group
@@ -106,9 +106,9 @@ paths:
           description: Success
     put:
       tags:
-        - Pets Service Group
-      description: 'Update Pets Information'
-      operationId: putPets
+        - People Service Group
+      description: 'Update People Information'
+      operationId: putPeople
       responses:
         '200':
           description: Success
@@ -116,7 +116,7 @@ paths:
       tags:
         - People Service Group
       description: 'Create People Information By Id'
-      operationId: createPetById
+      operationId: createPeople
       responses:
         '200':
           description: Success

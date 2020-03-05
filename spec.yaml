@@ -24,8 +24,8 @@ paths:
         '200':
           description: Success
   '/pets/{id}':
-    x-micro-service-name: micro-service-for-pets    
-    x-micro-service-model-name: peopleManager
+    x-micro-service-name: micro-service-for-pets
+    x-micro-service-model-name: people-pets
     x-micro-service-hystrix-stream: true
     put:
       x-micro-service-circuit-protection: true
@@ -41,7 +41,7 @@ paths:
         required: true
         schema:
             type: string
-      operationId: putPetById
+      operationId: updatePetById
       responses:
         '200':
           description: Success
@@ -49,7 +49,7 @@ paths:
       tags:
         - Pets Service Group
       description: 'Create Pets Information By Id'
-      operationId: createById
+      operationId: linkPetToPerson
       parameters:
       - in: path
         name: id
@@ -75,7 +75,7 @@ paths:
           description: Success
   '/people':
     x-micro-service-name: micro-service-for-people
-    x-micro-service-model-name: people-manager
+    x-micro-service-model-name: people-pets
     get:
       tags:
         - People Service Group
@@ -86,9 +86,9 @@ paths:
           description: Success
     put:
       tags:
-        - Pets Service Group
-      description: 'Update Pets Information'
-      operationId: putPets
+        - People Service Group
+      description: 'Update People Information'
+      operationId: putPeople
       responses:
         '200':
           description: Success
@@ -96,7 +96,7 @@ paths:
       tags:
         - People Service Group
       description: 'Create People Information By Id'
-      operationId: createPetById
+      operationId: createPeople
       responses:
         '200':
           description: Success
