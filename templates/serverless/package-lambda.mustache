@@ -1,10 +1,11 @@
 {
-  "name": "{{serviceNameOrigin}}",
+  "name": "{{serviceNamePosix}}",
   "version": "{{appVersion}}",
   "description": "{{{appDescription}}}",
   "main": "app.js",
   "scripts": {
-    "deploy": "echo Publishing {{serviceName}}"
+    "deploy": "echo Publishing {{serviceName}}",
+    "start": "node app.js"
   },
   "license": "MIT",
   "private": true,

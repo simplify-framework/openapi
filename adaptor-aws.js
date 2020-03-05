@@ -263,8 +263,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
             operation.formParams.push(clone(parameter));
             operation.hasFormParams = true;
         }*/
-    } // end of effective parameters
-
+    } // end of effective parameters    
     operation.operationId = op.operationId || Case.camel((op.tags ? op.tags[0] : '') + (paramList ? '_' + paramList.join('_') + '_' : '') + verb);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);    
@@ -445,15 +444,15 @@ function convertToServices(source, obj, defaults) {
                     const split = p.replace(/^\//, '').split(/\//g);                    
                     const className = source.paths[p]['x-lambda-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
                     entry = {};
-                    entry.path = p;
+                    entry.path = p;                    
                     entry.serviceName = source.paths[p]['x-lambda-service-name'].toCamelCase().split(' ').join('').split('-').join('');
-                    entry.serviceNameOrigin = source.paths[p]['x-lambda-service-name']
+                    entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
                     entry.className = className.toPascalCase().split(' ').join('').split('-').join('');                    
                     entry.operations = [];
                     paths.push(entry);
                 }
                 let operation = convertOperation(op, m, p, source.paths[p], obj, source);                
-                entry.operations.push(operation);
+                entry.operations.push(operation);                
             }
         }
     }
@@ -475,7 +474,7 @@ function convertToServices(source, obj, defaults) {
         if (!service) {            
             service = {
                 serviceName: path.serviceName,
-                serviceNameOrigin: path.serviceNameOrigin,
+                serviceNamePosix: path.serviceNamePosix,
                 servicePoints: [path]
             }            
             services.push(service)
@@ -489,6 +488,7 @@ function convertToServices(source, obj, defaults) {
             } else {            
                 serviceOperations.operations.push(path.operations[0])
             }
+            serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodCase == 'post' || op.httpMethodCase == 'put' || op.httpMethodCase == 'patch')
         }
     }
     return services;
@@ -568,6 +568,7 @@ function getPrime(api, defaults) {
     let prime = {};
     prime.projectBundle = api.info.title;
     prime.apiName = api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join('');
+    prime.apiNamePosix = Case.snake(prime.apiName).split('_').join('-');
     prime.projectName = api.info.title.toPascalCase().split(' ').join('').split('-').join('');
     prime.appVersion = api.info.version;
     prime.apiVersion = api.info.version;

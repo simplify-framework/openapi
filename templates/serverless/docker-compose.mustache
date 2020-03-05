@@ -1,15 +1,22 @@
 version: '3.3'
 services:
   {{#services}}  
-  {{serviceName}}:
+  {{serviceNamePosix}}:
     build:
       context: ./{{serviceName}}/
+    container_name: {{serviceNamePosix}}-{{packageGuid}}
     environment:
       - LOG_LEVEL=info    
     restart: always  
   {{/services}}
-  {{projectBundle}}:
+  {{apiNamePosix}}:
     image: nginx
     ports:
-      - 3000:80
+      - 80:8080
+    volumes:
+      - ./api-gateway.conf:/etc/nginx/conf.d/api-gateway.conf
     restart: always
+    depends_on:
+    {{#services}}
+    - {{serviceNamePosix}}
+    {{/services}}
