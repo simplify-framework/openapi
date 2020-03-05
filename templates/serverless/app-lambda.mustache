@@ -1,15 +1,24 @@
 'use strict';
 
-var fs = require('fs'),
-  path = require('path');
+var path = require('path');
 var express = require('express')
 var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+var Brakes = require('brakes');
+var globalStats = Brakes.getGlobalStats();
 
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
-let specYAML = path.join(__dirname, 'specs/openapi.yaml');
+let specYAML = path.join(__dirname, 'specs/swagger.yaml');
 const swagger = require('swagger-express-middleware');
 const Middleware = swagger.Middleware;
+const middlewareParseParams = function(req, res, next) {    
+  req.swagger.params.map(p => {
+    if (p.in == 'path') req.swagger.params[p.name] = { name: p.name, value: req.params[p.name] }
+    if (p.in == 'body') req.swagger.params[p.name] = { name: p.name, value: req.body }
+    if (p.in == 'query') req.swagger.params[p.name] = { name: p.name, value: req.query[p.name] }
+  })   
+  return next()
+}
 
 let app = express()
 let middleware = new Middleware(app);
@@ -18,13 +27,15 @@ middleware.init(specYAML, (err) => {
   app.use(bodyParser.json())
   app.use(awsServerlessExpressMiddleware.eventContext())
   app.use(middleware.metadata());
+  app.use(middleware.parseRequest());
 
   // These two middleware don't have any options (yet)
-  app.use(middleware.CORS(), middleware.validateRequest());
+  app.use(middleware.CORS());
+  app.use(middleware.validateRequest());
   // Route validated requests to appropriate controller    
   {{#servicePoints}}
   {{#operations}}
-  app.use(require("./controllers/{{operationId}}"));  
+  app.{{httpMethodCase}}("{{replacedPathName}}", middlewareParseParams, require("./controllers/{{operationId}}"));  
   {{/operations}}
   {{/servicePoints}}
 
@@ -44,6 +55,13 @@ middleware.init(specYAML, (err) => {
       });
     }
   });
+
+  app.use('/hystrix.stream', function (req, res, next) {
+    res.setHeader('Content-Type', 'text/event-stream;charset=UTF-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    globalStats.getHystrixStream().pipe(res);
+  })
 
   app.listen(3000, function () {
     console.log("Server is started")

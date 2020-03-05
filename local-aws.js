@@ -57,6 +57,7 @@ function main(o, config, configName, callback) {
                     if (!ff.existsSync(requestDir)) {
                         ff.mkdirp.sync(requestDir);
                     }
+                    console.log("Generating...", path.join(outputDir, subDir, action.output))
                     ff.createFile(path.join(outputDir, subDir, action.output), content, 'utf8');
                 }
                 if (config.perGateway) {
@@ -71,6 +72,7 @@ function main(o, config, configName, callback) {
                         if (!ff.existsSync(requestDir)) {
                             ff.mkdirp.sync(requestDir);
                         }
+                        console.log("Generating...", filename)
                         ff.createFile(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8');
                     }
                 }
@@ -87,6 +89,7 @@ function main(o, config, configName, callback) {
                             if (!ff.existsSync(requestDir)) {
                                 ff.mkdirp.sync(requestDir);
                             }
+                            console.log("Generating...", filename)
                             ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
                         })
                     }
@@ -105,6 +108,7 @@ function main(o, config, configName, callback) {
                                 if (!ff.existsSync(requestDir)) {
                                     ff.mkdirp.sync(requestDir);
                                 }
+                                console.log("Generating...", filename)
                                 ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
                             })
                         })
@@ -119,12 +123,13 @@ function main(o, config, configName, callback) {
                         model.apiInfo.services.map(svc => {
                             svc.servicePoints.map(endpoint => {
                                 endpoint.operations.map(op => {
-                                    let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);
+                                    let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);                                    
                                     let filename = fnTemplate.render(serviceModel, config.partials);
                                     let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                     if (!ff.existsSync(requestDir)) {
                                         ff.mkdirp.sync(requestDir);
                                     }
+                                    console.log("Generating...", filename)
                                     ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
                                 })
                             })

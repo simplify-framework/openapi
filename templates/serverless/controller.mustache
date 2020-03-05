@@ -4,6 +4,13 @@ var utils = require('../utils/writer.js');
 
 var {{className}} = require('../{{implementation}}/{{className}}');
 
+{{#circuitProtection}}
+/** ENABLE CIRCUIT BREAKER **/
+const Brakes = require('brakes');
+/** Declare circuit breaker brakes **/
+var {{{operationId}}}CircuitBreakerBrake = null;
+{{/circuitProtection}}
+
 /**
  {{#summary}}
  * {{{summary}}}
@@ -27,6 +34,30 @@ module.exports = function (req, res, next) {
   {{#allParams}}
   var {{paramName}} = req.swagger.params['{{baseName}}'].value;
   {{/allParams}}
+  {{#circuitProtection}}
+  /** Instanciate circuit breaker guardian **/
+  if (!{{{operationId}}}CircuitBreakerBrake) {
+    {{{operationId}}}CircuitBreakerBrake = new Brakes({{className}}.{{{operationId}}}, {
+      name: '{{serviceName}}::{{{operationId}}}',
+      group: '{{serviceName}}::{{className}}Service',
+      timeout: {{operationTimeout}},
+      circuitDuration: {{circuitDuration}},
+      threshold: {{circuitThreshold}}
+    });
+  }
+  return {{{operationId}}}CircuitBreakerBrake.exec({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+    .then(function (response) {
+      utils.writeJson(res, response);
+    }, function (error) {
+      utils.writeError(res, error);
+    }).catch(function (error) {
+      utils.writeError(res, {
+        code: 'InnerHandlerThrownException',
+        message: error
+      });
+    });  
+  {{/circuitProtection}}
+  {{^circuitProtection}}
   {{className}}.{{operationId}}({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
     .then(function (response) {
       utils.writeJson(res, response);
@@ -39,4 +70,5 @@ module.exports = function (req, res, next) {
         message: error
       });
     });
+  {{/circuitProtection}}
 };

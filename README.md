@@ -12,7 +12,7 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
 ## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
 - `x-api-gateway-name`: to define the API gateway Rest API stack name
-  - `x-lambda-service-name`: to define lambda function name that host the code
+  - `x-micro-service-name`: to define lambda function name that host the code
   - `x-swagger-router-controller`: to decouple lambda code into controllers
 
 ```yaml
@@ -23,7 +23,7 @@ info:
 x-api-gateway-name: api-gateway-restapi-name
 paths:
   '/pets':
-    x-lambda-service-name: lambda-function-name-for-pets
+    x-micro-service-name: micro-service-for-pets
     x-swagger-router-controller: routerControllerNameForPets
     get:
       tags:
@@ -34,7 +34,7 @@ paths:
         '200':
           description: Success
   '/people':
-    x-lambda-service-name: lambda-function-name-for-people
+    x-micro-service-name: micro-service-for-people
     x-swagger-router-controller: routerControllerNameForPeople
     get:
       tags:

@@ -5,7 +5,8 @@
         "extraDependancies": [
             { "package":"request", "version":"^2.87.0" },
             { "package":"dynamodb", "version":"^1.0.0" },
-            { "package": "jwt-decode", "version": "^2.2.0"}
+            { "package": "jwt-decode", "version": "^2.2.0"},
+            { "package": "brakes", "version": "^2.8.0"}
         ]
     },
     "transformations": [
@@ -26,6 +27,7 @@
         { "input": "setup.env.mustache", "output": "tests/{{apiName}}/{{serviceName}}/setup.env.js" },
         { "input": "app-lambda.mustache", "output": "{{apiName}}/{{serviceName}}/app.js" },        
         { "input": "openapi.mustache", "output": "{{apiName}}/{{serviceName}}/specs/openapi.yaml" },
+        { "input": "swagger-yaml.mustache", "output": "{{apiName}}/{{serviceName}}/specs/swagger.yaml" },
         { "input": "index.mustache", "output": "{{apiName}}/{{serviceName}}/index.js" },        
         { "input": "package-lambda.mustache", "output": "{{apiName}}/{{serviceName}}/package.json" },
         { "input": "Dockerfile.mustache", "output": "{{apiName}}/{{serviceName}}/Dockerfile" },

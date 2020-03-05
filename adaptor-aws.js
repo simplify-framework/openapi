@@ -6,6 +6,7 @@ const Case = require('case');
 const sampler = require('openapi-sampler');
 const clone = require('reftools/lib/clone.js').circularClone;
 const validator = require('oas-validator').validateSync;
+const downconverter = require('./lib/orange/downconvert.js');
 
 const schemaProperties = [
     'format',
@@ -133,9 +134,11 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.httpMethodHasBody = operation.httpMethodCase == 'post' || operation.httpMethodCase == 'put' || operation.httpMethodCase == 'patch'
     if (obj.httpMethodCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
-    operation.replacedPathName = path; //?
-    operation.operationTimeout = op['x-operation-timeout'] || 60000;
-    operation.enableProtection = op['x-enable-protection'] || false;
+    operation.replacedPathName = path; //?    
+    operation.circuitProtection = op['x-micro-service-circuit-protection'] || false;
+    operation.operationTimeout = op['x-micro-service-circuit-timeout'] || 60000;
+    operation.circuitDuration = op['x-micro-service-circuit-duration'] || 30000;
+    operation.circuitThreshold = op['x-micro-service-circuit-threshold'] || 0.1;
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);    
@@ -146,7 +149,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.queryParams = [];
     operation.headerParams = [];
     operation.formParams = [];
-    operation.primaryParamName = undefined;
+    operation.firstParamName = undefined;
     operation.summary = op.summary;
     operation.notes = op.description;
     if (!operation.notes) {
@@ -211,8 +214,7 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         parameter.defaultValue = (param.schema && typeof param.schema.default !== 'undefined') ? param.schema.default : undefined;
         parameter.isFile = false;
         parameter.isEnum = false; // TODO?
-        parameter.vendorExtensions = specificationExtensions(param);
-
+        parameter.vendorExtensions = specificationExtensions(param);        
         if (param.schema && param.schema.nullable) {
             parameter.vendorExtensions["x-nullable"] = true;
         }
@@ -239,8 +241,8 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
         if (param.name == "x-api-token") {
             parameter.paramName = 'token';
         }
-        if (!operation.primaryParamName) {
-            operation.primaryParamName = parameter.paramName;
+        if (!operation.firstParamName) {
+            operation.firstParamName = parameter.paramName;
         }
         operation.allParams.push(parameter);
         if (param.in === 'path') {
@@ -267,7 +269,6 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.operationId = op.operationId || Case.camel((op.tags ? op.tags[0] : '') + (paramList ? '_' + paramList.join('_') + '_' : '') + verb);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);    
-
     operation.bodyParams = [];
     if (op.requestBody) {
         operation.openapi.requestBody = op.requestBody;
@@ -414,14 +415,17 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
             });
         }
     }
+    operation.pathParams.map(p => {
+        operation.replacedPathName = operation.path.replace(`{${p.paramName}}`, `:${p.paramName}`)        
+    })
     operation.queryParams = convertArray(operation.queryParams);
     operation.headerParams = convertArray(operation.headerParams);
     operation.pathParams = convertArray(operation.pathParams);
     operation.formParams = convertArray(operation.formParams);
     operation.bodyParams = convertArray(operation.bodyParams);
     operation.allParams = convertArray(operation.allParams);
-    operation.examples = convertArray(operation.examples);
-    operation.openapi.callbacks = op.callbacks;
+    operation.examples = convertArray(operation.examples);    
+    operation.openapi.callbacks = op.callbacks;    
     return operation;
 }
 
@@ -442,17 +446,21 @@ function convertToServices(source, obj, defaults) {
                 });
                 if (!entry) {
                     const split = p.replace(/^\//, '').split(/\//g);                    
-                    const className = source.paths[p]['x-lambda-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
+                    const className = source.paths[p]['x-micro-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
                     entry = {};
-                    entry.path = p;                    
-                    entry.serviceName = source.paths[p]['x-lambda-service-name'].toCamelCase().split(' ').join('').split('-').join('');
-                    entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
-                    entry.className = className.toPascalCase().split(' ').join('').split('-').join('');                    
-                    entry.operations = [];
-                    paths.push(entry);
+                    entry.path = p;
+                    if (source.paths[p]['x-micro-service-name']) {
+                        entry.serviceName = source.paths[p]['x-micro-service-name'].toCamelCase().split(' ').join('').split('-').join('');
+                        entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
+                        entry.className = className.toPascalCase().split(' ').join('').split('-').join('');                    
+                        entry.operations = [];
+                        paths.push(entry);
+                    }
                 }
-                let operation = convertOperation(op, m, p, source.paths[p], obj, source);                
-                entry.operations.push(operation);                
+                if (source.paths[p]['x-micro-service-name']) {
+                    let operation = convertOperation(op, m, p, source.paths[p], obj, source);                
+                    entry.operations.push(operation);
+                }   
             }
         }
     }
@@ -604,7 +612,15 @@ function transform(api, defaults, callback) {
     let vOptions = { lint: defaults.lint };
     let prime = getPrime(api, defaults); // defaults which depend in some way on the api definition
     let obj = Object.assign({}, base, prime, defaults);
-    obj.messages = [];    
+    obj.messages = [];
+    const container = {};
+    container.spec = api;
+    container.source = defaults.source;
+    let conv = new downconverter(container);
+    obj.swagger = conv.convert();    
+    delete obj.swagger.securityDefinitions
+    obj["swagger-yaml"] = yaml.stringify(obj.swagger); // set to original if converted v2.0
+    obj["swagger-json"] = JSON.stringify(obj.swagger, null, 2); // set to original if converted 2.0
     obj["openapi-yaml"] = yaml.stringify(api);
     obj["openapi-json"] = JSON.stringify(api, null, 2);    
     obj.openapi = {};

@@ -3,11 +3,10 @@ services:
   {{#services}}  
   {{serviceNamePosix}}:
     build:
-      context: ./{{serviceName}}/
-    container_name: {{serviceNamePosix}}-{{packageGuid}}
+      context: ./{{serviceName}}/    
     environment:
-      - LOG_LEVEL=info    
-    restart: always  
+      - LOG_LEVEL=info
+    restart: always
   {{/services}}
   {{apiNamePosix}}:
     image: nginx

@@ -4,8 +4,18 @@ info:
   title: serverless-stack-name
 x-api-gateway-name: api-gateway-restapi-name
 paths:
+  '/hystrix.stream':    
+    get:
+      description: hystrix server-sent event stream
+      responses:
+        200:
+          description: Event pushed to hystrix dashboard
+          content:
+            text/event-stream:              
+              schema:
+                type: object
   '/pets':
-    x-lambda-service-name: lambda-function-name-for-pets    
+    x-micro-service-name: micro-service-for-pets
     get:
       tags:
         - Pets Service Group
@@ -23,9 +33,13 @@ paths:
         '200':
           description: Success
   '/pets/{id}':
-    x-lambda-service-name: lambda-function-name-for-pets    
-    x-lambda-service-model-name: peopleManager
+    x-micro-service-name: micro-service-for-pets    
+    x-micro-service-model-name: peopleManager    
     put:
+      x-micro-service-circuit-protection: true
+      x-micro-service-circuit-timeout: 60000
+      x-micro-service-circuit-duration: 30000
+      x-micro-service-circuit-threshold: 0.1
       tags:
         - Pets Service Group
       description: 'Update Pets Information'
@@ -35,7 +49,7 @@ paths:
         required: true
         schema:
             type: string
-      operationId: getPetById
+      operationId: putPetById
       responses:
         '200':
           description: Success
@@ -49,20 +63,27 @@ paths:
         name: id
         required: true
         schema:
+            type: string
+      - in: query
+        name: filter        
+        schema:
             type: string    
       requestBody:
         description: Optional description in *Markdown*
         required: true
         content:
-          text/plain:
+          application/json:
             schema:
-              type: string
+              type: object
+              properties:
+                foo:
+                  type: string
       responses:
         '200':
           description: Success
   '/people':
-    x-lambda-service-name: lambda-function-name-for-people
-    x-lambda-service-model-name: people-manager
+    x-micro-service-name: micro-service-for-people
+    x-micro-service-model-name: people-manager
     get:
       tags:
         - People Service Group
