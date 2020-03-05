@@ -4,9 +4,10 @@ var path = require('path');
 var express = require('express')
 var bodyParser = require('body-parser')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+{{#hystrixStream}}
 var Brakes = require('brakes');
 var globalStats = Brakes.getGlobalStats();
-
+{{/hystrixStream}}
 // The Swagger document (require it, build it programmatically, fetch it from a URL, ...)
 let specYAML = path.join(__dirname, 'specs/swagger.yaml');
 const swagger = require('swagger-express-middleware');
@@ -55,14 +56,14 @@ middleware.init(specYAML, (err) => {
       });
     }
   });
-
+  {{#hystrixStream}}
   app.use('/hystrix.stream', function (req, res, next) {
     res.setHeader('Content-Type', 'text/event-stream;charset=UTF-8');
     res.setHeader('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
     globalStats.getHystrixStream().pipe(res);
   })
-
+  {{/hystrixStream}}
   app.listen(3000, function () {
     console.log("Server is started")
   })

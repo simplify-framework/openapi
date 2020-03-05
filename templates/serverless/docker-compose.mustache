@@ -19,6 +19,7 @@ services:
     {{#services}}
     - {{serviceNamePosix}}
     {{/services}}
+  {{#hystrixDashboard}}
   hystrix-dashboard:
     image: travix/hystrix-dashboard
     ports:
@@ -28,3 +29,4 @@ services:
     - {{serviceNamePosix}}
     {{/services}}
     restart: always
+  {{/hystrixDashboard}}

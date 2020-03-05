@@ -3,6 +3,7 @@ info:
   version: 0.0.1
   title: serverless-stack-name
 x-api-gateway-name: api-gateway-restapi-name
+x-api-hystrix-dashboard: false
 paths:
   '/pets':
     x-micro-service-name: micro-service-for-pets
@@ -24,7 +25,8 @@ paths:
           description: Success
   '/pets/{id}':
     x-micro-service-name: micro-service-for-pets    
-    x-micro-service-model-name: peopleManager    
+    x-micro-service-model-name: peopleManager
+    x-micro-service-hystrix-stream: true
     put:
       x-micro-service-circuit-protection: true
       x-micro-service-circuit-timeout: 60000

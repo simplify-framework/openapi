@@ -450,6 +450,7 @@ function convertToServices(source, obj, defaults) {
                     entry = {};
                     entry.path = p;
                     if (source.paths[p]['x-micro-service-name']) {
+                        entry.hystrixStream = source.paths[p]['x-micro-service-hystrix-stream'] || false
                         entry.serviceName = source.paths[p]['x-micro-service-name'].toCamelCase().split(' ').join('').split('-').join('');
                         entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
                         entry.className = className.toPascalCase().split(' ').join('').split('-').join('');
@@ -483,6 +484,7 @@ function convertToServices(source, obj, defaults) {
             service = {
                 serviceName: path.serviceName,
                 serviceNamePosix: path.serviceNamePosix,
+                hystrixStream: path.hystrixStream,
                 servicePoints: [path]
             }
             services.push(service)
@@ -497,6 +499,7 @@ function convertToServices(source, obj, defaults) {
                 serviceOperations.operations.push(path.operations[0])
             }
             serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodCase == 'post' || op.httpMethodCase == 'put' || op.httpMethodCase == 'patch')
+            service.hystrixStream = service.servicePoints.some(sp => sp.hystrixStream == true)
         }
     }
     return services;
@@ -576,6 +579,7 @@ function getPrime(api, defaults) {
     let prime = {};
     prime.projectBundle = api.info.title;
     prime.apiName = api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join('');
+    prime.hystrixDashboard = api['x-api-hystrix-dashboard'] || false
     prime.apiNamePosix = Case.snake(prime.apiName).split('_').join('-');
     prime.projectName = api.info.title.toPascalCase().split(' ').join('').split('-').join('');
     prime.appVersion = api.info.version;
@@ -660,7 +664,8 @@ function transform(api, defaults, callback) {
             return thisFunc(this.paramName);
         };
         obj.apiInfo = {
-            apiName: api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join('')
+            apiName: api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join(''),
+            hystrixDashboard: api['x-api-hystrix-dashboard'] || false
         };
         obj.apiInfo.services = convertToServices(api, obj, defaults);
         obj.produces = convertArray(obj.produces);
