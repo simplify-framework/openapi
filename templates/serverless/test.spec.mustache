@@ -8,13 +8,9 @@ const {{className}}Service = rewire('../../../{{apiName}}/{{serviceName}}/{{impl
 
 describe('({{implementation}}) {{className}}:', function () {
     before('Prepare for {{className}} test specs', function () {});
-{{#operation}}
-
     it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', function () {
         return {{className}}Service.{{{operationId}}}('{{#allParams}}{{paramName}}{{#hasMore}}', '{{/hasMore}}{{/allParams}}').should.eventually.rejected;
     });
-
-{{/operation}}
     after('Cleanup {{className}} test specs', function () {});
 });
 {{/operations}}
