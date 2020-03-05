@@ -13,7 +13,13 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 ## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
 - `x-api-gateway-name`: to define the API gateway Rest API stack name
   - `x-micro-service-name`: to define lambda function name that host the code
-  - `x-swagger-router-controller`: to decouple lambda code into controllers
+  - `x-micro-service-model-name`: to redirect the related routing paths into a service group
+
+```sequence
+Alice->Bob: Hello Bob, how are you?
+Note right of Bob: Bob thinks
+Bob-->Alice: I am good thanks!
+​```
 
 ```yaml
 openapi: 3.0.0
@@ -21,10 +27,10 @@ info:
   version: 0.0.1
   title: serverless-stack-name
 x-api-gateway-name: api-gateway-restapi-name
+x-api-hystrix-dashboard: false
 paths:
   '/pets':
     x-micro-service-name: micro-service-for-pets
-    x-swagger-router-controller: routerControllerNameForPets
     get:
       tags:
         - Pets Service Group
@@ -33,14 +39,88 @@ paths:
       responses:
         '200':
           description: Success
+    post:
+      tags:
+        - Pets Service Group
+      description: 'Create Pets Information'
+      operationId: createPet
+      responses:
+        '200':
+          description: Success
+  '/pets/{id}':
+    x-micro-service-name: micro-service-for-pets    
+    x-micro-service-model-name: peopleManager
+    x-micro-service-hystrix-stream: true
+    put:
+      x-micro-service-circuit-protection: true
+      x-micro-service-circuit-timeout: 60000
+      x-micro-service-circuit-duration: 30000
+      x-micro-service-circuit-threshold: 0.1
+      tags:
+        - Pets Service Group
+      description: 'Update Pets Information'
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+            type: string
+      operationId: putPetById
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - Pets Service Group
+      description: 'Create Pets Information By Id'
+      operationId: createById
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+            type: string
+      - in: query
+        name: filter        
+        schema:
+            type: string    
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                foo:
+                  type: string
+      responses:
+        '200':
+          description: Success
   '/people':
     x-micro-service-name: micro-service-for-people
-    x-swagger-router-controller: routerControllerNameForPeople
+    x-micro-service-model-name: people-manager
     get:
       tags:
         - People Service Group
       description: 'Get People Information'
       operationId: getPeople
+      responses:
+        '200':
+          description: Success
+    put:
+      tags:
+        - Pets Service Group
+      description: 'Update Pets Information'
+      operationId: putPets
+      responses:
+        '200':
+          description: Success
+    post:
+      tags:
+        - People Service Group
+      description: 'Create People Information By Id'
+      operationId: createPetById
       responses:
         '200':
           description: Success
