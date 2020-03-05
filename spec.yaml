@@ -4,16 +4,6 @@ info:
   title: serverless-stack-name
 x-api-gateway-name: api-gateway-restapi-name
 paths:
-  '/hystrix.stream':    
-    get:
-      description: hystrix server-sent event stream
-      responses:
-        200:
-          description: Event pushed to hystrix dashboard
-          content:
-            text/event-stream:              
-              schema:
-                type: object
   '/pets':
     x-micro-service-name: micro-service-for-pets
     get:
