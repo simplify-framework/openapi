@@ -32,19 +32,19 @@ var getObject = require('../utils/get-object');
  **/
 exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
   {{#listObjects}}
-  return listObjects['{{listObjects}}']({{listObjectsFrom}});
+  return listObjects['{{listObjects}}']('{{listObjectsFrom}}');
   {{/listObjects}}
   {{^listObjects}}
   {{#createObject}}
-  return createObject['{{createObject}}'](body.{{createObjectName}}, body.{{createObjectData}});
+  return createObject['{{createObject}}']('{{createObjectName}}', body.{{createObjectData}});
   {{/createObject}}
   {{^createObject}}
   {{#updateObject}}
-  return updateObject['{{updateObject}}'](body.{{updateObjectName}}, [{{#updateObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/updateObjectFields}}], body.{{updateObjectData}});
+  return updateObject['{{updateObject}}']('{{updateObjectName}}', [{{#updateObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/updateObjectFields}}], body.{{updateObjectData}});
   {{/updateObject}}
   {{^updateObject}}
   {{#getObject}}
-  return getObject['{{getObject}}']({{getObjectName}}, [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}]);
+  return getObject['{{getObject}}']('{{getObjectName}}', [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}]);
   {{/getObject}}
   {{^getObject}}
   return new Promise(function(resolve, reject) {  
