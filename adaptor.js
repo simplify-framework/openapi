@@ -472,7 +472,7 @@ function convertToApis(source, obj, defaults) {
                 });
                 if (!entry) {
                     entry = {};
-                    entry.serviceName = source.paths[p]['x-micro-service-name'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
+                    entry.serviceName = source.paths[p]['x-api-service-name'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.className = source.paths[p]['x-swagger-router-controller'] || tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.classFilename = tagName.toCamelCase().split(' ').join('').split('-').join('');
                     entry.classVarName = tagName.toCamelCase().split(' ').join('').split('-').join(''); // see issue #21

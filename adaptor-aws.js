@@ -152,15 +152,15 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.path = path;
     operation.replacedPathName = path;
     Object.keys(op).forEach(key => {
-        if (key.startsWith('x-micro-service-model-')) {
-            const convertedKey = key.replace('x-micro-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
+        if (key.startsWith('x-api-service-model-')) {
+            const convertedKey = key.replace('x-api-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
             operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];            
         }
     })
-    operation.circuitProtection = op['x-micro-service-circuit-protection'] || false;
-    operation.operationTimeout = op['x-micro-service-circuit-timeout'] || 60000;
-    operation.circuitDuration = op['x-micro-service-circuit-duration'] || 30000;
-    operation.circuitThreshold = op['x-micro-service-circuit-threshold'] || 0.1;
+    operation.circuitProtection = op['x-api-service-circuit-protection'] || false;
+    operation.operationTimeout = op['x-api-service-circuit-timeout'] || 60000;
+    operation.circuitDuration = op['x-api-service-circuit-duration'] || 30000;
+    operation.circuitThreshold = op['x-api-service-circuit-threshold'] || 0.1;
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
@@ -468,19 +468,19 @@ function convertToServices(source, obj, defaults) {
                 });
                 if (!entry) {
                     const split = p.replace(/^\//, '').split(/\//g);
-                    const className = source.paths[p]['x-micro-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
+                    const className = source.paths[p]['x-api-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
                     entry = {};
                     entry.path = p;
-                    if (source.paths[p]['x-micro-service-name']) {
-                        entry.hystrixStream = source.paths[p]['x-micro-service-hystrix-stream'] || false
-                        entry.serviceName = source.paths[p]['x-micro-service-name'].toCamelCase().split(' ').join('').split('-').join('');
+                    if (source.paths[p]['x-api-service-name']) {
+                        entry.hystrixStream = source.paths[p]['x-api-service-hystrix-stream'] || false
+                        entry.serviceName = source.paths[p]['x-api-service-name'].toCamelCase().split(' ').join('').split('-').join('');
                         entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
                         entry.className = className.toPascalCase().split(' ').join('').split('-').join('');
                         entry.operations = [];
                         paths.push(entry);
                     }
                 }
-                if (source.paths[p]['x-micro-service-name']) {
+                if (source.paths[p]['x-api-service-name']) {
                     let operation = convertOperation(op, m, p, source.paths[p], obj, source);
                     entry.operations.push(operation);
                 }
