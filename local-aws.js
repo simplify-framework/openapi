@@ -35,7 +35,7 @@ function main(o, config, configName, callback) {
     let verbose = config.defaults.verbose;
     config.defaults.configName = configName;
     adaptor.transform(o, config.defaults, function (err, model) {
-        let actions = [];        
+        let actions = [];
         for (let t in config.transformations) {
             let tx = config.transformations[t];
             if (tx.input) {
@@ -43,7 +43,7 @@ function main(o, config, configName, callback) {
                 tx.template = ff.readFileSync(tpl(config, configName, tx.input), 'utf8');
             }
             actions.push(tx);
-        }        
+        }
         const subDir = (config.defaults.flat ? '' : configName);
         if (verbose) console.log('Making/cleaning output directories');
         ff.mkdirp(path.join(outputDir, subDir), function () {
@@ -51,7 +51,7 @@ function main(o, config, configName, callback) {
                 for (let action of actions) {
                     if (verbose) console.log('Rendering ' + action.output);
                     let template = Hogan.compile(action.template);
-                    let cServices = Object.assign({}, model, model.apiInfo)                    
+                    let cServices = Object.assign({}, model, model.apiInfo)
                     let content = template.render(cServices, config.partials);
                     let requestDir = require('path').dirname(path.join(outputDir, subDir, action.output))
                     if (!ff.existsSync(requestDir)) {
@@ -101,9 +101,17 @@ function main(o, config, configName, callback) {
                         let fnTemplate = Hogan.compile(item.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(config, configName, item.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
-                            svc.servicePoints.map(endpoint => {                                
-                                let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, config.apis);
-                                let filename = fnTemplate.render(serviceModel, config.partials);
+                            let models = {}
+                            svc.servicePoints.map(endpoint => {
+                                if (!models[endpoint.className]) {
+                                    models[endpoint.className] = endpoint
+                                } else {
+                                    models[endpoint.className] = [...models[endpoint.className].operations, ...endpoint.operations]
+                                }
+                            })
+                            Object.keys(models).forEach(key => {                                
+                                let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, models[key], config.apis);
+                                let filename = fnTemplate.render(serviceModel, config.partials);                                
                                 let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                 if (!ff.existsSync(requestDir)) {
                                     ff.mkdirp.sync(requestDir);
@@ -123,14 +131,14 @@ function main(o, config, configName, callback) {
                         model.apiInfo.services.map(svc => {
                             svc.servicePoints.map(endpoint => {
                                 endpoint.operations.map(op => {
-                                    let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);                                    
-                                    let filename = fnTemplate.render(serviceModel, config.partials);
+                                    let operation = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);
+                                    let filename = fnTemplate.render(operation, config.partials);
                                     let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                     if (!ff.existsSync(requestDir)) {
                                         ff.mkdirp.sync(requestDir);
                                     }
                                     console.log("Generating...", filename)
-                                    ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
+                                    ff.createFile(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8');
                                 })
                             })
                         })
