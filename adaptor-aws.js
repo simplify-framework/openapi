@@ -150,17 +150,17 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.httpMethodHasBody = operation.httpMethodCase == 'post' || operation.httpMethodCase == 'put' || operation.httpMethodCase == 'patch'
     if (obj.httpMethodCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
-    operation.replacedPathName = path;
+    operation.replacedPathName = path;    
     Object.keys(op).forEach(key => {
         if (key.startsWith('x-api-service-model-')) {
             const convertedKey = key.replace('x-api-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
-            operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];            
+            operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];
         }
     })
-    operation.circuitProtection = op['x-api-service-circuit-protection'] || false;
-    operation.operationTimeout = op['x-api-service-circuit-timeout'] || 60000;
-    operation.circuitDuration = op['x-api-service-circuit-duration'] || 30000;
-    operation.circuitThreshold = op['x-api-service-circuit-threshold'] || 0.1;
+    operation.circuitProtection = op['x-control-service-circuit-protection'] || false;
+    operation.operationTimeout = op['x-control-service-circuit-timeout'] || 60000;
+    operation.circuitDuration = op['x-control-service-circuit-duration'] || 30000;
+    operation.circuitThreshold = op['x-control-service-circuit-threshold'] || 0.1;
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
@@ -466,22 +466,24 @@ function convertToServices(source, obj, defaults) {
                 let entry = paths.find(function (e, i, a) {
                     return (e.name === p);
                 });
+                const serviceName = source.paths[p]['x-api-service-name'] || source.paths[p]['x-event-service-name']
                 if (!entry) {
                     const split = p.replace(/^\//, '').split(/\//g);
                     const className = source.paths[p]['x-api-service-model-name'] || split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('');
                     entry = {};
                     entry.path = p;
-                    if (source.paths[p]['x-api-service-name']) {
+                    if (serviceName) {
                         entry.hystrixStream = source.paths[p]['x-api-service-hystrix-stream'] || false
-                        entry.serviceName = source.paths[p]['x-api-service-name'].toCamelCase().split(' ').join('').split('-').join('');
+                        entry.serviceName = serviceName.toCamelCase().split(' ').join('').split('-').join('');
                         entry.serviceNamePosix = Case.snake(entry.serviceName).split('_').join('-');
                         entry.className = className.toPascalCase().split(' ').join('').split('-').join('');
                         entry.operations = [];
                         paths.push(entry);
                     }
                 }
-                if (source.paths[p]['x-api-service-name']) {
+                if (serviceName) {
                     let operation = convertOperation(op, m, p, source.paths[p], obj, source);
+                    entry.serviceType = source.paths[p]['x-api-service-name'] ? 'api' : 'event';
                     entry.operations.push(operation);
                 }
             }

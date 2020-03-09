@@ -48,10 +48,10 @@ paths:
     x-api-service-model-name: people-pets
     x-api-service-hystrix-stream: true
     put:
-      x-api-service-circuit-protection: true
-      x-api-service-circuit-timeout: 60000
-      x-api-service-circuit-duration: 30000
-      x-api-service-circuit-threshold: 0.1
+      x-control-service-circuit-protection: true
+      x-control-service-circuit-timeout: 60000
+      x-control-service-circuit-duration: 30000
+      x-control-service-circuit-threshold: 0.1
       tags:
         - Pets Service Group
       description: 'Update Pets Information'

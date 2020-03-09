@@ -5,11 +5,28 @@ info:
 x-api-gateway-name: api-gateway-restapi-name
 x-api-hystrix-dashboard: false
 paths:
+  '/path-to-key':
+    x-event-service-name: api-service-for-pets
+    x-event-service-listen-from: path-to-s3-bucket-name
+    put:
+      x-event-service-model-code-plain-text:
+        - module.exports.handle = function(event) {
+              console.log('EVENT2:', event)
+            }
+      x-event-service-model-access:
+        Action:
+        - logs:PutLogEvents
+        Resource:
+        - arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:log-stream:*
+      description: 'Run on event operation'
+      responses:
+        '200':
+          description: Success
   '/pets':
     x-api-service-name: api-service-for-pets
     get:
       x-api-service-model-list-objects: aws-s3
-      x-api-service-model-list-objects-from: bucketName
+      x-api-service-model-list-objects-from: path-to-s3-bucket-name/path-to-key
       tags:
         - Pets Service Group
       description: 'Get Pets Information'
@@ -25,7 +42,7 @@ paths:
           description: Success
     post:
       x-api-service-model-create-object: aws-s3
-      x-api-service-model-create-object-name: bucketName
+      x-api-service-model-create-object-name: path-to-s3-bucket-name/path-to-key
       x-api-service-model-create-object-data: dataObject
       tags:
         - Pets Service Group
@@ -46,7 +63,7 @@ paths:
           description: Success
     put:
       x-api-service-model-update-object: aws-s3
-      x-api-service-model-update-object-name: bucketName
+      x-api-service-model-update-object-name: path-to-s3-bucket-name/path-to-key
       x-api-service-model-update-object-data: dataObject
       x-api-service-model-update-object-fields: ['foo', 'test']       
       tags:
@@ -71,10 +88,10 @@ paths:
     x-api-service-model-name: people-pets
     x-api-service-hystrix-stream: true    
     post:
-      x-api-service-circuit-protection: true
-      x-api-service-circuit-timeout: 60000
-      x-api-service-circuit-duration: 30000
-      x-api-service-circuit-threshold: 0.1
+      x-control-service-circuit-protection: true
+      x-control-service-circuit-timeout: 60000
+      x-control-service-circuit-duration: 30000
+      x-control-service-circuit-threshold: 0.1
       tags:
         - Pets Service Group
       description: 'Create Pets Information By Id'
@@ -107,7 +124,7 @@ paths:
     x-api-service-model-name: people-pets
     get:
       x-api-service-model-get-object: aws-s3
-      x-api-service-model-get-object-name: bucketName      
+      x-api-service-model-get-object-name: path-to-s3-bucket-name/path-to-key      
       x-api-service-model-get-object-fields: ['foo', 'test']
       tags:
         - People Service Group
