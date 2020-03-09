@@ -1,6 +1,17 @@
 'use strict';
 {{#operations}}
-
+{{#listObjects}}
+var listObjects = require('../utils/list-objects');
+{{/listObjects}}
+{{#createObject}}
+var createObject = require('../utils/create-object');
+{{/createObject}}
+{{#updateObject}}
+var updateObject = require('../utils/update-object');
+{{/updateObject}}
+{{#getObject}}
+var getObject = require('../utils/get-object');
+{{/getObject}}
 /**
  {{#summary}}
  * {{{summary}}}
@@ -20,12 +31,32 @@
 {{/returnType}}
  **/
 exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
+  {{#listObjects}}
+  return listObjects['{{listObjects}}']({{listObjectsFrom}});
+  {{/listObjects}}
+  {{^listObjects}}
+  {{#createObject}}
+  return createObject['{{createObject}}'](body.{{createObjectName}}, body.{{createObjectData}});
+  {{/createObject}}
+  {{^createObject}}
+  {{#updateObject}}
+  return updateObject['{{updateObject}}'](body.{{updateObjectName}}, [{{#updateObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/updateObjectFields}}], body.{{updateObjectData}});
+  {{/updateObject}}
+  {{^updateObject}}
+  {{#getObject}}
+  return getObject['{{getObject}}']({{getObjectName}}, [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}]);
+  {{/getObject}}
+  {{^getObject}}
   return new Promise(function(resolve, reject) {  
     reject({
       "code": "ErrorOperationNotImplemetedException",
       "message": "The '{{{operationId}}}' was not Implemented. [TODO: Imprement your service calls here]"
     });  
   });
+  {{/getObject}}
+  {{/updateObject}}  
+  {{/createObject}}
+  {{/listObjects}}
 }
 
 {{/operations}}

@@ -8,44 +8,82 @@ paths:
   '/pets':
     x-micro-service-name: micro-service-for-pets
     get:
+      x-micro-service-model-list-objects: aws-s3
+      x-micro-service-model-list-objects-from: category
       tags:
         - Pets Service Group
       description: 'Get Pets Information'
       operationId: getPets
+      parameters:
+      - name: category
+        in: query        
+        schema:
+          type: string
+        required: true
+      - name: cats
+        in: query        
+        schema:
+          type: string
+        required: false
       responses:
         '200':
           description: Success
     post:
+      x-micro-service-model-create-object: aws-s3
+      x-micro-service-model-create-object-name: bucketName
+      x-micro-service-model-create-object-data: dataObject
       tags:
         - Pets Service Group
       description: 'Create Pets Information'
       operationId: createPet
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bucketName:
+                  type: string
+                dataObject:
+                  type: object
+      responses:
+        '200':
+          description: Success
+    put:
+      x-micro-service-model-update-object: aws-s3
+      x-micro-service-model-update-object-name: bucketName
+      x-micro-service-model-update-object-data: dataObject
+      x-micro-service-model-update-object-fields: ['foo', 'test']       
+      tags:
+        - Pets Service Group
+      description: 'Update Pets Information'
+      operationId: updatePetWithFields
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bucketName:
+                  type: string
+                dataObject:
+                  type: object
       responses:
         '200':
           description: Success
   '/pets/{id}':
     x-micro-service-name: micro-service-for-pets
     x-micro-service-model-name: people-pets
-    x-micro-service-hystrix-stream: true
-    put:
+    x-micro-service-hystrix-stream: true    
+    post:
       x-micro-service-circuit-protection: true
       x-micro-service-circuit-timeout: 60000
       x-micro-service-circuit-duration: 30000
       x-micro-service-circuit-threshold: 0.1
-      tags:
-        - Pets Service Group
-      description: 'Update Pets Information'
-      parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-            type: string
-      operationId: updatePetById
-      responses:
-        '200':
-          description: Success
-    post:
       tags:
         - Pets Service Group
       description: 'Create Pets Information By Id'
@@ -77,10 +115,19 @@ paths:
     x-micro-service-name: micro-service-for-people
     x-micro-service-model-name: people-pets
     get:
+      x-micro-service-model-get-object: aws-s3
+      x-micro-service-model-get-object-name: bucketName      
+      x-micro-service-model-get-object-fields: ['foo', 'test']
       tags:
         - People Service Group
       description: 'Get People Information'
       operationId: getPeople
+      parameters:
+      - in: query
+        name: bucketName        
+        schema:
+            type: string
+        required: true
       responses:
         '200':
           description: Success

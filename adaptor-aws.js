@@ -41,6 +41,22 @@ function safeSample(schema, options, api) {
     return {};
 }
 
+function convertStringArray(arr) {
+    if (!arr) arr = [];
+    if (arr.length) {
+        arr.isEmpty = false;
+        for (let i = 0; i < arr.length; i++) {
+            if (typeof (arr[i]) == 'string') arr[i] = { value: arr[i] }
+            arr[i]['first'] = (i === 0);
+            arr[i]['last'] = (i === arr.length - 1);
+            arr[i].hasMore = (i < arr.length - 1);
+        }
+    }
+    else arr.isEmpty = true;
+    arr.toString = function () { if (arrayMode === 'length') return this.length.toString() };
+    return arr;
+}
+
 function convertArray(arr) {
     if (!arr) arr = [];
     if (arr.length) {
@@ -134,7 +150,13 @@ function convertOperation(op, verb, path, pathItem, obj, api) {
     operation.httpMethodHasBody = operation.httpMethodCase == 'post' || operation.httpMethodCase == 'put' || operation.httpMethodCase == 'patch'
     if (obj.httpMethodCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
-    operation.replacedPathName = path; //?    
+    operation.replacedPathName = path;
+    Object.keys(op).forEach(key => {
+        if (key.startsWith('x-micro-service-model-')) {
+            const convertedKey = key.replace('x-micro-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
+            operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];            
+        }
+    })
     operation.circuitProtection = op['x-micro-service-circuit-protection'] || false;
     operation.operationTimeout = op['x-micro-service-circuit-timeout'] || 60000;
     operation.circuitDuration = op['x-micro-service-circuit-duration'] || 30000;
@@ -634,7 +656,7 @@ function transform(api, defaults, callback) {
                 }
             }
         }
-    }    
+    }
     container.spec = api;
     container.source = defaults.source;
     let conv = new downconverter(container);

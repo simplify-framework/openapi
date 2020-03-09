@@ -6,7 +6,8 @@
             { "package":"request", "version":"^2.87.0" },
             { "package":"dynamodb", "version":"^1.0.0" },
             { "package": "jwt-decode", "version": "^2.2.0"},
-            { "package": "brakes", "version": "^2.8.0"}
+            { "package": "brakes", "version": "^2.8.0"},
+            { "package": "aws-sdk", "version": "^2.635.0"}
         ]
     },
     "transformations": [
@@ -32,7 +33,11 @@
         { "input": "package-lambda.mustache", "output": "{{apiName}}/{{serviceName}}/package.json" },
         { "input": "Dockerfile.mustache", "output": "{{apiName}}/{{serviceName}}/Dockerfile" },
         { "input": "docker-entrypoint.mustache", "output": "{{apiName}}/{{serviceName}}/docker-entrypoint.sh" },        
-        { "input": "writer.mustache", "output": "{{apiName}}/{{serviceName}}/utils/writer.js" }
+        { "input": "writer.mustache", "output": "{{apiName}}/{{serviceName}}/utils/writer.js" },
+        { "input": "list-objects.mustache", "output": "{{apiName}}/{{serviceName}}/utils/list-objects.js" },
+        { "input": "create-object.mustache", "output": "{{apiName}}/{{serviceName}}/utils/create-object.js" },
+        { "input": "update-object.mustache", "output": "{{apiName}}/{{serviceName}}/utils/update-object.js" },
+        { "input": "get-object.mustache", "output": "{{apiName}}/{{serviceName}}/utils/get-object.js" }
     ],
     "perServiceModel": [
         { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/{{implementation}}/{{className}}.js" },                
