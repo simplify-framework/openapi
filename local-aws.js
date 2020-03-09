@@ -106,7 +106,11 @@ function main(o, config, configName, callback) {
                                 if (!models[endpoint.className]) {
                                     models[endpoint.className] = endpoint
                                 } else {
-                                    models[endpoint.className] = [...models[endpoint.className].operations, ...endpoint.operations]
+                                    models[endpoint.className] = {
+                                        className: endpoint.className,
+                                        serviceName: endpoint.serviceName,
+                                        operations: [...models[endpoint.className].operations, ...endpoint.operations]
+                                    }
                                 }
                             })
                             Object.keys(models).forEach(key => {                                
