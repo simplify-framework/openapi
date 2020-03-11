@@ -10,7 +10,8 @@ module.exports = {
   'aws-s3': function(bucket, filter) {
     var parts = bucket.split('/')  
     bucket = parts.shift()
-    var prefix = parts.join('/') + (filter ? filter : '')
+    var prefix = parts.join('/')
+    prefix = (filter ? filter : prefix + '/')
     var params = { Bucket: bucket, Delimiter: '/', Prefix: prefix };
     return new Promise(function (resolve, reject) {
       s3.listObjects(params, function (err, data) {
