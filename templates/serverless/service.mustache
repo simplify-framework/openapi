@@ -32,7 +32,7 @@ var getObject = require('../utils/get-object');
  **/
 exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
   {{#listObjects}}
-  return listObjects['{{listObjects}}']('{{listObjectsFrom}}');
+  return listObjects['{{listObjects}}']('{{listObjectsFrom}}', {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}''{{/allParams}});
   {{/listObjects}}
   {{^listObjects}}
   {{#createObject}}

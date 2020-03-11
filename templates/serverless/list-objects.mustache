@@ -7,10 +7,10 @@ if (process.env.LOCAL_DEBUG) {
 }
 
 module.exports = {
-  'aws-s3': function(bucket) {
+  'aws-s3': function(bucket, filter) {
     var parts = bucket.split('/')  
     bucket = parts.shift()
-    var prefix = parts.join('/')
+    var prefix = parts.join('/') + (filter ? filter : '')
     var params = { Bucket: bucket, Delimiter: '/', Prefix: prefix };
     return new Promise(function (resolve, reject) {
       s3.listObjects(params, function (err, data) {
@@ -22,7 +22,7 @@ module.exports = {
           });
         }
         else {
-          resolve({ items: data.Contents })
+          resolve({ items: data.Contents, filters: data.CommonPrefixes })
         }
       });
     });
