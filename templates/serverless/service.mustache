@@ -44,7 +44,7 @@ exports.{{{operationId}}} = function({{#allParams}}{{paramName}}{{#hasMore}}, {{
   {{/updateObject}}
   {{^updateObject}}
   {{#getObject}}
-  return getObject['{{getObject}}']('{{getObjectName}}', [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}]);
+  return getObject['{{getObject}}']('{{getObjectName}}', [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}], {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}undefined{{/allParams}});
   {{/getObject}}
   {{^getObject}}
   return new Promise(function(resolve, reject) {  

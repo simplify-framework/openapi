@@ -7,10 +7,11 @@ if (process.env.LOCAL_DEBUG) {
 }
 
 module.exports = {
-  'aws-s3': function (bucket, fields) {
+  'aws-s3': function (bucket, fields, path) {
     var parts = bucket.split('/')
     bucket = parts.shift()
     var key = parts.join('/')
+    key = (path ? path : key + '/')
     var params = {
       Bucket: bucket,
       Key: key
