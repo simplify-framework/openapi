@@ -6,6 +6,7 @@ const path = require('path');
 const url = require('url');
 const yaml = require('yaml');
 const fetch = require('node-fetch');
+const logger = require('./logger');
 
 const processor = require('./processor.js');
 
@@ -20,6 +21,7 @@ var argv = require('yargs')
     .describe('output', 'output directory')
     .default('output', './output')
     .boolean('verbose')
+    .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
     .alias('v', 'verbose')
     .demandOption(['i', 'o'])
@@ -72,14 +74,10 @@ function runCommandLine() {
         let generator_path = path.resolve(configPath, config.generator);
         config.generator = require(generator_path);
     }
-
     if (argv.verbose) {
         config.defaults.verbose = true;
-        console.log('Loaded configuration.');
+        logger.debug('Loaded configuration.');
     }
-    if (argv.lint) config.defaults.lint = true;
-    if (argv.debug) config.defaults.debug = true;
-    if (argv.stools) config.defaults.stools = true;
     if (argv.zip) {
         processor.fileFunctions.createFile = zipFile;
         processor.fileFunctions.rimraf = nop;
@@ -118,7 +116,7 @@ function despatch(obj, config, callback) {
 }
 
 function main(o) {
-    if (argv.verbose) console.log('Loaded definition ' + defName, o);
+    if (argv.verbose) logger.debug('Loaded definition ' + defName, o);
 
     if (o && o.openapi) {
         despatch(o, config);

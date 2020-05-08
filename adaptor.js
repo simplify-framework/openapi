@@ -7,6 +7,7 @@ const sampler = require('openapi-sampler');
 const clone = require('reftools/lib/clone.js').circularClone;
 const validator = require('oas-validator').validateSync;
 const downconverter = require('./downconvert.js');
+const logger = require('./logger');
 
 const schemaProperties = [
     'format',
@@ -584,13 +585,20 @@ function removeCustomPrefix(obj) {
             })
         }
     } catch (err) {
-        console.log(err.message)
+        logger.error(err.message)
     }
     return tmp
 }
 
 function getPrime(api, defaults) {
     let prime = {};
+    let require_fields = ['x-api-gateway-name', 'x-deployment-name', 'x-deployment-region']
+    require_fields.forEach(function (f) {
+        if (typeof api[f] === 'undefined') {
+            logger.warn(`Missing required definition at root level: ${f}`)
+            process.exit(-1)
+        }
+    })
     prime.projectBundle = api.info.title;
     prime.apiName = api['x-api-gateway-name'].toCamelCase().split(' ').join('').split('-').join('');
     prime.deploymentName = api['x-deployment-name'];
@@ -677,7 +685,7 @@ function transform(api, defaults, callback) {
                 message.elementId = 'None';
                 message.message = 'No validation errors detected';
                 obj.messages.push(message);
-                if (defaults.verbose) console.log(message);
+                if (defaults.verbose) logger.info(message.message);
                 obj.this = function () {
                     console.warn('this called');
                     return thisFunc(this.paramName);
@@ -691,7 +699,7 @@ function transform(api, defaults, callback) {
                 obj.consumes = convertArray(obj.consumes);
                 if (callback) callback(null, obj);
             } else {
-                console.log(`${err}`)
+                logger.error(`${err}`)
                 if (callback) callback(err);
             }
         });

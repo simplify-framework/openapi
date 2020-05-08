@@ -4,7 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const util = require('util');
+const logger = require('./logger');
 
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
@@ -33,7 +33,7 @@ function main(o, config, callback) {
     adaptor.transform(o, config.defaults, function (err, model) {
         const subDir = (config.defaults.flat ? '' : templateFolder);
         let actions = [];
-        if (verbose) console.log('Making/cleaning output directories');
+        if (verbose) logger.info('Making/cleaning output directories');
         var outputDirPath = path.join(outputDir, subDir)
         if (!err) {
             ff.mkdirp(outputDirPath).then(function () {
@@ -50,7 +50,7 @@ function main(o, config, callback) {
         }
         function generate() {
             for (let action of actions) {
-                if (verbose) console.log('Rendering ' + action.output);
+                if (verbose) logger.info('Rendering ' + action.output);
                 let template = Hogan.compile(action.template);
                 let cServices = Object.assign({}, model, model.apiInfo)
                 let content = template.render(cServices, config.partials);
@@ -58,7 +58,7 @@ function main(o, config, callback) {
                 if (!ff.existsSync(requestDir)) {
                     ff.mkdirp.sync(requestDir);
                 }
-                console.log("Generating...", path.join(outputDir, subDir, action.output))
+                if (verbose) logger.info("Generating...", path.join(outputDir, subDir, action.output))
                 ff.createFile(path.join(outputDir, subDir, action.output), content, 'utf8');
             }
             if (config.ApiGateway) {
@@ -74,7 +74,7 @@ function main(o, config, callback) {
                     if (!ff.existsSync(requestDir)) {
                         ff.mkdirp.sync(requestDir);
                     }
-                    console.log("Generating...", path.join(outputDir, filename))
+                    if (verbose) logger.info("Generating...", path.join(outputDir, filename))
                     ff.createFile(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8');
                 }
             }
@@ -94,7 +94,7 @@ function main(o, config, callback) {
                                 if (!ff.existsSync(requestDir)) {
                                     ff.mkdirp.sync(requestDir);
                                 }
-                                console.log("Generating...", path.join(outputDir, filename))
+                                if (verbose) logger.info("Generating...", path.join(outputDir, filename))
                                 ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
                             }
                         })
@@ -132,7 +132,7 @@ function main(o, config, callback) {
                                     if (!ff.existsSync(requestDir)) {
                                         ff.mkdirp.sync(requestDir);
                                     }
-                                    console.log("Generating...", path.join(outputDir, filename))
+                                    if (verbose) logger.info("Generating...", path.join(outputDir, filename))
                                     ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
                                 })
                             }
@@ -158,7 +158,7 @@ function main(o, config, callback) {
                                         if (!ff.existsSync(requestDir)) {
                                             ff.mkdirp.sync(requestDir);
                                         }
-                                        console.log("Generating...", path.join(outputDir, filename))
+                                        if (verbose) logger.info("Generating...", path.join(outputDir, filename))
                                         ff.createFile(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8');
                                     })
                                 })
@@ -172,7 +172,7 @@ function main(o, config, callback) {
         for (let t in config.Application) {
             let tx = config.Application[t];
             if (tx.input) {
-                if (verbose) console.log('Processing template ' + tx.input);
+                if (verbose) logger.info('Processing template ' + tx.input);
                 tx.template = ff.readFileSync(tpl(templateFolder, tx.input), 'utf8');
             }
             actions.push(tx);
