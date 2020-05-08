@@ -1,0 +1,25 @@
+{
+  "name": "{{serviceNamePosix}}",
+  "version": "{{serviceVersion}}",
+  "description": "{{{serviceDescription}}}",
+  "main": "app.js",
+  "scripts": {
+    "deploy": "node function-push.js",
+    "code-scan": "bash sonarqube-scanner.sh",
+    "start": "cd src && npm install && env LOCAL_DEBUG=true DEPLOYMENT=latest node app.js",
+    "prod": "env LOCAL_DEBUG= node dist/index.js",
+    "build": "webpack --mode development"
+  },
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "aws-sdk": "^2.635.0",
+    "adm-zip": "^0.4.14",
+    "simplify": ">=0.1.1",
+    "babel-loader": "^8.1.0",
+    "file-loader": "^6.0.0",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11",
+    "webpack-node-externals": "^1.7.2"
+  }
+}

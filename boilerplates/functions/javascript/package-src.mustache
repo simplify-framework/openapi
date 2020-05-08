@@ -1,0 +1,22 @@
+{
+  "name": "{{serviceNamePosix}}",
+  "version": "{{serviceVersion}}",
+  "description": "{{serviceNamePascal}} {{{serviceDescription}}}",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "aws-serverless-express": "^3.3.5",
+    "body-parser": "^1.17.1",
+    "express": "^4.17.1",
+    {{#serviceProtection}}
+    "brakes": "^2.8.0",
+    {{/serviceProtection}}
+    "swagger-express-middleware": "^4.0.0"
+  },
+  "devDependencies": {
+  }
+}

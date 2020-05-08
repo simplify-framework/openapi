@@ -1,0 +1,5 @@
+module.exports = {
+  {{#serviceModels}}
+  {{serviceModelName}}: require('./layered/{{serviceModelName}}'),
+  {{/serviceModels}}
+}

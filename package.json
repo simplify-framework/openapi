@@ -1,0 +1,44 @@
+{
+  "name": "simplify-codegen",
+  "version": "0.1.8",
+  "description": "Simplify Code Generator from OpenAPI 3.0 Specs",
+  "main": "simplify.js",
+  "bin": {
+    "simplify-codegen": "simplify.js"
+  },
+  "scripts": {
+    "start": "node simplify.js create -i spec.yaml -o ../output/functions"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simplify-framework/codegen.git"
+  },
+  "keywords": [
+    "codegen",
+    "lambda",
+    "aws"
+  ],
+  "author": "Duong Dinh Cuong",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/simplify-framework/codegen/issues"
+  },
+  "homepage": "https://github.com/simplify-framework/codegen#README",
+  "dependencies": {
+    "case": "^1.6.3",
+    "hogan.js": "^3.0.2",
+    "mkdirp": "^1.0.4",
+    "node-fetch": "^2.6.0",
+    "oas-schema-walker": "^1.1.4",
+    "oas-validator": "^3.4.0",
+    "openapi-sampler": "^1.0.0-beta.15",
+    "reftools": "^1.1.1",
+    "rimraf": "^3.0.2",
+    "safe-json-stringify": "^1.2.0",
+    "uuid": "^3.4.0",
+    "yaml": "^1.9.1",
+    "js-yaml": "^3.13.1",
+    "yargs": "^14.2.3"
+  },
+  "devDependencies": {}
+}

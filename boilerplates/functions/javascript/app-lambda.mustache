@@ -1,0 +1,68 @@
+'use strict';
+
+const path = require('path');
+const express = require('express')
+const bodyParser = require('body-parser')
+const {
+  createSwaggerExpressMiddleware,
+  awsServerlessExpressMiddleware,
+  customSanitizeParamsMiddleware
+} = require('./utils/middlewares')
+
+{{#serviceHystrixStream}}
+var Brakes = require('brakes');
+var globalStats = Brakes.getGlobalStats();
+{{/serviceHystrixStream}}
+
+let app = express()
+let specYAML = path.join(__dirname, process.env.LOCAL_DEBUG ? './specs/swagger.yaml' : require('./specs/swagger.yaml').default);
+
+createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
+  if (err) {
+    console.error(`createSwaggerExpressMiddleware: ${err}`)
+  } else {
+    app.use(bodyParser.json())
+    app.use(awsServerlessExpressMiddleware.eventContext())
+    app.use(middleware.metadata());
+    app.use(middleware.CORS());
+    {{#serviceRequestValidation}}
+    app.use(middleware.parseRequest());
+    function parseRequestErrorHandler(err, req, res, next) {
+      res.status(500).json({
+        code: "ErrorServiceParseRequestException",
+        message: err.message
+      });
+    }
+    app.use(parseRequestErrorHandler);
+    {{/serviceRequestValidation}}
+    app.use(middleware.validateRequest());
+    app.use(customSanitizeParamsMiddleware);
+    {{#serviceEntries}}
+    {{#operations}}
+    app.{{httpMethodLowerCase}}("{{replacedPathName}}", require("./operations/{{operationId}}"));  
+    {{/operations}}
+    {{/serviceEntries}}
+
+    app.use(function (err, req, res, next, statusCode) {
+      if (res.headersSent) {
+        return next(err);
+      } else {
+        res.status(statusCode || 500).json({
+          code: "ErrorGlobalServiceException",
+          message: err.message
+        });
+      }
+    });
+
+    if (process.env.LOCAL_DEBUG) {
+      app.listen(3000, function () {// NOSONAR
+        console.log("node express service - ".concat("debugging"));
+      });
+    } else {
+      console.log("node express service - ".concat("disabled (export LOCAL_DEBUG=true for local debugging)."));
+    }
+  }
+})
+
+// Export your express server so you can import it in the lambda function.
+module.exports = app

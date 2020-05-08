@@ -1,0 +1,159 @@
+global.fetch = require('node-fetch')
+require("@babel/polyfill")
+const AWS = require('aws-sdk')
+const sigV4Client = require('./sigV4Client')
+const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+let apiConfig = {}
+
+export const config = function(config) {
+    return new Promise(function(resolve, _) {
+        apiConfig = { ...config }
+        apiConfig.UserPool = new AmazonCognitoIdentity.CognitoUserPool({
+            UserPoolId: config.UserPoolsID,
+            ClientId: config.UserPoolsClientID
+        });
+        resolve(apiConfig)
+    })
+}
+
+function getAwsCredentials() {
+    AWS.config.update({ region: apiConfig.Region });
+    AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: apiConfig.CognitoIdentityPoolID
+    });
+    return AWS.config.credentials.getPromise();
+}
+
+async function invokeAwsResourceWithRole(endpoint, {
+    path,
+    method = "GET",
+    headers = {},
+    queryParams = {},
+    body
+}) {
+    let signedRequest = null
+    await getAwsCredentials();
+    const client = sigV4Client.newClient({
+        accessKey: AWS.config.credentials.accessKeyId,
+        secretKey: AWS.config.credentials.secretAccessKey,
+        sessionToken: AWS.config.credentials.sessionToken,
+        region: apiConfig.Region || 'eu-central-1'
+    })
+    signedRequest = sigV4Client.signRequest(client, {
+        endpoint,
+        method,
+        path,
+        headers,
+        queryParams,
+        body
+    });
+    body = body ? JSON.stringify(body) : body;
+    headers = signedRequest.headers;
+    const results = await fetch(signedRequest.url, {
+        method,
+        headers,
+        body
+    });
+    if (results.status !== 200) {
+        throw new Error((await results.json()).message);
+    }
+    return results.json();
+}
+
+const loginWithoutPassword = function (guestNameAsEmail, otp) {
+    return new Promise(function (resolve, reject) {
+        var user = new AmazonCognitoIdentity.CognitoUser({ Username: guestNameAsEmail, Pool: apiConfig.UserPool });
+        user.setAuthenticationFlowType('CUSTOM_AUTH')
+        var authDetails = new AmazonCognitoIdentity.AuthenticationDetails({
+            email: guestNameAsEmail
+        });
+        const authCallbacks = function (user, resolve, reject) {
+            return {
+                onSuccess: function (session) {
+                    resolve(user, session)
+                    rl.close()
+                    exit()
+                },
+                onFailure: function (err) {
+                    resolve({
+                        error: err
+                    })
+                },
+                customChallenge: function (challengeParam) {
+                    user['challengeName'] = 'CUSTOM_CHALLENGE';
+                    user['challengeParam'] = challengeParam;
+                    user.sendCustomChallengeAnswer(otp, authCallbacks(user, resolve, reject))
+                }
+            };
+        };
+        user.initiateAuth(authDetails, authCallbacks(user, resolve, reject))
+    })
+}
+
+const callAWSAPIGateway = function (action, body) {
+    return invokeAwsResourceWithRole(apiConfig.LoginEndpoint, {
+        path: '/guest' + (action ? "/" + action : ""),
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        queryParams: {},
+        body
+    })
+}
+
+export const executeIAM = function(path, method, data) {
+    const options = {
+        path: path,
+        method: method,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+    if (method === 'POST' || method === 'PUT') {
+        options.body = data.body
+    } else {
+        options.queryParams = data
+    }
+    return invokeAwsResourceWithRole(apiConfig.ApiEndpoint, options)
+}
+
+export const executeCognito = function(path, method, data, token) {
+    const options = {
+        method: method,
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${token}`
+        }
+    }
+    let query = ''
+    if (method === 'POST' || method === 'PUT') {
+        options.body = JSON.stringify(data.body)
+    } else {
+        query = '?' + new URLSearchParams(data)
+    }
+    const url = apiConfig.ApiEndpoint + path + query
+    return fetch(url, options).then(data => data.json())
+}
+
+const initiateGuest = function (deviceToken) {
+    return callAWSAPIGateway(null, {
+        "token": deviceToken
+    })
+}
+
+const verifyGuest = function (deviceToken, verifyCode) {
+    return callAWSAPIGateway("verify", {
+        "token": deviceToken,
+        "code": verifyCode
+    })
+}
+
+export const login = async function(deviceToken) {
+    const guest = await initiateGuest(deviceToken)        
+    const result = await verifyGuest(deviceToken, guest.code)        
+    const attributes = result.UserAttributes || result.Attributes
+    const email = attributes.find(element => element.Name == 'email').Value
+    const user = await loginWithoutPassword(email, guest.code)
+    return user.signInUserSession.idToken.jwtToken
+}

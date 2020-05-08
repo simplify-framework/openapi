@@ -1,0 +1,22 @@
+var chai = require('chai');
+var rewire = require('rewire');
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised).should();
+
+const {{serviceModelName}}Service = require('../../../{{apiName}}/{{serviceName}}/{{serviceFolder}}/{{serviceModelName}}');
+
+describe('({{apiName}}) {{serviceModelName}}:', function () {
+    var context = { requestContext: { identity: { user: {} }, authorizer: { claims: {} } } }
+    before('Prepare for {{serviceModelName}} test specs', function () {
+        context.requestContext.identity.user = "XXXXXXXXXXXXXXXXXXXX:CognitoIdentityCredentials"
+        context.requestContext.authorizer.claims.sub=  "9999-0000-33333333-2222-333333333333"
+    });
+
+    {{#operations}}
+    it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', function () {
+        return {{serviceModelName}}Service.{{{operationId}}}(context{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}'{{paramName}}'{{#hasMore}}, {{/hasMore}}{{/allParams}}).should.eventually.rejected;
+    });
+    {{/operations}}
+
+    after('Cleanup {{serviceModelName}} test specs', function () {});
+});

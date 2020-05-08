@@ -1,0 +1,47 @@
+'use strict';
+var AWS = require('aws-sdk');
+var s3 = new AWS.S3();
+if (process.env.LOCAL_DEBUG) {
+  var credentials = new AWS.SharedIniFileCredentials({ profile: process.env.AWS_PROFILE })
+  AWS.config.credentials = credentials;
+}
+
+module.exports = {
+  'aws-s3': function (bucket, fields, path) {
+    var parts = bucket.split('/')
+    bucket = parts.shift()
+    var key = parts.join('/')
+    key = (path ? path : key + '/')
+    var params = {
+      Bucket: bucket,
+      Key: key
+    };
+    return new Promise(function (resolve, reject) {
+      s3.getObject(params, function (err, data) {
+        if (err) {
+          reject({
+            "code": "ErrorOperationNotSatifiedException",
+            "message": "Cannot list buckets due to error",
+            "error": err
+          });
+        }
+        else {
+          if (fields.length > 0 && data.ContentType == "application/json") {
+            var payload = JSON.parse(data.Body);
+            var returnedPayload = {};
+            fields.forEach(field => {
+              returnedPayload[field] = payload[field];
+            })
+            resolve({ data: returnedPayload });
+          } else {          
+            if (data.ContentType == "application/json")  
+              resolve({ data: JSON.parse(data.Body) });
+            else {
+              resolve({ data: data.Body.toString() });
+            }
+          }
+        }
+      });
+    });
+  }
+}

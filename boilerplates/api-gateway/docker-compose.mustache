@@ -1,0 +1,32 @@
+version: '3.3'
+services:
+  {{#services}}  
+  {{serviceNamePosix}}:
+    build:
+      context: ./{{serviceName}}/    
+    environment:
+      - LOG_LEVEL=info
+    restart: always
+  {{/services}}
+  {{apiNamePosix}}:
+    image: nginx
+    ports:
+      - 80:8080
+    volumes:
+      - ./api-gateway.conf:/etc/nginx/conf.d/api-gateway.conf
+    restart: always
+    depends_on:
+    {{#services}}
+    - {{serviceNamePosix}}
+    {{/services}}
+  {{#hystrixDashboard}}
+  hystrix-dashboard:
+    image: travix/hystrix-dashboard
+    ports:
+      - 8080:8080
+    depends_on:
+    {{#services}}
+    - {{serviceNamePosix}}
+    {{/services}}
+    restart: always
+  {{/hystrixDashboard}}

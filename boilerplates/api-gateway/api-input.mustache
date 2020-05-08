@@ -1,0 +1,45 @@
+{
+    "Profile": "{{deploymentProfile}}",
+    "Region": "{{deploymentRegion}}",
+    "CognitoUserPoolId": "eu-central-1_xxxxxxxxxx",
+    "Bucket": {
+        "Name": "{{apiNamePosix}}",
+        "Key": "cloudformations/stacks"
+    },
+    "OutputFile": "${PWD}/${DATE_TODAY}/api-meta.json",
+    "Deployment": {
+        "Name": "{{deploymentName}}",
+        "Stacks": {
+            "ApiGateway": "api-gateway.yaml",
+            "DynamoDB": "dynamodb-template.yaml"
+        },
+        "Functions": {
+            {{#services}}
+            "{{serviceName}}": {
+                "FunctionName": "{{serviceName}}",
+                "Handler": "index.handler",
+                "MemorySize": 256,
+                "Publish": true,
+                "Role": "arn:aws:iam:::role/{{serviceName}}LambdaExecutionRole",
+                "Runtime": "nodejs12.x",
+                "Tags": {
+                    "GroupName": "simplify-framework"
+                },
+                "Timeout": 90,
+                "TracingConfig": {
+                    "Mode": "Active"
+                },
+                "Environment": {
+                    "Variables": {
+                        "DEPLOYMENT": "latest",
+                        "OVERRIDEN_PACKAGE_LAYER": ""
+                    }
+                }
+            }{{#hasMore}}, {{/hasMore}}
+            {{/services}}
+        },
+        "SecretManagers": {
+            "{{apiName}}Secret": {}
+        }
+    }
+}

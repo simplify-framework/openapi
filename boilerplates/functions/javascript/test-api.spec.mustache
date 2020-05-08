@@ -1,0 +1,22 @@
+import chai, { expect } from 'chai'
+chai.should()
+
+var apiService = require('../../api-utils');
+
+describe('({{apiName}}) {{serviceModelName}}:', function () {
+    var userToken = null
+    before('Prepare for {{serviceModelName}} test specs', async function () {
+        await apiService.config(require('../../api-utils.json'));
+        userToken = await apiService.login("user-token-00000001-{{serviceModelName}}");
+    });
+    
+    {{#operations}}
+    it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', async function () {
+        var data = { {{#allParams}}{{paramName}}: {{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isInteger}}10{{/isInteger}}{{^isInteger}}{{#isNumber}}1.0{{/isNumber}}{{^isNumber}}{{#isArray}}[]{{/isArray}}{{^isArray}}{{#isBodyParam}}{}{{/isBodyParam}}{{^isBodyParam}}'{{paramName}}'{{/isBodyParam}}{{/isArray}}{{/isNumber}}{{/isInteger}}{{/isBoolean}}{{#hasMore}}, {{/hasMore}}{{/allParams}} }
+        const result = await apiService.executeCognito('{{path}}', '{{httpMethod}}', data, userToken)
+        result.should.be.an('object') && expect(result.code).to.be.oneOf(['ErrorLayerNotImplemetedException', 'ErrorOperationNotImplemetedException'])
+    });
+    {{/operations}}
+
+    after('Cleanup {{serviceModelName}} test specs', function () {});
+});

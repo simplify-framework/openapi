@@ -1,0 +1,84 @@
+'use strict';
+
+var utils = require('../utils/writer.js');
+var {{serviceModelName}} = null
+if (process.env.OVERRIDEN_PACKAGE_LAYER) {
+  {{serviceModelName}} = __non_webpack_require__(`${process.env.OVERRIDEN_PACKAGE_LAYER}`).{{serviceModelName}}
+} else {
+  {{serviceModelName}} = process.env.DEPLOYMENT==='stable' ? __non_webpack_require__('{{serviceNamePosix}}').{{serviceModelName}}:require('../{{serviceNamePosix}}').{{serviceModelName}};
+}
+{{#serviceProtection}}
+/** ENABLE CIRCUIT BREAKER **/
+const Brakes = require('brakes');
+/** Declare circuit breaker brakes **/
+var {{{operationId}}}CircuitBreakerBrake = null;
+{{/serviceProtection}}
+
+/**
+ {{#summary}}
+ * {{{summary}}}
+ {{/summary}}
+ {{#notes}}
+ * {{{notes}}}
+ {{/notes}} 
+ * curl -X {{httpMethod}} http://localhost:3000{{path}}
+{{#allParams}}
+ * - {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
+{{/allParams}}
+{{^returnType}}
+ * no response value expected for this operation
+{{/returnType}}
+{{#returnType}}
+ * returns {{{returnType}}}
+{{/returnType}}
+ **/
+
+module.exports = function (req, res, next) {
+  {{#serviceModelLegacy}}
+  {{serviceModelName}}.{{operationId}}(req.sanitizer['context'], {}, function(error, data) {
+    error ? utils.writeError(res, error) : utils.writeJson(res, data)
+  });
+  {{/serviceModelLegacy}}
+  {{^serviceModelLegacy}}
+  {{#allParams}}
+  var {{paramName}} = req.sanitizer['{{baseName}}'].value;
+  {{/allParams}}
+  {{#serviceProtection}}
+  /** Instanciate circuit breaker guardian **/
+  if (!{{{operationId}}}CircuitBreakerBrake) {
+    {{{operationId}}}CircuitBreakerBrake = new Brakes({{serviceModelName}}.{{{operationId}}}, {
+      name: '{{serviceName}}::{{{operationId}}}',
+      group: '{{serviceName}}::{{serviceModelName}}Service',
+      timeout: {{circuitTimeout}},
+      circuitDuration: {{circuitDuration}},
+      threshold: {{circuitThreshold}}
+    });
+  }
+  return {{{operationId}}}CircuitBreakerBrake.exec(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+    .then(function (response) {
+      utils.writeJson(res, response);
+    }, function (error) {
+      utils.writeError(res, error);
+    }).catch(function (error) {
+      utils.writeError(res, {
+        code: 'InnerHandlerThrownException',
+        message: error
+      });
+    });  
+  {{/serviceProtection}}
+  {{^serviceProtection}}
+  {{serviceModelName}}.{{operationId}}(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+    .then(function (response) {
+      utils.writeJson(res, response);
+    }, function (error) {
+      utils.writeError(res, error);
+    })
+    .catch(function (error) {
+      utils.writeError(res, {
+        code: 'InnerHandlerThrownException',
+        message: error
+      });
+    });
+  {{/serviceProtection}}
+  {{/serviceModelLegacy}}
+};

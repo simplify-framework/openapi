@@ -1,0 +1,83 @@
+'use strict';
+
+const logger = require('../../utils/logger')
+{{#operations}}
+{{#listObjects}}
+var listObjects = require('../../utils/list-objects');
+{{/listObjects}}
+{{#createObject}}
+var createObject = require('../../utils/create-object');
+{{/createObject}}
+{{#updateObject}}
+var updateObject = require('../../utils/update-object');
+{{/updateObject}}
+{{#getObject}}
+var getObject = require('../../utils/get-object');
+{{/getObject}}
+
+{{#serviceModelLegacy}}
+exports.{{{operationId}}} = function(event, context, callback) {
+  var f = __function
+  logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
+  logger.warn(__function, __line, "Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
+  logger.error(__function, __line, "Enable Debug Error Only: process.env.DEBUG=ERROR")
+  callback({
+    "code": "ErrorOperationNotImplemetedException",
+    "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
+  })
+}
+{{/serviceModelLegacy}}
+{{^serviceModelLegacy}}
+/**
+ {{#summary}}
+ * {{{summary}}}
+ {{/summary}}
+ {{#notes}}
+ * {{{notes}}} - Trial Deployment (latest)
+ {{/notes}}
+ * curl -X {{httpMethod}} http://localhost:3000{{path}}
+ * - context object { requestContext: { identity, authorizer } }
+{{#allParams}}
+ * - {{paramName}} {{{dataType}}} {{{description}}}{{^required}} (optional){{/required}}
+{{/allParams}}
+{{^returnType}}
+ * no response value expected for this operation
+{{/returnType}}
+{{#returnType}}
+ * returns {{{returnType}}}
+{{/returnType}}
+ **/
+exports.{{{operationId}}} = function(context{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
+  {{#listObjects}}
+  return listObjects['{{listObjects}}']('{{listObjectsFrom}}', {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}undefined{{/allParams}});
+  {{/listObjects}}
+  {{^listObjects}}
+  {{#createObject}}
+  return createObject['{{createObject}}']('{{createObjectName}}', body.{{createObjectData}});
+  {{/createObject}}
+  {{^createObject}}
+  {{#updateObject}}
+  return updateObject['{{updateObject}}']('{{updateObjectName}}', [{{#updateObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/updateObjectFields}}], body.{{updateObjectData}});
+  {{/updateObject}}
+  {{^updateObject}}
+  {{#getObject}}
+  return getObject['{{getObject}}']('{{getObjectName}}', [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}], {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}undefined{{/allParams}});
+  {{/getObject}}
+  {{^getObject}}
+  var f = __function
+  logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
+  logger.warn(__function, __line, "Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
+  logger.error(__function, __line, "Enable Debug Error Only: process.env.DEBUG=ERROR")
+  return new Promise(function(resolve, reject) {  
+    reject({
+      "code": "ErrorOperationNotImplemetedException",
+      "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
+    });  
+  });
+  {{/getObject}}
+  {{/updateObject}}  
+  {{/createObject}}
+  {{/listObjects}}
+}
+{{/serviceModelLegacy}}
+{{/operations}}

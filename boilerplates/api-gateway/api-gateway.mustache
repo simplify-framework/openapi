@@ -1,0 +1,339 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: API Gateway resource stack creation using AWS Simplify CLI
+Parameters:
+  DeploymentStage:
+    Type: String
+    Default: 'latest'
+    AllowedValues:
+    - stable
+    - latest
+  CognitoUserPoolId:
+    Type: String
+Resources:
+  {{apiName}}:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: '{{apiName}} Definitions'
+      Name: {{apiName}}
+      Body:
+        swagger: '2.0'
+        info:
+          version: '2017-04-20T04:08:08Z'
+          title: {{apiName}}        
+        host:
+          Fn::Join:
+          - ''
+          - - apigateway.
+            - Ref: AWS::Region
+            - ".amazonaws.com"
+        basePath:
+          Fn::Join:
+          - ''
+          - - "/"
+            - "{{apiVersion}}"
+        schemes:
+        - https
+        x-amazon-apigateway-request-validators:
+          Passthrough:
+            validateRequestParameters: false
+            validateRequestBody: false
+          Validate body:
+            validateRequestParameters: false
+            validateRequestBody: true
+          Validate query string parameters and headers:
+            validateRequestParameters: true
+            validateRequestBody: false
+        x-amazon-apigateway-request-validator: Passthrough
+        paths:
+          {{#services}}          
+          {{#serviceEntries}}
+          "{{path}}":            
+            {{#hasOptions}}
+            options:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: 200 response
+                  headers:
+                    Access-Control-Allow-Origin:
+                      type: string
+                    Access-Control-Allow-Methods:
+                      type: string
+                    Access-Control-Allow-Headers:
+                      type: string
+              security:
+              - sigv4: []                  
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: '200'
+                    responseParameters:
+                      method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'"
+                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                requestTemplates:
+                  application/json: '{"statusCode": 200}'
+                passthroughBehavior: when_no_match
+                type: mock            
+            {{/hasOptions}}
+            {{^hasOptions}}
+            {{/hasOptions}}
+            {{#operations}}            
+            {{httpMethodLowerCase}}:
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              {{#httpMethodHasBody}}
+              parameters:
+              - in: body
+                name: RequestSchema
+                required: false
+                schema:
+                  "$ref": "#/definitions/RequestSchema"
+              {{/httpMethodHasBody}}
+              {{^httpMethodHasBody}}
+              parameters:
+              - in: query
+                name: search
+                required: false
+              {{/httpMethodHasBody}}
+              security:
+              {{#serviceIAMSecurity}}
+              - sigv4: []
+              {{/serviceIAMSecurity}}
+              {{^serviceIAMSecurity}}
+              - CognitoAuthorizer: []
+              {{/serviceIAMSecurity}}
+              responses:
+                '200':
+                  description: 200 response
+                  schema:
+                    "$ref": "#/definitions/ResponseSchema"                                    
+              x-amazon-apigateway-request-validator: Passthrough
+              x-amazon-apigateway-integration:                
+                responses:
+                  default:
+                    statusCode: '200'                
+                uri:
+                  Fn::Join:
+                  - ''
+                  - - 'arn:aws:apigateway:'
+                    - !Ref AWS::Region
+                    - ":lambda:path/2015-03-31/functions/"
+                    - !GetAtt {{serviceName}}LambdaFunction.Arn
+                    - "/invocations"                
+                passthroughBehavior: when_no_match
+                httpMethod: POST
+                type: aws_proxy                      
+          {{/operations}}
+          {{/serviceEntries}}
+          {{/services}}
+        securityDefinitions:
+          {{#serviceIAMSecurity}}
+          sigv4:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: awsSigv4
+          {{/serviceIAMSecurity}}
+          {{^serviceIAMSecurity}}
+          CognitoAuthorizer:
+            type: apiKey
+            name: Authorization
+            in: header
+            x-amazon-apigateway-authtype: cognito_user_pools
+            x-amazon-apigateway-authorizer:
+              type: cognito_user_pools
+              providerARNs:
+              - Fn::Sub:
+                - arn:aws:cognito-idp:${region}:${account}:userpool/${userPoolId}
+                - region:
+                    !Ref AWS::Region
+                  account:
+                    !Ref AWS::AccountId
+                  userPoolId:
+                    !Ref CognitoUserPoolId
+          {{/serviceIAMSecurity}}
+        definitions:
+          RequestSchema:
+            type: object
+            required:
+            - request
+            properties:
+              request:
+                type: string
+            title: Request Schema
+          ResponseSchema:
+            type: object
+            required:
+            - response
+            properties:
+              response:
+                type: string
+            title: Response Schema        
+      FailOnWarnings: true
+  {{apiName}}APIGateWayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      Description: The Development stage deployment of your API.
+      StageName: {{apiVersion}}
+      RestApiId:
+        !Ref {{apiName}}
+{{#services}}
+  {{serviceName}}LambdaFunction:
+    Type: AWS::Lambda::Function
+    Metadata:
+      aws:asset:path: "./src"
+      aws:asset:property: Code
+    Properties:
+      Handler: index.handler      
+      Environment:
+        Variables:
+          DEPLOYMENT:
+            !Ref DeploymentStage
+      Role:
+        Fn::GetAtt:
+        - {{serviceName}}LambdaExecutionRole
+        - Arn
+      Runtime: {{serviceRuntimeOrigin}}
+      Timeout: '25'
+      Code:
+        ZipFile: |
+          {{serviceCode}}
+
+  {{serviceName}}LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:      
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+  {{serviceName}}lambdaexecutionpolicy:
+    DependsOn:
+    - {{serviceName}}LambdaExecutionRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: lambda-execution-policy
+      Roles:
+      - !Ref {{serviceName}}LambdaExecutionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+          - logs:PutLogEvents
+          Resource:
+          - Fn::Sub:
+            - arn:aws:logs:${region}:${account}:log-group:/aws/lambda/${lambda}:log-stream:*
+            - region:
+                !Ref AWS::Region
+              account:
+                !Ref AWS::AccountId
+              lambda:
+                !Ref {{serviceName}}LambdaFunction
+  
+  {{serviceName}}LambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: {{serviceName}}LambdaFunction
+    Properties:
+      LogGroupName:
+        Fn::Join:
+        - ""
+        - - '/aws/lambda/{{apiName}}/'
+          - !Ref {{serviceName}}LambdaFunction
+      RetentionInDays: 14
+    
+  {{apiName}}Secret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Description: Secret manager for {{serviceName}}LambdaFunction
+      GenerateSecretString:
+        SecretStringTemplate: '{"type":"auto"}'
+        GenerateStringKey: password
+        ExcludeLowercase: false
+        ExcludeNumbers: false
+        ExcludePunctuation: false
+        ExcludeUppercase: false
+        PasswordLength: 16
+  {{serviceName}}ResourcesPolicy:
+    DependsOn:
+    - {{serviceName}}LambdaExecutionRole
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: lambda-resource-access-policy
+      Roles:
+      - !Ref {{serviceName}}LambdaExecutionRole
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - secretsmanager:GetSecretValue
+          Resource:
+          - Fn::Sub:
+            - arn:aws:secretsmanager:${region}:${account}:secret:${secretname}-${env}-*
+            - region:
+                !Ref AWS::Region
+              account:
+                !Ref AWS::AccountId
+              secretname:
+                !Ref {{apiName}}Secret
+              env:
+                !Ref DeploymentStage  
+  {{serviceName}}LambdaFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref {{serviceName}}LambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn:
+        Fn::Join:
+        - ''
+        - - 'arn:aws:execute-api:'
+          - !Ref AWS::Region
+          - ":"
+          - !Ref AWS::AccountId
+          - ":"
+          - !Ref {{apiName}}
+          - "/*/*/*"  
+  {{/services}}
+Outputs:
+  ApiGatewayUrl:
+    Description: Root URL of the API gateway
+    Value:
+      Fn::Join:
+      - ''
+      - - https://
+        - !Ref {{apiName}}
+        - ".execute-api."
+        - !Ref AWS::Region
+        - ".amazonaws.com/"
+        - !Ref DeploymentStage
+  apiGatewayName:
+    Description: API Friendly name
+    Value: !Ref {{apiName}}
+  {{#services}}
+  {{serviceName}}FunctionArn:
+    Description: {{serviceNamePascal}} Function ARN
+    Value: !GetAtt {{serviceName}}LambdaFunction.Arn
+  {{serviceName}}FunctionName:
+    Description: {{serviceNamePascal}} Function Name
+    Value: !Ref {{serviceName}}LambdaFunction
+  {{serviceName}}FunctionRole:
+    Description: {{serviceNamePascal}} Execution Role ARN
+    Value: !GetAtt {{serviceName}}LambdaExecutionRole.Arn
+  {{/services}}
+  {{apiName}}SecretArn:
+    Description: {{serviceNamePascal}} Secret Name
+    Value: !Ref {{apiName}}Secret

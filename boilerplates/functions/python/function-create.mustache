@@ -1,0 +1,120 @@
+var AdmZip = require('adm-zip')
+const path = require('path')
+const fs = require('fs')
+var nodeArgs = process.argv.slice(2);
+var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
+if (nodeArgs.length > 1) {
+    configInputFile = (nodeArgs[0] == "--input" || nodeArgs[0] == "-i") ? nodeArgs[1] : configInputFile
+}
+try {
+    var config = JSON.parse(fs.readFileSync(path.join(__dirname, configInputFile)))
+    const functionConfig = config.Function
+    const bucketName = config.Bucket.Name
+    const bucketKey = config.Bucket.Key
+    const specificRegion = config.Region
+    const functionName = functionConfig.FunctionName
+    const directoryPath = path.join(__dirname, 'src')
+    const distZippedPath = path.join(__dirname, 'dist')
+    const distZippedFile = path.join(distZippedPath, bucketKey)
+    const AWS = require('aws-sdk')
+    const zip = new AdmZip();
+    zip.addLocalFolder(directoryPath)
+    zip.writeZip(distZippedFile);
+    var credentials = new AWS.SharedIniFileCredentials(config.Profile ? { profile: config.Profile } : {})
+    AWS.config.credentials = credentials; console.log("createLambdaFunction-SharedIniFileCredentials:", credentials.profile)
+    var lambda = new AWS.Lambda({ apiVersion: '2015-03-31', region: specificRegion });
+    const uploadDistZipFile = function (filepath, bucketname, filename, callback) {
+        fs.readFile(filepath, function (err, data) {
+            if (err) throw err;
+            var s3bucket = new AWS.S3({
+                params: {
+                    Bucket: bucketname,
+                    CreateBucketConfiguration: {
+                        LocationConstraint: specificRegion
+                    },
+                    ACL: 'private'
+                }
+            });
+            s3bucket.createBucket(function (err) {
+                var params = {
+                    Key: filename,
+                    Body: data
+                };
+                if (!err || (err.code == 'BucketAlreadyOwnedByYou')) {
+                    console.log("createLambdaFunction-Uploading...")
+                    s3bucket.upload(params, function (err, data) {
+                        fs.unlink(filepath, function (err) {
+                            if (err) {
+                                console.error(`createLambdaFunction-ZipFile: ${err}`);
+                            }
+                            console.log(`createLambdaFunction-ZipFile: ${filename} was deleted`);
+                        });
+                        if (err) {
+                            callback(err)
+                        } else {
+                            callback(null)
+                        }
+                    });
+                } else {
+                    console.error(`createLambdaFunction-createBucket-ERROR: ${err}`)
+                }
+            });
+        });
+    };
+
+    const createFunction = function (functionConfig) {
+        return new Promise(function (resolve, reject) {
+            var params = {
+                Code: {
+                    ZipFile: fs.readFileSync(distZippedFile)
+                },
+                ...functionConfig
+            };
+            lambda.createFunction(params, function (err, data) {
+                if (err) {
+                    console.log("createLambdaFunction-UpdateConfig...");
+                    delete params.Code;
+                    delete params.Publish;
+                    delete params.Tags;
+                    lambda.updateFunctionConfiguration(params, function (err, data) {
+                        if (err) reject(err)
+                        resolve(data)
+                    });
+                } else {
+                    resolve(data);
+                }
+            });
+        })
+    }
+    createFunction(functionConfig).then(function () {
+        uploadDistZipFile(distZippedFile, bucketName, bucketKey, function (err) {
+            if (!err) {
+                var params = {
+                    FunctionName: functionName,
+                    S3Bucket: bucketName,
+                    S3Key: bucketKey
+                };
+                console.log(`createLambdaFunction-ZipFile: ${bucketKey} was uploaded`);
+                lambda.updateFunctionCode(params, function (err, data) {
+                    if (err) console.error(`createLambdaFunction-UpdateCode-ERROR ${err}`);
+                    else {
+                        fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
+                            FunctionName: data.FunctionName,
+                            FunctionArn: data.FunctionArn,
+                            LastModified: data.LastModified,
+                            CodeSha256: data.CodeSha256,
+                            RevisionId: data.RevisionId,
+                            LastUpdateStatus: data.LastUpdateStatus,
+                            LastUpdateStatusReason: data.LastUpdateStatusReason,
+                            LastUpdateStatusReasonCode: data.LastUpdateStatusReasonCode
+                        }, null, 4));
+                    }
+                });
+            } else {
+                console.error(`createLambdaFunction-Upload-ERROR ${err}`);
+            }
+        })
+    })
+} catch (err) {
+    console.error(`createLambdaFunction-LoadConfig: ${err}`)
+}

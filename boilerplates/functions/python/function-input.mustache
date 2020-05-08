@@ -1,0 +1,29 @@
+{
+    "Profile": "{{deploymentProfile}}",
+    "Region": "{{deploymentRegion}}",
+    "Bucket": {
+        "Name": "{{serviceNamePosix}}",
+        "Key": "latest-build.zip"
+    },
+    "OutputFile": "function-meta.json",
+    "Function": {
+        "FunctionName": "{{serviceName}}",
+        "Handler": "index.handler",
+        "MemorySize": 256,
+        "Publish": true,
+        "Role": "arn:aws:iam::{{accountId}}:role/{{serviceName}}",
+        "Runtime": "nodejs12.x",
+        "Tags": {
+            "GroupName": "{{serviceTag}}"
+        },
+        "Timeout": 15,
+        "TracingConfig": {
+            "Mode": "Active"
+        },
+        "Environment": {
+            "Variables": {
+                "ENVIRONMENT": "development"
+            }
+        }
+    }
+}

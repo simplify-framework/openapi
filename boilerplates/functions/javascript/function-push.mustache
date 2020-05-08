@@ -1,0 +1,49 @@
+const path = require('path')
+const fs = require('fs')
+var nodeArgs = process.argv.slice(2);
+const simplify = require('simplify-sdk')
+const provider = require('simplify-sdk/provider')
+var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
+if (nodeArgs.length > 1) {
+    configInputFile = (nodeArgs[0] == "--input" || nodeArgs[0] == "-i") ? nodeArgs[1] : configInputFile
+}
+try {
+    var config = simplify.getInputConfig(path.join(__dirname, configInputFile))
+    const functionConfig = config.Function
+    const bucketName = config.Bucket.Name
+    const bucketKey = config.Bucket.Key
+    const inputDirectory = path.join(__dirname, 'src')
+    const distZippedPath = path.join(__dirname, 'dist')
+    const outputFilePath = path.join(distZippedPath, bucketKey)
+    provider.setConfig(config).then(function() {
+        simplify.uploadDirectoryAsZip({
+            adaptor: provider.getStorage(), ...{
+                bucketKey, inputDirectory, outputFilePath
+            }
+        }).then(function (uploadInfor) {
+            simplify.createOrUpdateFunction({
+                adaptor: provider.getFunction(),
+                ...{ functionConfig, bucketName, bucketKey: uploadInfor.Key }
+            }).then(function (data) {
+                fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
+                    FunctionName: data.FunctionName,
+                    FunctionArn: data.FunctionArn,
+                    LastModified: data.LastModified,
+                    CodeSha256: data.CodeSha256,
+                    RevisionId: data.RevisionId,
+                    LastUpdateStatus: data.LastUpdateStatus,
+                    LastUpdateStatusReason: data.LastUpdateStatusReason,
+                    LastUpdateStatusReasonCode: data.LastUpdateStatusReasonCode
+                }, null, 4));
+            }, function(err) {
+                console.error(`createLambdaFunction-Update-ERROR: ${err}`);
+            })
+        }, function(err) {
+            console.error(`createLambdaFunction-UploadZip-ERROR: ${err}`);
+        })
+    }).catch(function (err) {
+        console.error(`${opName}-UploadDirectory: ${err}`)
+    })
+} catch (err) {
+    console.error(`createLambdaFunction-LoadConfig: ${err}`)
+}
