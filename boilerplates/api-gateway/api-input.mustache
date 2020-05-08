@@ -16,25 +16,8 @@
         "Functions": {
             {{#services}}
             "{{serviceName}}": {
-                "FunctionName": "{{serviceName}}",
-                "Handler": "index.handler",
-                "MemorySize": 256,
-                "Publish": true,
-                "Role": "arn:aws:iam:::role/{{serviceName}}LambdaExecutionRole",
-                "Runtime": "nodejs12.x",
-                "Tags": {
-                    "GroupName": "simplify-framework"
-                },
-                "Timeout": 90,
-                "TracingConfig": {
-                    "Mode": "Active"
-                },
-                "Environment": {
-                    "Variables": {
-                        "DEPLOYMENT": "latest",
-                        "OVERRIDEN_PACKAGE_LAYER": ""
-                    }
-                }
+                "functionInput": "./{{serviceName}}/function-input.json",
+                "functionRole": "{{serviceName}}FunctionRole"
             }{{#hasMore}}, {{/hasMore}}
             {{/services}}
         },
