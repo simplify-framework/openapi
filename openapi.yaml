@@ -8,25 +8,11 @@ x-deployment-region: eu-central-1
 x-deployment-profile: your-aws-profile
 x-api-hystrix-dashboard: false
 paths:
-  '/path-to-key':
+  '/event-for-pets':
     x-event-service-name: event-service-for-pets
     x-event-service-table: DynamodbPets
     x-event-service-policy: SNS-IAMPolicy
     x-event-service-schedule: rate(10 minutes)
-    put:
-      x-event-service-model-code-plain-text:
-        - module.exports.handle = function(event) {
-              console.log('EVENT2:', event)
-            }
-      x-event-service-model-access:
-        Action:
-        - logs:PutLogEvents
-        Resource:
-        - arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:log-stream:*
-      description: 'Run on event operation'
-      responses:
-        '200':
-          description: Success
   '/pets':
     x-api-service-name: api-service-for-pets
     x-api-service-table: DynamodbPets
