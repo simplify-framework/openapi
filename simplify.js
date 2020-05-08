@@ -116,10 +116,11 @@ function despatch(obj, config, callback) {
 }
 
 function main(o) {
-    if (argv.verbose) logger.debug('Loaded definition ' + defName, o);
-
+    console.log(` - Loaded definition ${defName}`);
     if (o && o.openapi) {
-        despatch(o, config);
+        despatch(o, config, function(err) {
+            console.log(` - Finish generation ${!err ? `without error. See ${config.outputDir} for your generated code!` : err}`);
+        });
     }
     else {
         console.error('Unrecognised OpenAPI 3.0 version');
