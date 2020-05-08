@@ -16,8 +16,7 @@
         "Functions": {
             {{#services}}
             "{{serviceName}}": {
-                "functionInput": "./{{serviceName}}/function-input.json",
-                "functionRole": "{{serviceName}}FunctionRole"
+                "functionInput": "./{{serviceName}}/function-input.json"
             }{{#hasMore}}, {{/hasMore}}
             {{/services}}
         },

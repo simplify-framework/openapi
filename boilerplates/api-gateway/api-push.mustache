@@ -29,6 +29,12 @@ try {
                     stackTemplate: TemplateURL
                 }
             }).then(function (stackData) {
+                Object.keys(config.Deployment.Functions).forEach(function(f) {
+                    const fInputPath = path.join(__dirname, config.Deployment.Functions[f].functionInput)
+                    var fConfig = JSON.parse(fs.readFileSync(fInputPath))
+                    fConfig.Function.Role = stackData.Output[`${f}FunctionRole`].Value
+                    fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
+                })
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify(stackData, null, 4));
             }, function (err) {
                 console.error(`${err}`)

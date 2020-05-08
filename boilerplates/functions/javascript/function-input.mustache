@@ -3,7 +3,7 @@
     "Region": "{{deploymentRegion}}",
     "Bucket": {
         "Name": "{{apiNamePosix}}",
-        "Key": "functions/{{serviceNamePosix}}/builds"
+        "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
     },
     "OutputFile": "function-meta.json",
     "Function": {
@@ -11,7 +11,7 @@
         "Handler": "index.handler",
         "MemorySize": 256,
         "Publish": true,
-        "Role": "arn:aws:iam::{{accountId}}:role/{{serviceName}}",
+        "Role": "${Function{{serviceNamePascal}}RoleArn}",
         "Runtime": "nodejs12.x",
         "Tags": {
             "GroupName": "{{serviceTag}}"
@@ -22,7 +22,7 @@
         },
         "Environment": {
             "Variables": {
-                "ENVIRONMENT": "development"
+                "DEPLOYMENT": "latest"
             }
         }
     }
