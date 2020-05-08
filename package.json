@@ -28,7 +28,9 @@
   "dependencies": {
     "case": "^1.6.3",
     "debug": "^4.1.1",
+    "diff": "^4.0.2",
     "hogan.js": "^3.0.2",
+    "js-yaml": "^3.13.1",
     "mkdirp": "^1.0.4",
     "node-fetch": "^2.6.0",
     "oas-schema-walker": "^1.1.4",
@@ -39,7 +41,6 @@
     "safe-json-stringify": "^1.2.0",
     "uuid": "^3.4.0",
     "yaml": "^1.9.1",
-    "js-yaml": "^3.13.1",
     "yargs": "^14.2.3"
   },
   "devDependencies": {}

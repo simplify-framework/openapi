@@ -9,8 +9,10 @@ x-deployment-profile: your-aws-profile
 x-api-hystrix-dashboard: false
 paths:
   '/path-to-key':
-    x-event-service-name: api-service-for-pets
-    x-event-service-listen-from: path-to-s3-bucket-name
+    x-event-service-name: event-service-for-pets
+    x-event-service-table: DynamodbPets
+    x-event-service-policy: SNS-IAMPolicy
+    x-event-service-schedule: rate(10 minutes)
     put:
       x-event-service-model-code-plain-text:
         - module.exports.handle = function(event) {
@@ -27,6 +29,7 @@ paths:
           description: Success
   '/pets':
     x-api-service-name: api-service-for-pets
+    x-api-service-table: DynamodbPets
     x-api-service-tag: devel
     get:
       x-api-service-model-list-objects: aws-s3
@@ -90,6 +93,7 @@ paths:
   '/pets/{id}':
     x-api-service-name: api-service-for-pets
     x-api-service-model-name: people-pets
+    x-api-service-table: dynamodb-pets
     x-api-service-hystrix-stream: true    
     post:
       x-control-service-circuit-protection: true
@@ -126,6 +130,7 @@ paths:
   '/people':
     x-api-service-name: api-service-for-people
     x-api-service-model-name: people-pets
+    x-api-service-table: dynamodb-people
     get:
       x-api-service-model-get-object: aws-s3
       x-api-service-model-get-object-name: path-to-s3-bucket-name/path-to-key      

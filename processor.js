@@ -5,13 +5,36 @@
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
-
+const jsdiff = require('diff');
 const mkdirp = require('mkdirp');
 const rimraf = require('rimraf');
 const Hogan = require('hogan.js');
 const clone = require('reftools/lib/clone.js').circularClone;
-
 const adaptor = require('./adaptor.js');
+
+function creatFileOrPatch(filePath, newFileData, encoding, config) {
+    try {
+        if (fs.existsSync(filePath)) {
+            var oldFile = fs.readFileSync(filePath).toString()
+            if (config.auto) {
+                var diff = jsdiff.diffChars(newFileData, oldFile.toString())
+                var content = diff.map(function (part) {
+                    return part.value
+                }).join('');
+                fs.writeFileSync(filePath, content, encoding);
+            }
+            if (config.diff) {
+                var patches = jsdiff.createPatch(`${filePath}`, oldFile.toString(), newFileData);
+                fs.writeFileSync(`${filePath}.diff`, patches, encoding);
+            }
+        } else {
+            fs.writeFileSync(filePath, newFileData, encoding);
+        }
+    }
+    catch (_) {
+        fs.writeFileSync(filePath, newFileData, encoding);
+    }
+}
 
 let ff = {
     readFileSync: fs.readFileSync,
@@ -133,7 +156,7 @@ function main(o, config, callback) {
                                         ff.mkdirp.sync(requestDir);
                                     }
                                     if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                    ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
+                                    creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', config.defaults);
                                 })
                             }
                         })

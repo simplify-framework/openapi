@@ -11,7 +11,7 @@ const logger = require('./logger');
 const processor = require('./processor.js');
 
 var argv = require('yargs')
-    .usage('simplify create|delete [options]')
+    .usage('simplify generate|reverse [options]')
     .describe('openapi', 'OpenAPI 3.0 spec YAML')
     .string('openapi')
     .alias('i', 'openapi')
@@ -24,6 +24,12 @@ var argv = require('yargs')
     .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
     .alias('v', 'verbose')
+    .boolean('auto')
+    .default('auto', false)
+    .describe('auto', 'Auto merge files')
+    .boolean('diff')
+    .default('diff', false)
+    .describe('diff', 'Generate diff file')
     .demandOption(['i', 'o'])
     .demandCommand(1)
     .argv;
@@ -78,6 +84,14 @@ function runCommandLine() {
         config.defaults.verbose = true;
         logger.debug('Loaded configuration.');
     }
+    if (argv.diff) {
+        config.defaults.diff = true;
+    }
+    if (argv.auto) {
+        config.defaults.auto = true;
+    } else {
+        config.defaults.diff = true;
+    }
     if (argv.zip) {
         processor.fileFunctions.createFile = zipFile;
         processor.fileFunctions.rimraf = nop;
@@ -119,6 +133,8 @@ function main(o) {
     console.log(` - Loaded definition ${defName}`);
     if (o && o.openapi) {
         despatch(o, config, function(err) {
+            console.warn(` - Auto merge is ${config.defaults.auto ? 'on (use option --auto=false to turn off)':'off (use option --auto to turn on)'}`)
+            console.warn(` - Generate diff file is ${config.defaults.diff ? 'on (automatic turn on if --auto=false)':'off (use option --diff to turn on)'}`)
             console.log(` - Finish generation ${!err ? `without error. See ${config.outputDir} for your generated code!` : err}`);
         });
     }

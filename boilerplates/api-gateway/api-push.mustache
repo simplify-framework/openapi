@@ -24,13 +24,13 @@ try {
                     stackName: config.Deployment.Name,
                     stackParameters: {
                         DeploymentStage: 'latest',
-                        CognitoUserPoolId: config.CognitoUserPoolId
+                        CognitoUserPoolId: {{#serviceIAMSecurity}}null{{/serviceIAMSecurity}}{{^serviceIAMSecurity}}config.CognitoUserPoolId{{/serviceIAMSecurity}}
                     },
                     stackTemplate: TemplateURL
                 }
             }).then(function (stackData) {
                 Object.keys(config.Deployment.Functions).forEach(function(f) {
-                    const fInputPath = path.join(__dirname, config.Deployment.Functions[f].functionInput)
+                    const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
                     var fConfig = JSON.parse(fs.readFileSync(fInputPath))
                     fConfig.Function.Role = stackData.Output[`${f}FunctionRole`].Value
                     fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));

@@ -6,14 +6,23 @@ Based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
 ```
 npm install -g simplify-codegen@latest
-simplify-codegen create -i spec.yaml -o ../output
+simplify-codegen generate -i spec.yaml -o ../output
 ```
 
 ## Purpose to have one solution in a functions stack with:
 + AWS API Gateway REST API
-  + AWS Secret Manager
-    + AWS Lambda function 1
-    + AWS Lambda function 2
+  + AWS Lambda function 1
+    + AWS Secret Manager 1
+    + DynamoDB resource 1*
+    + Manage Policy Arn 1
+  + AWS Lambda function 2
+    + AWS Secret Manager 2
+    + DynamoDB resource 2
+    + Manage Policy Arn 2*
+  + AWS Lambda function 3
+    + AWS Secret Manager 3
+    + DynamoDB resource 1*
+    + Manage Policy Arn 2*
 
 ## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
 - `x-api-gateway-name`: to define the API gateway Rest API stack name
@@ -184,5 +193,5 @@ servers:
 
 ## Generate project code by using command line:
 
-`simplify-codegen create -i spec.yaml -o ../output/functions`
+`simplify-codegen generate -i spec.yaml -o ../output/functions`
 

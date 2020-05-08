@@ -9,6 +9,24 @@ Parameters:
     - latest
   CognitoUserPoolId:
     Type: String
+  ManagedResourceStack
+    Type: String
+  {{#services}}
+  {{serviceName}}DynamoDBTableName:
+    Type: String
+  {{serviceName}}ResourcePolicyArn:
+    Type: String
+  {{/services}}
+
+Conditions:
+  {{#services}}
+  Has{{serviceNamePascal}}DynamoDBTableName: !Not !Equals [ !Ref {{serviceName}}DynamoDBTableName, '' ]
+  Has{{serviceNamePascal}}ResourcePolicyArn: !Not !Equals [ !Ref {{serviceName}}ResourcePolicyArn, '' ]
+  {{#serviceSchedule}}
+  Has{{serviceNamePascal}}ScheduleEvent: True
+  {{/serviceSchedule}}
+  {{/services}}
+
 Resources:
   {{apiName}}:
     Type: AWS::ApiGateway::RestApi
@@ -45,7 +63,8 @@ Resources:
             validateRequestBody: false
         x-amazon-apigateway-request-validator: Passthrough
         paths:
-          {{#services}}          
+          {{#services}}      
+          {{#hasServicePath}}    
           {{#serviceEntries}}
           "{{path}}":            
             {{#hasOptions}}
@@ -128,9 +147,10 @@ Resources:
                     - "/invocations"                
                 passthroughBehavior: when_no_match
                 httpMethod: POST
-                type: aws_proxy                      
+                type: aws_proxy
           {{/operations}}
           {{/serviceEntries}}
+          {{/hasServicePath}}
           {{/services}}
         securityDefinitions:
           {{#serviceIAMSecurity}}
@@ -162,20 +182,21 @@ Resources:
           RequestSchema:
             type: object
             required:
-            - request
+            - data
             properties:
-              request:
-                type: string
+              data:
+                type: object
             title: Request Schema
           ResponseSchema:
             type: object
             required:
-            - response
+            - data
             properties:
-              response:
-                type: string
+              data:
+                type: object
             title: Response Schema        
       FailOnWarnings: true
+
   {{apiName}}APIGateWayDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
@@ -183,6 +204,7 @@ Resources:
       StageName: {{apiVersion}}
       RestApiId:
         !Ref {{apiName}}
+
 {{#services}}
   {{serviceName}}LambdaFunction:
     Type: AWS::Lambda::Function
@@ -217,12 +239,19 @@ Resources:
             - lambda.amazonaws.com
           Action:
           - sts:AssumeRole
-  {{serviceName}}lambdaexecutionpolicy:
+          ManagedPolicyArns:
+          - !If [Has{{serviceNamePascal}}ResourcePolicyArn, !Ref {{serviceName}}ResourcePolicyArn, AWS::NoValue]
+
+  {{serviceName}}LambdaExecutionPolicy:
     DependsOn:
     - {{serviceName}}LambdaExecutionRole
-    Type: AWS::IAM::Policy
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: lambda-execution-policy
+      ManagedPolicyName:
+        Fn::Join:
+        - ""
+        - - !Ref {{apiName}}
+          - !Ref {{serviceName}}ManagedLambdaPolicy
       Roles:
       - !Ref {{serviceName}}LambdaExecutionRole
       PolicyDocument:
@@ -242,7 +271,20 @@ Resources:
                 !Ref AWS::AccountId
               lambda:
                 !Ref {{serviceName}}LambdaFunction
-  
+        - Effect: Allow
+          Action:
+          - secretsmanager:GetSecretValue
+          - secretsmanager:PutSecretValue
+          Resource:
+          - Fn::Sub:
+            - arn:aws:secretsmanager:${region}:${account}:${secretname}-*
+            - region:
+                !Ref AWS::Region
+              account:
+                !Ref AWS::AccountId
+              secretname:
+                !Ref {{serviceName}}Secret
+
   {{serviceName}}LambdaFunctionLogGroup:
     Type: AWS::Logs::LogGroup
     DependsOn: {{serviceName}}LambdaFunction
@@ -254,24 +296,64 @@ Resources:
           - !Ref {{serviceName}}LambdaFunction
       RetentionInDays: 14
     
-  {{apiName}}Secret:
+  {{serviceName}}Secret:
     Type: AWS::SecretsManager::Secret
     Properties:
       Description: Secret manager for {{serviceName}}LambdaFunction
       GenerateSecretString:
-        SecretStringTemplate: '{"type":"auto"}'
-        GenerateStringKey: password
+        SecretStringTemplate: '{"{{serviceNamePascal}}Type":"AutoRotation"}'
+        GenerateStringKey: {{serviceNamePascal}}Key
+        ExcludeCharacters: '"@/\'
         ExcludeLowercase: false
         ExcludeNumbers: false
         ExcludePunctuation: false
         ExcludeUppercase: false
-        PasswordLength: 16
-  {{serviceName}}ResourcesPolicy:
+        PasswordLength: 48
+
+  {{serviceName}}SecretRotationSchedule:
+    Type: AWS::SecretsManager::RotationSchedule
+    DependsOn: {{serviceName}}LambdaFunction
+    Properties:
+      SecretId: !Ref {{serviceName}}Secret
+      RotationLambdaARN: !GetAtt {{serviceName}}LambdaFunction.Arn
+      RotationRules:
+        AutomaticallyAfterDays: 30
+
+  {{serviceName}}SecretLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt {{serviceName}}LambdaFunction.Arn
+      Action: 'lambda:InvokeFunction'
+      Principal: secretsmanager.amazonaws.com
+
+  {{serviceName}}DynamoDBResource:
+    Condition: Has{{serviceNamePascal}}DynamoDBTableName
+    DependsOn:
+    - {{serviceName}}LambdaFunction
+    Type: AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken:
+      - Fn::Sub:
+        - arn:aws:dynamodb:${region}:${account}:table:${tablename}
+        - region:
+            !Ref AWS::Region
+          account:
+            !Ref AWS::AccountId
+          tablename:
+            !Ref {{serviceName}}DynamoDBTableName
+      StackName: !Ref ManagedResourceStack
+
+  {{serviceName}}DynamoDBResourcePolicy:
+    Condition: Has{{serviceNamePascal}}DynamoDBTableName
     DependsOn:
     - {{serviceName}}LambdaExecutionRole
-    Type: AWS::IAM::Policy
+    Type: AWS::IAM::ManagedPolicy
     Properties:
-      PolicyName: lambda-resource-access-policy
+      ManagedPolicyName:
+        Fn::Join:
+        - ""
+        - - !Ref {{apiName}}
+          - !Ref {{serviceName}}DynamoDBResourcePolicy
       Roles:
       - !Ref {{serviceName}}LambdaExecutionRole
       PolicyDocument:
@@ -279,19 +361,16 @@ Resources:
         Statement:
         - Effect: Allow
           Action:
-          - secretsmanager:GetSecretValue
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:GetRecords
+          - dynamodb:Scan
+          - dynamodb:Query
           Resource:
-          - Fn::Sub:
-            - arn:aws:secretsmanager:${region}:${account}:secret:${secretname}-${env}-*
-            - region:
-                !Ref AWS::Region
-              account:
-                !Ref AWS::AccountId
-              secretname:
-                !Ref {{apiName}}Secret
-              env:
-                !Ref DeploymentStage  
-  {{serviceName}}LambdaFunctionPermission:
+          - !Ref {{serviceName}}DynamoDBResource
+
+  {{serviceName}}LambdaApiGatewayPermission:
     Type: AWS::Lambda::Permission
     Properties:
       FunctionName: !Ref {{serviceName}}LambdaFunction
@@ -306,7 +385,28 @@ Resources:
           - !Ref AWS::AccountId
           - ":"
           - !Ref {{apiName}}
-          - "/*/*/*"  
+          - "/*/*/*"
+
+  {{serviceName}}ScheduledRule: 
+    Condition: Has{{serviceNamePascal}}ScheduleEvent
+    Type: AWS::Events::Rule
+    Properties: 
+      Description: ScheduledRule
+      ScheduleExpression: {{serviceSchedule}}
+      State: ENABLED
+      Targets: 
+        - Arn: !GetAtt {{serviceName}}LambdaFunction.Arn
+          Id: {{serviceName}}TargetFunction
+
+  {{serviceName}}PermissionForEventsToInvokeLambda: 
+    Condition: Has{{serviceNamePascal}}ScheduleEvent
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: !Ref {{serviceName}}LambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt {{serviceName}}ScheduledRule.Arn
+
   {{/services}}
 Outputs:
   ApiGatewayUrl:
@@ -334,6 +434,3 @@ Outputs:
     Description: {{serviceNamePascal}} Execution Role ARN
     Value: !GetAtt {{serviceName}}LambdaExecutionRole.Arn
   {{/services}}
-  {{apiName}}SecretArn:
-    Description: {{serviceNamePascal}} Secret Name
-    Value: !Ref {{apiName}}Secret

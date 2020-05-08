@@ -11,12 +11,14 @@
         "Name": "{{deploymentName}}",
         "Stacks": {
             "ApiGateway": "api-gateway.yaml",
-            "DynamoDB": "dynamodb-template.yaml"
+            "ManagedResourceStack": "DatabaseStack"
         },
         "Functions": {
             {{#services}}
             "{{serviceName}}": {
-                "functionInput": "./{{serviceName}}/function-input.json"
+                "FunctionInput": "./{{serviceName}}/function-input.json",
+                "DynamoDBTable": "{{serviceTableOrigin}}"{{#servicePolicyOrigin}},
+                "ResourcePolicyArn": "{{servicePolicyOrigin}}"{{/servicePolicyOrigin}}
             }{{#hasMore}}, {{/hasMore}}
             {{/services}}
         },

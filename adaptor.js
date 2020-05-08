@@ -403,6 +403,7 @@ function convertToServices(source, obj, defaults) {
                 }
                 Object.keys(source.paths[p]).map(function (key) {
                     if (key && (key.startsWith('x-api-service-') || key.startsWith('x-event-service-'))) {
+                        const hasServicePath = key.startsWith('x-api-service-')
                         const varName = key.replace('x-api-', '').replace('x-event-', '').toCamelCase().split(' ').join('').split('-').join('')
                         if (typeof (source.paths[p][key]) === 'string') {
                             const varData = source.paths[p][key].toCamelCase().split(' ').join('').split('-').join('')
@@ -413,6 +414,7 @@ function convertToServices(source, obj, defaults) {
                         } else {
                             serviceMeta[varName] = serviceMeta[varName + 'Posix'] = serviceMeta[varName + 'Pascal'] = source.paths[p][key]
                         }
+                        serviceMeta.hasServicePath = hasServicePath
                     }
                 })
                 if (!entry) {
