@@ -11,6 +11,7 @@ x-api-authorizer-id: eu-west-1_g4zb3L3Iu
 #x-api-hystrix-dashboard: false
 paths:
   '/event-for-pets':
+    x-event-service-key-vault: true
     x-event-service-name: event-service-for-pets
     x-event-service-custom: arn:aws:lambda:eu-west-1:636275562948:function:lambda-custom-resource
     x-event-service-policy: arn:aws:iam::636275562948:policy/External-DynamoDB-Read-IAMPolicy
