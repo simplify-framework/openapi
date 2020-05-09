@@ -1,17 +1,16 @@
 {
-  "name": "{{projectBundle}}",
+  "name": "{{projectNamePosix}}",
   "version": "{{projectVersion}}",
   "description": "{{{projectDescription}}}",
   "scripts": {
-    "deploy": "node deploy.js"
+    "deploy-{{deploymentNamePosix}}": "node deployment.js --input {{deploymentNamePosix}}.json",
+    "code-push": "bash code-push.sh"
   },
   "license": "MIT",
   "private": true,
   "dependencies": {
   },
   "devDependencies": {
-    "aws-sdk": "^2.592.0",
-    "case": "^1.5.4",
     "simplify-sdk": ">=0.1.1"
   }
 }

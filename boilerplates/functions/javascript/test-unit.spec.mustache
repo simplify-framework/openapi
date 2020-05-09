@@ -3,9 +3,9 @@ var rewire = require('rewire');
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised).should();
 
-const {{serviceModelName}}Service = require('../../../{{apiName}}/{{serviceName}}/{{serviceFolder}}/{{serviceModelName}}');
+const {{serviceModelName}}Service = require('../../../{{projectName}}/{{serviceName}}/{{serviceFolder}}/{{serviceModelName}}');
 
-describe('({{apiName}}) {{serviceModelName}}:', function () {
+describe('({{projectName}}) {{serviceModelName}}:', function () {
     var context = { requestContext: { identity: { user: {} }, authorizer: { claims: {} } } }
     before('Prepare for {{serviceModelName}} test specs', function () {
         context.requestContext.identity.user = "XXXXXXXXXXXXXXXXXXXX:CognitoIdentityCredentials"

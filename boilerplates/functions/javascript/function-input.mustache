@@ -2,7 +2,7 @@
     "Profile": "{{deploymentProfile}}",
     "Region": "{{deploymentRegion}}",
     "Bucket": {
-        "Name": "{{apiNamePosix}}",
+        "Name": "{{projectNamePosix}}",
         "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
     },
     "OutputFile": "function-meta.json",
@@ -22,7 +22,8 @@
         },
         "Environment": {
             "Variables": {
-                "DEPLOYMENT": "latest"
+                "DEPLOYMENT_STAGE": "${DEPLOYMENT_STAGE}",
+                "OVERRIDEN_PACKAGE_LAYER": "${OVERRIDEN_PACKAGE_LAYER}"
             }
         }
     }

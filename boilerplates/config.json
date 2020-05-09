@@ -4,69 +4,70 @@
             { "package": "brakes", "version": "^2.8.0"}
         ]
     },
-    "Application": [
+    "Deployments": [
         { "input": "package.mustache", "output": "package.json" },
-        { "input": "README.mustache", "output": "README.md" }
+        { "input": "README.mustache", "output": "README.md" },
+        { "input": "deployment.mustache", "output": "{{deploymentNamePosix}}.yaml" },
+        { "input": "deployment-push.mustache", "output": "deployment.js" },
+        { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
+        { "input": "code-push.mustache", "output": "code-push.sh" }
     ],
-    "ApiGateway": [
-        { "input": "api-gateway.mustache", "output": "{{apiName}}/api-gateway.yaml" },
-        { "input": "api-gateway.conf.mustache", "output": "{{apiName}}/api-gateway.conf" },
-        { "input": "api-push.mustache", "output": "{{apiName}}/api-push.js" },
-        { "input": "api-input.mustache", "output": "{{apiName}}/api-input.json" },
-        { "input": "logger.mustache", "output": "{{apiName}}/logger.js" },
-        { "input": "middlewares.mustache", "output": "{{apiName}}/middlewares.js" },
-        { "input": "openapi.mustache", "output": "{{apiName}}/specs/openapi.yaml" },
-        { "input": "swagger-yaml.mustache", "output": "{{apiName}}/specs/swagger.yaml" },
-        { "input": "swagger-json.mustache", "output": "{{apiName}}/specs/swagger.json" },
-        { "input": "docker-compose.mustache", "output": "{{apiName}}/docker-compose.yml" },
-        { "input": "package.mustache", "output": "{{apiName}}/package.json" },
-        { "input": "api-utils.mustache", "output": "{{apiName}}/tests/api-utils.js" },
-        { "input": "sigV4Client.mustache", "output": "{{apiName}}/tests/sigV4Client.js" },
-        { "input": "app.mustache", "output": "{{apiName}}/app.js" },
-        { "input": "index.mustache", "output": "{{apiName}}/index.js" }
+    "Applications": [
+        { "input": "middlewares.mustache", "output": "{{projectName}}/middlewares.js" },
+        { "input": "openapi.mustache", "output": "{{projectName}}/specs/openapi.yaml" },
+        { "input": "logger.mustache", "output": "{{projectName}}/logger.js" },
+        { "input": "nginx.conf.mustache", "output": "{{projectName}}/nginx.conf" },
+        { "input": "swagger-yaml.mustache", "output": "{{projectName}}/specs/swagger.yaml" },
+        { "input": "swagger-json.mustache", "output": "{{projectName}}/specs/swagger.json" },
+        { "input": "docker-compose.mustache", "output": "{{projectName}}/docker-compose.yml" },
+        { "input": "package.mustache", "output": "{{projectName}}/package.json" },
+        { "input": "test-utils.mustache", "output": "{{projectName}}/tests/test-utils.js" },
+        { "input": "sigV4Client.mustache", "output": "{{projectName}}/tests/sigV4Client.js" },
+        { "input": "app.mustache", "output": "{{projectName}}/app.js" },
+        { "input": "index.mustache", "output": "{{projectName}}/index.js" }
     ],
     "Functions": {
         "javascript": [
-            { "input": "app-lambda.mustache", "output": "{{apiName}}/{{serviceName}}/src/app.js" },      
-            { "input": "openapi.mustache", "output": "{{apiName}}/{{serviceName}}/src/specs/openapi.yaml" },
-            { "input": "swagger-yaml.mustache", "output": "{{apiName}}/{{serviceName}}/src/specs/swagger.yaml" },
-            { "input": "index.mustache", "output": "{{apiName}}/{{serviceName}}/src/index.js" },        
-            { "input": "package-src.mustache", "output": "{{apiName}}/{{serviceName}}/src/package.json" },
-            { "input": "package-layer.mustache", "output": "{{apiName}}/{{serviceName}}/src/{{serviceNamePosix}}/package.json" },
-            { "input": "middlewares.mustache", "output": "{{apiName}}/{{serviceName}}/src/utils/middlewares.js" },
-            { "input": "logger.mustache", "output": "{{apiName}}/{{serviceName}}/src/utils/logger.js" },    
-            { "input": "writer.mustache", "output": "{{apiName}}/{{serviceName}}/src/utils/writer.js" },
-            { "input": "Dockerfile.mustache", "output": "{{apiName}}/{{serviceName}}/Dockerfile" },
-            { "input": "docker-entrypoint.mustache", "output": "{{apiName}}/{{serviceName}}/docker-entrypoint.sh" },
-            { "input": "function-push.mustache", "output": "{{apiName}}/{{serviceName}}/function-push.js" },
-            { "input": "function-input.mustache", "output": "{{apiName}}/{{serviceName}}/function-input.json" },
-            { "input": "sonar-project.mustache", "output": "{{apiName}}/{{serviceName}}/sonar-project.properties" },
-            { "input": "sonarqube-scanner.mustache", "output": "{{apiName}}/{{serviceName}}/sonarqube-scanner.sh" },
-            { "input": "webpack.config.mustache", "output": "{{apiName}}/{{serviceName}}/webpack.config.js" },
-            { "input": ".babelrc.mustache", "output": "{{apiName}}/{{serviceName}}/.babelrc" },
-            { "input": "package.mustache", "output": "{{apiName}}/{{serviceName}}/package.json" },
-            { "input": "index-layer.mustache", "output": "{{apiName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
+            { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
+            { "input": "openapi.mustache", "output": "{{projectName}}/{{serviceName}}/src/specs/openapi.yaml" },
+            { "input": "swagger-yaml.mustache", "output": "{{projectName}}/{{serviceName}}/src/specs/swagger.yaml" },
+            { "input": "index.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },        
+            { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
+            { "input": "package-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/package.json" },
+            { "input": "middlewares.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/middlewares.js" },
+            { "input": "logger.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/logger.js" },    
+            { "input": "writer.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/writer.js" },
+            { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
+            { "input": "docker-entrypoint.mustache", "output": "{{projectName}}/{{serviceName}}/docker-entrypoint.sh" },
+            { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
+            { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" },
+            { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
+            { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
+            { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
+            { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
+            { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
+            { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
         ],
         "python": [
-            { "input": "index.mustache", "output": "{{apiName}}/{{serviceName}}/src/index.py" },
-            { "input": "README.mustache", "output": "{{apiName}}/{{serviceName}}/src/README.md" },
-            { "input": "package.mustache", "output": "{{apiName}}/{{serviceName}}/package.json" },
-            { "input": "sonar-project.mustache", "output": "{{apiName}}/{{serviceName}}/sonar-project.properties" },
-            { "input": "sonarqube-scanner.mustache", "output": "{{apiName}}/{{serviceName}}/sonarqube-scanner.sh" },
-            { "input": "function-create.mustache", "output": "{{apiName}}/{{serviceName}}/function-create.js" },
-            { "input": "function-input.mustache", "output": "{{apiName}}/{{serviceName}}/function-input.json" }
+            { "input": "index.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.py" },
+            { "input": "README.mustache", "output": "{{projectName}}/{{serviceName}}/src/README.md" },
+            { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
+            { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
+            { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
+            { "input": "function-create.mustache", "output": "{{projectName}}/{{serviceName}}/function-create.js" },
+            { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" }
         ]
     },
     "ServiceModel": {
         "javascript": [
-            { "input": "service.mustache", "output": "{{apiName}}/{{serviceName}}/src/{{serviceNamePosix}}/layered/{{serviceModelName}}.js" },                
-            { "input": "test-unit.spec.mustache", "output": "{{apiName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
-            { "input": "test-api.spec.mustache", "output": "{{apiName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
+            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/layered/{{serviceModelName}}.js" },                
+            { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
+            { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
         ]
     },
     "ServiceOperation": {
         "javascript": [
-            { "input": "operation.mustache", "output": "{{apiName}}/{{serviceName}}/src/operations/{{operationId}}.js" }
+            { "input": "operation.mustache", "output": "{{projectName}}/{{serviceName}}/src/operations/{{operationId}}.js" }
         ]
     }
 }

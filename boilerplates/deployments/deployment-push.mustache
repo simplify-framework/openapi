@@ -1,43 +1,49 @@
 const path = require('path')
 const fs = require('fs')
-const opName = 'Simplify::APIGateway'
+const opName = 'Simplify::Deployment'
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var nodeArgs = process.argv.slice(2);
-var configInputFile = process.env.API_INPUT || "api-input.json"
+var configInputFile = process.env.DEPLOYMENT_INPUT || "deployment.json"
 if (nodeArgs.length > 1) {
     configInputFile = (nodeArgs[0] == "--input" || nodeArgs[0] == "-i") ? nodeArgs[1] : configInputFile
 }
 try {
     var config = simplify.getInputConfig(path.join(__dirname, configInputFile))
-    const distYamlFile = path.join(__dirname, config.Deployment.Stacks.ApiGateway)
+    const distYamlFile = path.join(__dirname, config.Deployment.Definition)
     const bucketKey = config.Bucket.Key
     provider.setConfig(config).then(function() {
         simplify.uploadLocalFile({
             adaptor: provider.getStorage(),
-            ...{ bucketKey: bucketKey + '/stacks', inputLocalFile: distYamlFile }
+            ...{ bucketKey: bucketKey, inputLocalFile: distYamlFile }
         }).then(function (uploadInfo) {
             var TemplateURL = uploadInfo.Location
+            var parameters = {}
+            Object.keys(config.Deployment.Functions).map(function(fname) {
+                parameters[`${fname}CustomResourceArn`] = config.Deployment.Functions[fname].CustomResourceArn || "NO"
+                parameters[`${fname}ResourcePermission`] = config.Deployment.Functions[fname].ResourcePermission || "NO"
+            })
             simplify.createOrUpdateStackOnComplete({
                 adaptor: provider.getResource(),
                 ...{
                     stackName: config.Deployment.Name,
                     stackParameters: {
                         DeploymentStage: 'latest',
-                        CognitoUserPoolId: {{#serviceIAMSecurity}}null{{/serviceIAMSecurity}}{{^serviceIAMSecurity}}config.CognitoUserPoolId{{/serviceIAMSecurity}}
+                        ApiAuthorizerId: {{#serviceIAMSecurity}}null{{/serviceIAMSecurity}}{{^serviceIAMSecurity}}config.Deployment.Authorizer{{/serviceIAMSecurity}},
+                        ...parameters
                     },
                     stackTemplate: TemplateURL
                 }
             }).then(function (stackData) {
+                fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify(stackData, null, 4));
                 Object.keys(config.Deployment.Functions).forEach(function(f) {
                     const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
                     var fConfig = JSON.parse(fs.readFileSync(fInputPath))
                     fConfig.Function.Role = stackData.Output[`${f}FunctionRole`].Value
                     fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
                 })
-                fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify(stackData, null, 4));
             }, function (err) {
-                console.error(`${err}`)
+                console.error(`${opName}-CreateDeployment-ERROR:`, err)
             })
         }, function (err) {
             console.error(`${opName}-UploadDirectory: ${err}`)

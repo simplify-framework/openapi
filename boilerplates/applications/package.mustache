@@ -1,12 +1,12 @@
 {
-  "name": "{{apiNamePosix}}",
+  "name": "{{projectNamePosix}}",
   "version": "{{projectVersion}}",
   "description": "{{{apiDescription}}}",
   "main": "app.js",
   "scripts": {
     "build": "nyc --reporter=html mocha --require @babel/register --reporter mocha-simple-html-reporter --reporter-options output=index.html --timeout 60000 \"./tests/**/*.spec.js*\"",
     "start": "node app.js",
-    "deploy": "node api-push.js",
+    "deploy": "node application-push.js",
     "test": "nyc --reporter=text mocha --require @babel/register --timeout 60000 \"./tests/**/*.spec.js*\"",
     {{#services}}
     "test-{{serviceName}}": "mocha --require @babel/register --timeout 60000 \"./tests/{{serviceName}}/apis/*.spec.js*\"",

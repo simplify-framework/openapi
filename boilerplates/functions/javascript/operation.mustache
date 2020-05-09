@@ -5,7 +5,7 @@ var {{serviceModelName}} = null
 if (process.env.OVERRIDEN_PACKAGE_LAYER) {
   {{serviceModelName}} = __non_webpack_require__(`${process.env.OVERRIDEN_PACKAGE_LAYER}`).{{serviceModelName}}
 } else {
-  {{serviceModelName}} = process.env.DEPLOYMENT==='stable' ? __non_webpack_require__('{{serviceNamePosix}}').{{serviceModelName}}:require('../{{serviceNamePosix}}').{{serviceModelName}};
+  {{serviceModelName}} = process.env.DEPLOYMENT_STAGE==='stable' ? __non_webpack_require__('{{serviceNamePosix}}').{{serviceModelName}}:require('../{{serviceNamePosix}}').{{serviceModelName}};
 }
 {{#serviceProtection}}
 /** ENABLE CIRCUIT BREAKER **/

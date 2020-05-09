@@ -13,7 +13,7 @@ services:
     ports:
       - 80:8080
     volumes:
-      - ./api-gateway.conf:/etc/nginx/conf.d/api-gateway.conf
+      - ./nginx.conf:/etc/nginx/conf.d/gateway.conf
     restart: always
     depends_on:
     {{#services}}

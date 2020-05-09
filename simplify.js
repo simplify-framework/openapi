@@ -34,6 +34,10 @@ var argv = require('yargs')
     .demandCommand(1)
     .argv;
 
+if (argv._[0] !== 'generate' && argv._[0] !== 'reverse') {
+    console.log(` - The command '${argv._[0]}' is not supported or no longer supported. Try with 'generate' command`)
+    process.exit(-1)
+}
 let configPath = path.resolve(__dirname, 'boilerplates');
 let configFile = path.join(path.join(configPath), 'config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });

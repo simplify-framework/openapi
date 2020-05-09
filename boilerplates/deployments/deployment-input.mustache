@@ -1,0 +1,23 @@
+{
+    "Profile": "{{deploymentProfile}}",
+    "Region": "{{deploymentRegion}}",
+    "Bucket": {
+        "Name": "{{deploymentNamePosix}}",
+        "Key": "stacks/${DATE_TODAY}"
+    },
+    "OutputFile": "{{deploymentNamePosix}}-meta.json",
+    "Deployment": {
+        "Name": "{{deploymentNamePascal}}",
+        "Definition": "{{deploymentNamePosix}}.yaml",
+        "Authorizer": "{{apiAuthorizerId}}",
+        "Functions": {
+            {{#services}}
+            "{{serviceName}}": {
+                "FunctionInput": "./{{projectName}}/{{serviceName}}/function-input.json",
+                "CustomResourceArn": "{{#serviceCustomOrigin}}{{serviceCustomOrigin}}{{/serviceCustomOrigin}}{{^serviceCustomOrigin}}NO{{/serviceCustomOrigin}}",
+                "ResourcePermission": "{{#servicePolicyOrigin}}{{servicePolicyOrigin}}{{/servicePolicyOrigin}}{{^servicePolicyOrigin}}NO{{/servicePolicyOrigin}}"
+            }{{#hasMore}}, {{/hasMore}}
+            {{/services}}
+        }
+    }
+}

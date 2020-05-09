@@ -1,21 +1,31 @@
 openapi: 3.0.0
 info:
   version: 0.0.1
-  title: functions-stack-name
+  title: The pet project with serverless pattern
+x-project-name: project-pets
+x-deployment-name: project-pets-demo
+x-deployment-region: eu-west-1
+x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
-x-deployment-name: microservice-demo
-x-deployment-region: eu-central-1
-x-deployment-profile: your-aws-profile
-x-api-hystrix-dashboard: false
+x-api-authorizer-id: eu-west-1_g4zb3L3Iu
+#x-api-hystrix-dashboard: false
 paths:
   '/event-for-pets':
     x-event-service-name: event-service-for-pets
-    x-event-service-table: DynamodbPets
-    x-event-service-policy: SNS-IAMPolicy
+    x-event-service-custom: arn:aws:lambda:eu-west-1:636275562948:function:lambda-custom-resource
+    x-event-service-policy: arn:aws:iam::636275562948:policy/External-DynamoDB-Read-IAMPolicy
     x-event-service-schedule: rate(10 minutes)
+    x-event-service-path: true
+    put:
+      description: 'Run on event operation'
+      responses:
+        '200':
+          description: Success
   '/pets':
+    x-api-service-path: false
     x-api-service-name: api-service-for-pets
-    x-api-service-table: DynamodbPets
+    x-api-service-authorizer: false
+    x-api-service-api-key: true
     x-api-service-tag: devel
     get:
       x-api-service-model-list-objects: aws-s3
@@ -77,9 +87,11 @@ paths:
         '200':
           description: Success
   '/pets/{id}':
+    x-api-service-path: true
+    x-api-service-authorizer: true
+    x-api-service-api-key: false
     x-api-service-name: api-service-for-pets
     x-api-service-model-name: people-pets
-    x-api-service-table: dynamodb-pets
     x-api-service-hystrix-stream: true    
     post:
       x-control-service-circuit-protection: true
@@ -116,7 +128,6 @@ paths:
   '/people':
     x-api-service-name: api-service-for-people
     x-api-service-model-name: people-pets
-    x-api-service-table: dynamodb-people
     get:
       x-api-service-model-get-object: aws-s3
       x-api-service-model-get-object-name: path-to-s3-bucket-name/path-to-key      

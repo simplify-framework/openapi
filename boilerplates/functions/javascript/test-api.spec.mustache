@@ -1,12 +1,12 @@
 import chai, { expect } from 'chai'
 chai.should()
 
-var apiService = require('../../api-utils');
+var apiService = require('../../test-utils');
 
-describe('({{apiName}}) {{serviceModelName}}:', function () {
+describe('({{projectName}}) {{serviceModelName}}:', function () {
     var userToken = null
     before('Prepare for {{serviceModelName}} test specs', async function () {
-        await apiService.config(require('../../api-utils.json'));
+        await apiService.config(require('../../application-meta.json'));
         userToken = await apiService.login("user-token-00000001-{{serviceModelName}}");
     });
     

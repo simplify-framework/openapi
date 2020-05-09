@@ -52,7 +52,7 @@ function main(o, config, callback) {
     let outputDir = path.join(config.outputDir || './out/');
     let verbose = config.defaults.verbose;
     let cleanUp = config.cleanUp || false;
-    let templateFolder = 'application';
+    let templateFolder = '';
     adaptor.transform(o, config.defaults, function (err, model) {
         const subDir = (config.defaults.flat ? '' : templateFolder);
         let actions = [];
@@ -71,27 +71,15 @@ function main(o, config, callback) {
         } else {
             callback && callback(err, null)
         }
-        function generate() {
-            for (let action of actions) {
-                if (verbose) logger.info('Rendering ' + action.output);
-                let template = Hogan.compile(action.template);
-                let cServices = Object.assign({}, model, model.apiInfo)
-                let content = template.render(cServices, config.partials);
-                let requestDir = require('path').dirname(path.join(outputDir, subDir, action.output))
-                if (!ff.existsSync(requestDir)) {
-                    ff.mkdirp.sync(requestDir);
-                }
-                if (verbose) logger.info("Generating...", path.join(outputDir, subDir, action.output))
-                ff.createFile(path.join(outputDir, subDir, action.output), content, 'utf8');
-            }
-            if (config.ApiGateway) {
+        function parseContent(type, model, config) {
+            if (config[type]) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
-                templateFolder = 'api-gateway';
-                for (let gw of config.ApiGateway) {
-                    let fnTemplate = Hogan.compile(gw.output);
-                    let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, gw.input), 'utf8'));
-                    let rootModel = Object.assign({}, config.defaults, gw.defaults || {}, toplevel, model.apiInfo, config.apis);
+                templateFolder = type.toLowerCase();
+                for (let cfg of config[type]) {
+                    let fnTemplate = Hogan.compile(cfg.output);
+                    let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
+                    let rootModel = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, model.apiInfo, config.apis);
                     let filename = fnTemplate.render(rootModel, config.partials);
                     let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                     if (!ff.existsSync(requestDir)) {
@@ -101,6 +89,10 @@ function main(o, config, callback) {
                     ff.createFile(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8');
                 }
             }
+        }
+        function generate() {
+            parseContent('Deployments', model, config)
+            parseContent('Applications', model, config)
             if (config.Functions) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
@@ -191,14 +183,6 @@ function main(o, config, callback) {
                 })
             }
             if (callback) callback(null, true);
-        }
-        for (let t in config.Application) {
-            let tx = config.Application[t];
-            if (tx.input) {
-                if (verbose) logger.info('Processing template ' + tx.input);
-                tx.template = ff.readFileSync(tpl(templateFolder, tx.input), 'utf8');
-            }
-            actions.push(tx);
         }
     });
 }
