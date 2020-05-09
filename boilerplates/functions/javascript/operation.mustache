@@ -7,12 +7,12 @@ if (process.env.OVERRIDEN_PACKAGE_LAYER) {
 } else {
   {{serviceModelName}} = process.env.DEPLOYMENT_STAGE==='stable' ? __non_webpack_require__('{{serviceNamePosix}}').{{serviceModelName}}:require('../{{serviceNamePosix}}').{{serviceModelName}};
 }
-{{#serviceProtection}}
+{{#serviceControl}}
 /** ENABLE CIRCUIT BREAKER **/
 const Brakes = require('brakes');
 /** Declare circuit breaker brakes **/
 var {{{operationId}}}CircuitBreakerBrake = null;
-{{/serviceProtection}}
+{{/serviceControl}}
 
 /**
  {{#summary}}
@@ -34,24 +34,24 @@ var {{{operationId}}}CircuitBreakerBrake = null;
  **/
 
 module.exports = function (req, res, next) {
-  {{#serviceModelLegacy}}
+  {{#servicePassthrough}}
   {{serviceModelName}}.{{operationId}}(req.sanitizer['context'], {}, function(error, data) {
     error ? utils.writeError(res, error) : utils.writeJson(res, data)
   });
-  {{/serviceModelLegacy}}
-  {{^serviceModelLegacy}}
+  {{/servicePassthrough}}
+  {{^servicePassthrough}}
   {{#allParams}}
   var {{paramName}} = req.sanitizer['{{baseName}}'].value;
   {{/allParams}}
-  {{#serviceProtection}}
+  {{#serviceControl}}
   /** Instanciate circuit breaker guardian **/
   if (!{{{operationId}}}CircuitBreakerBrake) {
     {{{operationId}}}CircuitBreakerBrake = new Brakes({{serviceModelName}}.{{{operationId}}}, {
       name: '{{serviceName}}::{{{operationId}}}',
       group: '{{serviceName}}::{{serviceModelName}}Service',
-      timeout: {{circuitTimeout}},
-      circuitDuration: {{circuitDuration}},
-      threshold: {{circuitThreshold}}
+      timeout: {{serviceTimeout}},
+      circuitDuration: {{serviceDuration}},
+      threshold: {{serviceThreshold}}
     });
   }
   return {{{operationId}}}CircuitBreakerBrake.exec(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
@@ -65,8 +65,8 @@ module.exports = function (req, res, next) {
         message: error
       });
     });  
-  {{/serviceProtection}}
-  {{^serviceProtection}}
+  {{/serviceControl}}
+  {{^serviceControl}}
   {{serviceModelName}}.{{operationId}}(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
     .then(function (response) {
       utils.writeJson(res, response);
@@ -79,6 +79,6 @@ module.exports = function (req, res, next) {
         message: error
       });
     });
-  {{/serviceProtection}}
-  {{/serviceModelLegacy}}
+  {{/serviceControl}}
+  {{/servicePassthrough}}
 };

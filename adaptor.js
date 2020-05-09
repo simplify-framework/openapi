@@ -95,8 +95,8 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
             const convertedKey = key.replace('x-api-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
             operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];
         }
-        if (key.startsWith('x-control-service-')) {
-            const varName = key.replace('x-control-service-', '').toCamelCase().split(' ').join('').split('-').join('')
+        if (key.startsWith('x-control-')) {
+            const varName = key.replace('x-control-', '').toCamelCase().split(' ').join('').split('-').join('')
             operation[varName] = op[key]
         }
     })
@@ -443,7 +443,7 @@ function convertToServices(source, obj, defaults) {
                 }
                 if (serviceName) {
                     let operation = convertMethodOperation(op, m, p, source.paths[p], obj, source);
-                    pathEntry.operations.push(operation);
+                    pathEntry.operations.push({...operation, ...serviceMetas[p]});
                 }
             }
         }
@@ -493,7 +493,7 @@ function convertToServices(source, obj, defaults) {
                 serviceOperations = path
                 service.serviceEntries.push(serviceOperations)
             } else {
-                serviceOperations.operations.push(path.operations[0])
+                serviceOperations.operations.push({...path.operations[0], ...path.serviceMeta})
             }
             service.serviceModels = service.serviceEntries.filter((v, i, a) => a.findIndex(t => (t.serviceModelName === v.serviceModelName)) === i)
             serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodLowerCase == 'post' || op.httpMethodLowerCase == 'put' || op.httpMethodLowerCase == 'patch')

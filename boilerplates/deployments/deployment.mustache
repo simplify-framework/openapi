@@ -122,7 +122,9 @@ Resources:
               - CognitoAuthorizer: []
               {{/serviceAuthorizer}}
               {{^serviceAuthorizer}}
+              {{^serviceApiKey}}
               - sigv4: []
+              {{/serviceApiKey}}
               {{/serviceAuthorizer}}
               responses:
                 '200':

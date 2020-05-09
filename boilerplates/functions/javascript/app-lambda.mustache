@@ -25,7 +25,7 @@ createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
     app.use(awsServerlessExpressMiddleware.eventContext())
     app.use(middleware.metadata());
     app.use(middleware.CORS());
-    {{#serviceRequestValidation}}
+    {{#serviceValidation}}
     app.use(middleware.parseRequest());
     function parseRequestErrorHandler(err, req, res, next) {
       res.status(500).json({
@@ -34,7 +34,7 @@ createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
       });
     }
     app.use(parseRequestErrorHandler);
-    {{/serviceRequestValidation}}
+    {{/serviceValidation}}
     app.use(middleware.validateRequest());
     app.use(customSanitizeParamsMiddleware);
     {{#serviceEntries}}

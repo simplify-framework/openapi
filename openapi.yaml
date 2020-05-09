@@ -13,8 +13,8 @@ paths:
   '/event-for-pets':
     x-event-service-key-vault: true
     x-event-service-name: event-service-for-pets
-    x-event-service-custom: arn:aws:lambda:eu-west-1:636275562948:function:lambda-custom-resource
-    x-event-service-policy: arn:aws:iam::636275562948:policy/External-DynamoDB-Read-IAMPolicy
+    #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:lambda-custom-resource
+    #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/External-DynamoDB-Read-IAMPolicy
     x-event-service-schedule: rate(10 minutes)
     x-event-service-path: true
     put:
@@ -23,14 +23,12 @@ paths:
         '200':
           description: Success
   '/pets':
-    x-api-service-path: false
+    x-api-service-path: true
     x-api-service-name: api-service-for-pets
-    x-api-service-authorizer: false
+    x-api-service-authorizer: true
     x-api-service-api-key: true
     x-api-service-tag: devel
     get:
-      x-api-service-model-list-objects: aws-s3
-      x-api-service-model-list-objects-from: path-to-s3-bucket-name/path-to-key
       tags:
         - Pets Service Group
       description: 'Get Pets Information'
@@ -45,9 +43,6 @@ paths:
         '200':
           description: Success
     post:
-      x-api-service-model-create-object: aws-s3
-      x-api-service-model-create-object-name: path-to-s3-bucket-name/path-to-key
-      x-api-service-model-create-object-data: dataObject
       tags:
         - Pets Service Group
       description: 'Create Pets Information'
@@ -66,10 +61,6 @@ paths:
         '200':
           description: Success
     put:
-      x-api-service-model-update-object: aws-s3
-      x-api-service-model-update-object-name: path-to-s3-bucket-name/path-to-key
-      x-api-service-model-update-object-data: dataObject
-      x-api-service-model-update-object-fields: ['foo', 'test']       
       tags:
         - Pets Service Group
       description: 'Update Pets Information'
@@ -93,12 +84,11 @@ paths:
     x-api-service-api-key: false
     x-api-service-name: api-service-for-pets
     x-api-service-model-name: people-pets
-    x-api-service-hystrix-stream: true    
+    x-api-service-control: true
     post:
-      x-control-service-circuit-protection: true
-      x-control-service-circuit-timeout: 60000
-      x-control-service-circuit-duration: 30000
-      x-control-service-circuit-threshold: 0.1
+      x-control-service-timeout: 60000
+      x-control-service-duration: 30000
+      x-control-service-threshold: 0.1
       tags:
         - Pets Service Group
       description: 'Create Pets Information By Id'
@@ -130,9 +120,6 @@ paths:
     x-api-service-name: api-service-for-people
     x-api-service-model-name: people-pets
     get:
-      x-api-service-model-get-object: aws-s3
-      x-api-service-model-get-object-name: path-to-s3-bucket-name/path-to-key      
-      x-api-service-model-get-object-fields: ['foo', 'test']
       tags:
         - People Service Group
       description: 'Get People Information'
