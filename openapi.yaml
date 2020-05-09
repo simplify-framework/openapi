@@ -8,7 +8,7 @@ x-deployment-region: eu-west-1
 x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
 x-api-authorizer-id: eu-west-1_g4zb3L3Iu
-#x-api-hystrix-dashboard: false
+#x-api-control-dashboard: false
 paths:
   '/event-for-pets':
     x-event-service-key-vault: true

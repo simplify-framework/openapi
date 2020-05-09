@@ -615,7 +615,7 @@ function getPrime(api, defaults) {
     prime.deploymentNamePosix = Case.snake(prime.deploymentName).split('_').join('-');
     prime.deploymentRegion = api['x-deployment-region'];
     prime.deploymentProfile = api['x-deployment-profile'];
-    prime.hystrixDashboard = api['x-api-hystrix-dashboard'] || false
+    prime.controlDashboard = api['x-api-control-dashboard'] || false
     prime.apiNamePosix = Case.snake(prime.apiName).split('_').join('-');
     prime.projectName = api['x-project-name'].toCamelCase().split(' ').join('').split('-').join('');
     prime.projectNamePascal = prime.projectName.toPascalCase().split(' ').join('').split('-').join('');
@@ -703,7 +703,7 @@ function transform(api, defaults, callback) {
                 };
                 obj.apiInfo = {
                     apiName: (api['x-api-gateway-name'] || '').toCamelCase().split(' ').join('').split('-').join(''),
-                    hystrixDashboard: api['x-api-hystrix-dashboard'] || false
+                    controlDashboard: api['x-api-control-dashboard'] || false
                 };
                 obj.apiInfo.services = convertToServices(api, obj, defaults);
                 obj.produces = convertArray(obj.produces);

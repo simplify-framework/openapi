@@ -45,7 +45,7 @@ let ff = {
 };
 
 function tpl(...segments) {
-    return path.join(__dirname, 'boilerplates', ...segments)
+    return path.join(__dirname, 'packages', ...segments)
 }
 
 function main(o, config, callback) {

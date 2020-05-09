@@ -38,7 +38,7 @@ if (argv._[0] !== 'generate' && argv._[0] !== 'reverse') {
     console.log(` - The command '${argv._[0]}' is not supported or no longer supported. Try with 'generate' command`)
     process.exit(-1)
 }
-let configPath = path.resolve(__dirname, 'boilerplates');
+let configPath = path.resolve(__dirname, 'packages');
 let configFile = path.join(path.join(configPath), 'config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
 let defName = path.resolve(path.join(argv.openapi || 'specs/openapi.yaml'));

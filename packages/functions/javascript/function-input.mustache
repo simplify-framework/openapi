@@ -9,10 +9,10 @@
     "Function": {
         "FunctionName": "{{serviceName}}",
         "Handler": "index.handler",
-        "MemorySize": 256,
+        "MemorySize": 128,
         "Publish": true,
         "Role": "${Function{{serviceNamePascal}}RoleArn}",
-        "Runtime": "nodejs12.x",
+        "Runtime": "{{serviceRuntime}}",
         "Tags": {
             "GroupName": "{{serviceTag}}"
         },
