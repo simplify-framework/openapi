@@ -9,6 +9,7 @@
         { "input": "README.mustache", "output": "README.md" },
         { "input": "deployment.mustache", "output": "{{deploymentNamePosix}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
+        { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
         { "input": "code-init.mustache", "output": "code-init.js" }

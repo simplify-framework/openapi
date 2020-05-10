@@ -7,6 +7,7 @@ const url = require('url');
 const yaml = require('yaml');
 const fetch = require('node-fetch');
 const logger = require('./logger');
+const mkdirp = require('mkdirp');
 
 const processor = require('./processor.js');
 
@@ -30,20 +31,26 @@ var argv = require('yargs')
     .boolean('diff')
     .default('diff', false)
     .describe('diff', 'Generate diff file')
-    .demandOption(['i', 'o'])
+    .demandOption(['o'])
     .demandCommand(1)
     .argv;
 
-if (argv._[0] !== 'generate' && argv._[0] !== 'reverse') {
+if (argv._[0] !== 'generate' && argv._[0] !== 'petsample') {
     console.log(` - The command '${argv._[0]}' is not supported or no longer supported. Try with 'generate' command`)
     process.exit(-1)
 }
+
 let configPath = path.resolve(__dirname, 'packages');
 let configFile = path.join(path.join(configPath), 'config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
-let defName = path.resolve(path.join(argv.openapi || 'specs/openapi.yaml'));
+let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
 config.outputDir = argv.output;
-
+if (argv._[0] === 'petsample') {
+    mkdirp(path.join(__dirname, config.outputDir)).then(function () {
+        fs.writeFileSync(path.join(__dirname, config.outputDir, 'openapi.yaml'), fs.readFileSync(defName, 'utf8'), 'utf8')
+        process.exit(-1)
+    })
+}
 function mergeArrays(arrObj, moreArrObj) {
     if (!moreArrObj) return arrObj
     moreArrObj.forEach(function(tmp, i) {
