@@ -39,7 +39,13 @@ try {
                 Object.keys(config.Deployment.Functions).forEach(function(f) {
                     const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
                     var fConfig = JSON.parse(fs.readFileSync(fInputPath))
-                    fConfig.Function.Role = stackData.Outputs[`${f}FunctionRole`].Value
+                    stackData.Outputs.map(function(o) {
+                        if (o.OutputKey == `${f}FunctionRole`) {
+                            fConfig.Function.Role = o.OutputValue
+                        } else if (o.OutputKey == `${f}FunctionName`) {
+                            fConfig.Function.FunctionName = o.OutputValue
+                        }
+                    })
                     fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
                 })
             }, function (err) {

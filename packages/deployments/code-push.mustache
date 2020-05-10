@@ -6,12 +6,15 @@
 # Profile: {{deploymentProfile}}
 # Version: {{projectVersion}}
 INITIAL_DIR=$PWD
+
+node code-init.js --input {{deploymentNamePosix}}.json
+
 {{#services}}
 export DEPLOYMENT_STAGE=latest
-export OVERRIDEN_PACKAGE_LAYER={{serviceNamePosix}}
+export OVERRIDEN_PACKAGE_LAYER=
 cd ${INITIAL_DIR}/{{projectName}}/{{serviceName}} && npm install && npm run build && npm run deploy && cd -
 if [ $? -ne 0 ]; then
     echo "Publishing {{serviceName}} has failed!"
-    exit(255)
+    exit 255
 fi
 {{/services}}

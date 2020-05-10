@@ -2,20 +2,8 @@
 
 const logger = require('../../utils/logger')
 {{#operations}}
-{{#listObjects}}
-var listObjects = require('../../utils/list-objects');
-{{/listObjects}}
-{{#createObject}}
-var createObject = require('../../utils/create-object');
-{{/createObject}}
-{{#updateObject}}
-var updateObject = require('../../utils/update-object');
-{{/updateObject}}
-{{#getObject}}
-var getObject = require('../../utils/get-object');
-{{/getObject}}
 
-{{#serviceModelLegacy}}
+{{#servicePassthrough}}
 exports.{{{operationId}}} = function(event, context, callback) {
   var f = __function
   logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
@@ -26,8 +14,8 @@ exports.{{{operationId}}} = function(event, context, callback) {
     "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
   })
 }
-{{/serviceModelLegacy}}
-{{^serviceModelLegacy}}
+{{/servicePassthrough}}
+{{^servicePassthrough}}
 /**
  {{#summary}}
  * {{{summary}}}
@@ -47,23 +35,7 @@ exports.{{{operationId}}} = function(event, context, callback) {
  * returns {{{returnType}}}
 {{/returnType}}
  **/
-exports.{{{operationId}}} = function(context{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
-  {{#listObjects}}
-  return listObjects['{{listObjects}}']('{{listObjectsFrom}}', {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}undefined{{/allParams}});
-  {{/listObjects}}
-  {{^listObjects}}
-  {{#createObject}}
-  return createObject['{{createObject}}']('{{createObjectName}}', body.{{createObjectData}});
-  {{/createObject}}
-  {{^createObject}}
-  {{#updateObject}}
-  return updateObject['{{updateObject}}']('{{updateObjectName}}', [{{#updateObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/updateObjectFields}}], body.{{updateObjectData}});
-  {{/updateObject}}
-  {{^updateObject}}
-  {{#getObject}}
-  return getObject['{{getObject}}']('{{getObjectName}}', [{{#getObjectFields}}'{{value}}'{{#hasMore}}, {{/hasMore}}{{/getObjectFields}}], {{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}{{^allParams}}undefined{{/allParams}});
-  {{/getObject}}
-  {{^getObject}}
+exports.{{{operationId}}} = function(context{{#hasParams}}, {{/hasParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
   var f = __function
   logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
   logger.warn(__function, __line, "Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
@@ -74,10 +46,6 @@ exports.{{{operationId}}} = function(context{{#allParams}}{{#length}}, {{/length
       "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
     });  
   });
-  {{/getObject}}
-  {{/updateObject}}  
-  {{/createObject}}
-  {{/listObjects}}
 }
-{{/serviceModelLegacy}}
+{{/servicePassthrough}}
 {{/operations}}

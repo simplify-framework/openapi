@@ -4,17 +4,31 @@
   "description": "{{{serviceDescription}}}",
   "main": "app.js",
   "scripts": {
-    "deploy": "node function-push.js",
+    "deploy": "env FUNCTION_SOURCE=dist node function-push.js",
     "code-scan": "bash sonarqube-scanner.sh",
     "start": "cd src && npm install && env LOCAL_DEBUG=true DEPLOYMENT=latest node app.js",
     "prod": "env LOCAL_DEBUG= node dist/index.js",
-    "build": "webpack --mode development"
+    "build-dev": "webpack --mode development",
+    "build": "webpack -p"
   },
   "license": "MIT",
   "private": true,
+  "dependencies": {
+    "yaml": "^1.9.2",
+    {{#serviceControl}}
+    "brakes": "^2.8.0",
+    {{/serviceControl}}
+    "debug": "^4.1.1"
+  },
   "devDependencies": {
     "aws-sdk": "^2.635.0",
     "adm-zip": "^0.4.14",
+    "@babel/cli": "^7.7.5",
+    "@babel/core": "^7.7.5",
+    "@babel/node": "^7.7.4",
+    "@babel/polyfill": "^7.6.0",
+    "@babel/preset-env": "^7.7.6",
+    "@babel/register": "^7.7.4",
     "simplify": ">=0.1.1",
     "babel-loader": "^8.1.0",
     "file-loader": "^6.0.0",

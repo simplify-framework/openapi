@@ -15,7 +15,7 @@ paths:
     x-event-service-name: event-service-for-pets
     #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:lambda-custom-resource
     #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/External-DynamoDB-Read-IAMPolicy
-    x-event-service-schedule: rate(10 minutes)
+    x-event-service-schedule: rate(10 days)
     x-event-service-path: true
     put:
       description: 'Run on event operation'
@@ -24,9 +24,10 @@ paths:
           description: Success
   '/pets':
     x-api-service-path: true
+    x-api-service-control: false
     x-api-service-name: api-service-for-pets
-    x-api-service-authorizer: true
-    x-api-service-api-key: true
+    x-api-service-authorizer: false
+    x-api-service-api-key: false
     x-api-service-tag: devel
     get:
       tags:
@@ -80,7 +81,7 @@ paths:
           description: Success
   '/pets/{id}':
     x-api-service-path: true
-    x-api-service-authorizer: true
+    x-api-service-authorizer: false
     x-api-service-api-key: false
     x-api-service-name: api-service-for-pets
     x-api-service-model-name: people-pets

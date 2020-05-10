@@ -3,11 +3,9 @@
 const path = require('path');
 const express = require('express')
 const bodyParser = require('body-parser')
-const {
-  createSwaggerExpressMiddleware,
-  awsServerlessExpressMiddleware,
-  customSanitizeParamsMiddleware
-} = require('./utils/middlewares')
+const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
+const createSwaggerExpressMiddleware = require('@apidevtools/swagger-express-middleware');
+const customSanitizeParamsMiddleware = require('./utils/sanitizer').customSanitizeParamsMiddleware
 
 {{#serviceHystrixStream}}
 var Brakes = require('brakes');
@@ -15,7 +13,7 @@ var globalStats = Brakes.getGlobalStats();
 {{/serviceHystrixStream}}
 
 let app = express()
-let specYAML = path.join(__dirname, process.env.LOCAL_DEBUG ? './specs/swagger.yaml' : require('./specs/swagger.yaml').default);
+let specYAML = path.join(__dirname, './specs/swagger.yaml');
 
 createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
   if (err) {
@@ -35,7 +33,6 @@ createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
     }
     app.use(parseRequestErrorHandler);
     {{/serviceValidation}}
-    app.use(middleware.validateRequest());
     app.use(customSanitizeParamsMiddleware);
     {{#serviceEntries}}
     {{#operations}}
@@ -54,13 +51,9 @@ createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
       }
     });
 
-    if (process.env.LOCAL_DEBUG) {
-      app.listen(3000, function () {// NOSONAR
-        console.log("node express service - ".concat("debugging"));
-      });
-    } else {
-      console.log("node express service - ".concat("disabled (export LOCAL_DEBUG=true for local debugging)."));
-    }
+    app.listen(3000, function () {// NOSONAR
+      console.log("node express service - ".concat("debugging"));
+    });
   }
 })
 

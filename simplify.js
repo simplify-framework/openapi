@@ -24,9 +24,9 @@ var argv = require('yargs')
     .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
     .alias('v', 'verbose')
-    .boolean('auto')
-    .default('auto', false)
-    .describe('auto', 'Auto merge files')
+    .boolean('merge')
+    .default('merge', false)
+    .describe('merge', 'Auto merge files')
     .boolean('diff')
     .default('diff', false)
     .describe('diff', 'Generate diff file')
@@ -91,10 +91,8 @@ function runCommandLine() {
     if (argv.diff) {
         config.defaults.diff = true;
     }
-    if (argv.auto) {
-        config.defaults.auto = true;
-    } else {
-        config.defaults.diff = true;
+    if (argv.merge) {
+        config.defaults.merge = true;
     }
     if (argv.zip) {
         processor.fileFunctions.createFile = zipFile;
@@ -137,8 +135,8 @@ function main(o) {
     console.log(` - Loaded definition ${defName}`);
     if (o && o.openapi) {
         despatch(o, config, function(err) {
-            console.warn(` - Auto merge is ${config.defaults.auto ? 'on (use option --auto=false to turn off)':'off (use option --auto to turn on)'}`)
-            console.warn(` - Generate diff file is ${config.defaults.diff ? 'on (automatic turn on if --auto=false)':'off (use option --diff to turn on)'}`)
+            console.warn(` - Auto merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)':'off (use option --merge to turn on)'}`)
+            console.warn(` - Generate diff file is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)':'off (use option --diff to turn on)'}`)
             console.log(` - Finish generation ${!err ? `without error. See ${config.outputDir} for your generated code!` : err}`);
         });
     }

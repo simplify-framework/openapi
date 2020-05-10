@@ -394,6 +394,9 @@ Resources:
   {{/services}}
 Outputs:
 {{#hasApiGateway}}
+  Region:
+    Description: AWS Deployment Region
+    Value: !Ref AWS::Region
   ApiGatewayUrl:
     Description: Root URL of the API gateway
     Value:

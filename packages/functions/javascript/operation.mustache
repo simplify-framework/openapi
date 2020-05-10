@@ -54,7 +54,7 @@ module.exports = function (req, res, next) {
       threshold: {{serviceThreshold}}
     });
   }
-  return {{{operationId}}}CircuitBreakerBrake.exec(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+  return {{{operationId}}}CircuitBreakerBrake.exec(req.sanitizer['context']{{#hasParams}}, {{/hasParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
     .then(function (response) {
       utils.writeJson(res, response);
     }, function (error) {
@@ -67,7 +67,7 @@ module.exports = function (req, res, next) {
     });  
   {{/serviceControl}}
   {{^serviceControl}}
-  {{serviceModelName}}.{{operationId}}(req.sanitizer['context']{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
+  {{serviceModelName}}.{{operationId}}(req.sanitizer['context']{{#hasParams}}, {{/hasParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}})
     .then(function (response) {
       utils.writeJson(res, response);
     }, function (error) {

@@ -2,8 +2,9 @@ var chai = require('chai');
 var rewire = require('rewire');
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised).should();
+require('../../../utils/sanitizer');
 
-const {{serviceModelName}}Service = require('../../../{{projectName}}/{{serviceName}}/{{serviceFolder}}/{{serviceModelName}}');
+const {{serviceModelName}}Service = require('../../../{{serviceName}}/src/{{serviceNamePosix}}').{{serviceModelName}};
 
 describe('({{projectName}}) {{serviceModelName}}:', function () {
     var context = { requestContext: { identity: { user: {} }, authorizer: { claims: {} } } }
@@ -14,7 +15,8 @@ describe('({{projectName}}) {{serviceModelName}}:', function () {
 
     {{#operations}}
     it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', function () {
-        return {{serviceModelName}}Service.{{{operationId}}}(context{{#allParams}}{{#length}}, {{/length}}{{/allParams}}{{#allParams}}'{{paramName}}'{{#hasMore}}, {{/hasMore}}{{/allParams}}).should.eventually.rejected;
+        var data = { {{#allParams}}{{paramName}}: {{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isInteger}}10{{/isInteger}}{{^isInteger}}{{#isNumber}}1.0{{/isNumber}}{{^isNumber}}{{#isArray}}[]{{/isArray}}{{^isArray}}{{#isBodyParam}}{}{{/isBodyParam}}{{^isBodyParam}}'{{paramName}}'{{/isBodyParam}}{{/isArray}}{{/isNumber}}{{/isInteger}}{{/isBoolean}}{{#hasMore}}, {{/hasMore}}{{/allParams}} }
+        return {{serviceModelName}}Service.{{{operationId}}}(context{{#hasParams}}, {{/hasParams}}{{#allParams}}data.{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}).should.eventually.rejected;
     });
     {{/operations}}
 

@@ -16,12 +16,14 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
         if (fs.existsSync(filePath)) {
             var oldFile = fs.readFileSync(filePath).toString()
-            if (config.auto) {
+            if (config.merge) {
                 var diff = jsdiff.diffChars(newFileData, oldFile.toString())
                 var content = diff.map(function (part) {
                     return part.value
                 }).join('');
                 fs.writeFileSync(filePath, content, encoding);
+            } else {
+                fs.writeFileSync(filePath, newFileData, encoding);
             }
             if (config.diff) {
                 var patches = jsdiff.createPatch(`${filePath}`, oldFile.toString(), newFileData);
@@ -103,6 +105,7 @@ function main(o, config, callback) {
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, svc, config.apis);
+                            serviceModel.serviceControl = svc.serviceEntries.some(op => op.serviceControl)
                             if (serviceModel.serviceLang == language) {
                                 let filename = fnTemplate.render(serviceModel, config.partials);
                                 let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))

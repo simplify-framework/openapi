@@ -459,25 +459,25 @@ function convertToServices(source, obj, defaults) {
             pathEntry.externalDocs = tag.externalDocs;
         }
     }
-    for (let path of paths) {
+    for (let pathEntry of paths) {
         let service = services.find(function (e, i, a) {
-            return (e.serviceName === path.serviceName);
+            return (e.serviceName === pathEntry.serviceName);
         });
         if (!service) {
             service = {
-                ...path.serviceMeta,
-                serviceHystrixStream: path.serviceHystrixStream,
-                serviceEntries: [path]
+                ...serviceMetas[pathEntry.path],
+                serviceHystrixStream: pathEntry.serviceHystrixStream,
+                serviceEntries: [pathEntry]
             }
             service.serviceLang = service.serviceLang || 'javascript'
             if (service.serviceLang == 'javascript') {
                 service.serviceLangExt = 'js'
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
-                service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ "statusCode": 200, "body": JSON.stringify({}) })}`
+                service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`
             } else if (service.serviceLang == 'python') {
                 service.serviceLangExt = 'py'
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
-                service.serviceCode = service.serviceCode || `def handler(event, context): return { \'statusCode\': 200, \'body'\: \'{}\' }`
+                service.serviceCode = service.serviceCode || `def handler(event, context): return { \"statusCode\": 200, \"body\": \"{}\" }`
             } else {
                 service.serviceLangExt = 'py'
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
@@ -487,13 +487,13 @@ function convertToServices(source, obj, defaults) {
             services.push(service)
         } else {
             let serviceOperations = service.serviceEntries.find(function (e, i, a) {
-                return (e.path === path.path);
+                return (e.path === pathEntry.path);
             });
             if (!serviceOperations) {
-                serviceOperations = path
+                serviceOperations = pathEntry
                 service.serviceEntries.push(serviceOperations)
             } else {
-                serviceOperations.operations.push({...path.operations[0], ...path.serviceMeta})
+                serviceOperations.operations.push({...pathEntry.operations[0], ...pathEntry.serviceMeta})
             }
             service.serviceModels = service.serviceEntries.filter((v, i, a) => a.findIndex(t => (t.serviceModelName === v.serviceModelName)) === i)
             serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodLowerCase == 'post' || op.httpMethodLowerCase == 'put' || op.httpMethodLowerCase == 'patch')
