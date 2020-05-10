@@ -1,6 +1,6 @@
 {
   "name": "simplify-codegen",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Simplify Code Generator from OpenAPI 3.0 Specs",
   "main": "simplify.js",
   "bin": {
