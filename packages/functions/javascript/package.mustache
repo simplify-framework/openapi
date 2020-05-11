@@ -5,11 +5,13 @@
   "main": "app.js",
   "scripts": {
     "deploy": "env FUNCTION_SOURCE=dist node function-push.js",
-    "code-scan": "bash sonarqube-scanner.sh",
-    "start": "cd src && npm install && env LOCAL_DEBUG=true DEPLOYMENT=latest node app.js",
-    "prod": "env LOCAL_DEBUG= node dist/index.js",
-    "build-dev": "webpack --mode development",
-    "build": "webpack -p"
+    "build": "webpack -p --config webpack.config.js",
+    "deploy-layer": "env LAYER_SOURCE=layer node layer-push.js",
+    "build-layer": "webpack -p --config webpack.config.layer.js",
+    "production": "webpack -p && env LOCAL_DEBUG= node dist/index.js",
+    "development": "webpack --mode development && env LOCAL_DEBUG=YES node dist/index.js",
+    "start": "cd src && npm install && env LOCAL_DEBUG=YES DEPLOYMENT=latest node app.js",
+    "code-scan": "bash sonarqube-scanner.sh"
   },
   "license": "MIT",
   "private": true,
@@ -29,7 +31,7 @@
     "@babel/polyfill": "^7.6.0",
     "@babel/preset-env": "^7.7.6",
     "@babel/register": "^7.7.4",
-    "simplify": ">=0.1.1",
+    "simplify": ">=0.1.4",
     "babel-loader": "^8.1.0",
     "file-loader": "^6.0.0",
     "webpack": "^4.43.0",

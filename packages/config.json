@@ -11,6 +11,7 @@
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
+        { "input": "code-push.stable.mustache", "output": "code-push.stable.sh" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
         { "input": "code-init.mustache", "output": "code-init.js" }
     ],
@@ -42,11 +43,13 @@
             { "input": "writer.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/writer.js" },
             { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
             { "input": "docker-entrypoint.mustache", "output": "{{projectName}}/{{serviceName}}/docker-entrypoint.sh" },
+            { "input": "layer-push.mustache", "output": "{{projectName}}/{{serviceName}}/layer-push.js" },
             { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
             { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" },
             { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
+            { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
             { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}

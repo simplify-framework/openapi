@@ -1,4 +1,4 @@
-const {{projectName}} = require('debug')('{{projectNamePascal}}')
+const {{projectName}} = require('debug')('{{projectName}}')
 exports.info = {{projectName}}.extend('INFO')
 exports.warn = {{projectName}}.extend('WARNING')
 exports.error = {{projectName}}.extend('ERROR')
@@ -36,4 +36,4 @@ if (typeof global.__function === 'undefined') {
     });
 }
 
-require('debug').enable('{{projectNamePascal}}:INFO,codegen:WARNING,codegen:ERROR')
+require('debug').enable(process.env.DEBUG || '{{projectName}}:INFO,{{projectName}}:WARNING,{{projectName}}:ERROR')

@@ -1,11 +1,11 @@
 const path = require('path')
 const fs = require('fs')
+const opName = 'Simplify::FunctionLayer'
 var nodeArgs = process.argv.slice(2);
-const opName = 'Simplify::Function'
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
-var configSrcDir =  process.env.FUNCTION_SOURCE || "dist"
+var configSrcDir =  process.env.LAYER_SOURCE || "layer"
 process.env.OVERRIDEN_PACKAGE_LAYER = process.env.OVERRIDEN_PACKAGE_LAYER || ''
 process.env.DEPLOYMENT_STAGE = process.env.DEPLOYMENT_STAGE || 'latest'
 while (nodeArgs.length > 1) {
@@ -18,6 +18,7 @@ while (nodeArgs.length > 1) {
 }
 try {
     var config = simplify.getInputConfig(path.join(__dirname, configInputFile))
+    const layerConfig = config.Layer
     const functionConfig = config.Function
     const bucketName = config.Bucket.Name
     const bucketKey = config.Bucket.Key
@@ -30,20 +31,17 @@ try {
                 bucketKey, inputDirectory, outputFilePath
             }
         }).then(function (uploadInfor) {
-            simplify.createOrUpdateFunction({
+            simplify.createFunctionLayerVersion({
                 adaptor: provider.getFunction(),
-                ...{ functionConfig, bucketName, bucketKey: uploadInfor.Key }
+                ...{ layerConfig, functionConfig, bucketName, bucketKey: uploadInfor.Key }
             }).then(function (data) {
-                fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
-                    FunctionName: data.FunctionName,
-                    FunctionArn: data.FunctionArn,
-                    LastModified: data.LastModified,
-                    CodeSha256: data.CodeSha256,
-                    RevisionId: data.RevisionId,
-                    LastUpdateStatus: data.LastUpdateStatus,
-                    LastUpdateStatusReason: data.LastUpdateStatusReason,
-                    LastUpdateStatusReasonCode: data.LastUpdateStatusReasonCode
-                }, null, 4));
+                try {                    
+                    var configInput = JSON.parse(fs.readFileSync(path.join(__dirname, configInputFile)))
+                    configInput.Function.Layers = [data.LayerVersionArn]
+                    fs.writeFileSync(path.join(__dirname, configInputFile), JSON.stringify(configInput, null, 4))
+                } catch(err) {
+                    console.error(`${opName}-Update-ERROR: ${err}`);
+                }
             }, function(err) {
                 console.error(`${opName}-Update-ERROR: ${err}`);
             })

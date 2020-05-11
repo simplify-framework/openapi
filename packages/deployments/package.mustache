@@ -4,13 +4,12 @@
   "description": "{{{projectDescription}}}",
   "scripts": {
     "deploy": "node deployment.js --input {{deploymentNamePosix}}.json",
-    "code-push": "bash code-push.sh"
+    "stable": "bash code-push.stable.sh",
+    "latest": "bash code-push.sh"
   },
   "license": "MIT",
   "private": true,
-  "dependencies": {
-  },
   "devDependencies": {
-    "simplify-sdk": ">=0.1.1"
+    "simplify-sdk": ">=0.1.4"
   }
 }

@@ -610,7 +610,7 @@ function getPrime(api, defaults) {
     prime.apiName = (api['x-api-gateway-name'] || '').toCamelCase().split(' ').join('').split('-').join('');
     prime.apiAuthorizerId = (api['x-api-authorizer-id'] || '');
     prime.hasApiGateway = typeof api['x-api-gateway-name'] !== 'undefined' ? true : false
-    prime.deploymentName = api['x-deployment-name'];
+    prime.deploymentName = api['x-deployment-name'].toCamelCase().split(' ').join('').split('-').join('');
     prime.deploymentNamePascal = prime.deploymentName.toPascalCase().split(' ').join('').split('-').join('');
     prime.deploymentNamePosix = Case.snake(prime.deploymentName).split('_').join('-');
     prime.deploymentRegion = api['x-deployment-region'];

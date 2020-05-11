@@ -103,7 +103,7 @@ function main(o, config, callback) {
                         ff.mkdirp.sync(requestDir);
                     }
                     if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                    ff.createFile(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8');
+                    creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8', config.defaults);
                 }
             }
         }
@@ -128,7 +128,7 @@ function main(o, config, callback) {
                                     ff.mkdirp.sync(requestDir);
                                 }
                                 if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                ff.createFile(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8');
+                                creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', config.defaults);
                             }
                         })
                     }
@@ -192,7 +192,7 @@ function main(o, config, callback) {
                                             ff.mkdirp.sync(requestDir);
                                         }
                                         if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                        ff.createFile(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8');
+                                        creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8', config.defaults);
                                     })
                                 })
                             }

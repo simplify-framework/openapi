@@ -6,6 +6,12 @@
         "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
     },
     "OutputFile": "function-meta.json",
+    "Layer": {
+        "CompatibleRuntimes": [
+            "{{serviceRuntime}}"
+        ],
+        "LayerName": "{{serviceNamePosix}}"
+    },
     "Function": {
         "FunctionName": "{{serviceName}}",
         "Handler": "index.handler",
