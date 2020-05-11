@@ -36,11 +36,11 @@ npm install -g simplify-codegen@latest
 - Setup IAM Role policy using: `deployment-policy.json`
 - Configure your machine `aws configure --profile simplify-eu`
 
-## From your existing spec.yaml, an OpenAPI specs, add extra definitions:
-- `info.version`: the software package version, set for initial packages
-- `info.title`: the software package description, set for initial packages
+## OpenAPI specs with Simplify definitions:
+- `info.version`: define software package version, set for initial packages
+- `info.title`: define software package description, set for initial packages
 - `x-project-name`: to define a project which contains other resources (e.g `pets-micro-services`)
-- `x-deployment-name`: to define a deployment environment (e.g `deployment-demo`, `deployment-prod`)
+- `x-deployment-name`: to define a deployment environment (e.g `pets-demo`, `pets-prod`)
 - `x-deployment-region`: to define where to deploy resources (e.g `eu-west-1`)
 - `x-deployment-profile`: to define a profile that hold the deployment access (e.g `simplify-eu`)
 - `x-api-gateway-name`: to define an API gateway (Rest API) resource (e.g `pets-api-gateway`)

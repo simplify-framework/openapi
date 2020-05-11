@@ -16,10 +16,25 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
         if (fs.existsSync(filePath)) {
             var oldFile = fs.readFileSync(filePath).toString()
+            function autoNewLine(value, lastAdded) {
+                return lastAdded ? value : `${value}>>>>>>> mine:${filePath}\n`
+            }
+            function autoYourLine(value, lastRemoved) {
+                var newline = `<<<<<<< auto:${filePath}\n${value}=======\n`
+                if (lastRemoved) newline += `>>>>>>> mine:${filePath}\n`
+                return newline
+            }
             if (config.merge) {
-                var diff = jsdiff.diffChars(newFileData, oldFile.toString())
+                var diff = jsdiff.diffLines(newFileData, oldFile.toString())
+                var lastAdded = false
+                var lastRemoved = false
+                var index = 0
                 var content = diff.map(function (part) {
-                    return part.value
+                    if (++index == (diff.length -1) && part.removed) { lastRemoved = true }
+                    var newcontent = part.removed ? autoYourLine(part.value, index == (diff.length -1)) : (part.added ? autoNewLine(part.value, lastAdded): part.value)
+                    if (part.added) { lastAdded = true; lastRemoved = false;  }
+                    if (part.removed) { lastAdded = false; lastRemoved = true; }
+                    return newcontent
                 }).join('');
                 fs.writeFileSync(filePath, content, encoding);
             } else {
