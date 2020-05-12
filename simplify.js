@@ -45,15 +45,17 @@ let configFile = path.join(path.join(configPath), 'config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
 let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
 config.outputDir = argv.output;
-if (argv._[0] === 'petsample') {
-    mkdirp(path.join(__dirname, config.outputDir)).then(function () {
-        fs.writeFileSync(path.join(__dirname, config.outputDir, 'openapi.yaml'), fs.readFileSync(defName, 'utf8'), 'utf8')
+
+mkdirp(path.join(__dirname, config.outputDir)).then(function () {
+    fs.writeFileSync(path.join(__dirname, config.outputDir, 'openapi.yaml'), fs.readFileSync(defName, 'utf8'), 'utf8')
+    if (argv._[0] === 'petsample') {
         process.exit(-1)
-    })
-}
+    }
+})
+
 function mergeArrays(arrObj, moreArrObj) {
     if (!moreArrObj) return arrObj
-    moreArrObj.forEach(function(tmp, i) {
+    moreArrObj.forEach(function (tmp, i) {
         if (typeof tmp === 'object') {
             if (Array.isArray(tmp)) {
                 arrObj[i] = arrObj[i] || []
@@ -71,7 +73,7 @@ function mergeArrays(arrObj, moreArrObj) {
 
 function mergeObjects(obj, moreObj) {
     if (!moreObj) return obj
-    Object.keys(moreObj).map(function(k) {
+    Object.keys(moreObj).map(function (k) {
         if (Array.isArray(moreObj[k])) {
             obj[k] = obj[k] || []
             obj[k] = mergeArrays(obj[k], moreObj[k])
@@ -144,9 +146,9 @@ function main(o) {
     console.log("╙───────────────────────────────────────────────────────────────╜")
     console.log(` - OpenAPI definition ${defName}`);
     if (o && o.openapi) {
-        despatch(o, config, function(err) {
-            console.warn(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)':'off (use option --merge to turn on)'}`)
-            console.warn(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)':'off (use option --diff to turn on)'}`)
+        despatch(o, config, function (err) {
+            console.warn(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)' : 'off (use option --merge to turn on)'}`)
+            console.warn(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)' : 'off (use option --diff to turn on)'}`)
             console.log(` - Finished generation ${!err ? `with NO error. See ${config.outputDir} for your generated code!` : err}`);
         });
     }

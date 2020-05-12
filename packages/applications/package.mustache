@@ -8,6 +8,8 @@
         "start": "node app.js",
         "deploy": "docker-compose up -d",
         "test": "nyc --reporter=text mocha --require @babel/register --timeout 60000 \"./tests/**/*.spec.js*\"",
+        "test-unit": "nyc --reporter=text mocha --require @babel/register --timeout 60000 \"./tests/**/units/*.spec.js*\"",
+        "test-apis": "nyc --reporter=text mocha --require @babel/register --timeout 60000 \"./tests/**/apis/*.spec.js*\"",
         {{#services}}
         "test-{{serviceNamePosix}}": "mocha --require @babel/register --timeout 60000 \"./tests/{{serviceName}}/apis/*.spec.js*\"",
         {{/services}}

@@ -8,7 +8,7 @@
     "OutputFile": "function-meta.json",
     "Layer": {
         "CompatibleRuntimes": [
-            "{{serviceRuntime}}"
+            "{{serviceRuntimeOrigin}}"
         ],
         "LayerName": "{{serviceNamePosix}}"
     },
@@ -18,7 +18,7 @@
         "MemorySize": 128,
         "Publish": true,
         "Role": "${Function{{serviceNamePascal}}RoleArn}",
-        "Runtime": "{{serviceRuntime}}",
+        "Runtime": "{{serviceRuntimeOrigin}}",
         "Tags": {
             "GroupName": "{{serviceTag}}"
         },

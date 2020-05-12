@@ -245,7 +245,7 @@ Resources:
         Fn::GetAtt:
         - {{serviceName}}LambdaExecutionRole
         - Arn
-      Runtime: {{serviceRuntime}}
+      Runtime: {{serviceRuntimeOrigin}}
       Timeout: '15'
       Code:
         ZipFile: |

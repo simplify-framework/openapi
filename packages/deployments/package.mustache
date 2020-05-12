@@ -3,6 +3,8 @@
     "version": "{{projectVersion}}",
     "description": "{{{projectDescription}}}",
     "scripts": {
+        "start": "npm install && npm run gencode",
+        "gencode": "simplify-codegen generate -i openapi.yaml -o . --merge",
         "deploy": "node deployment.js --input {{deploymentNamePosix}}.json",
         "stable": "bash code-push.stable.sh",
         "latest": "bash code-push.sh"
@@ -10,6 +12,6 @@
     "license": "MIT",
     "private": true,
     "devDependencies": {
-        "simplify-sdk": ">=0.1.4"
+        "simplify-sdk": "latest"
     }
 }

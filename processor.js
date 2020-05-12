@@ -16,22 +16,22 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
         if (fs.existsSync(filePath)) {
             var oldFile = fs.readFileSync(filePath).toString()
-            function autoNewLine(value, lastAdded) {
-                return lastAdded ? value : `${value}>>>>>>> mine:${filePath}\n`
+            function addNewLine(value, lastRemoved) {
+                return lastRemoved ? `${value}>>>>>>> auto:${filePath}\n` : value
             }
-            function autoYourLine(value, lastRemoved) {
-                var newline = `<<<<<<< auto:${filePath}\n${value}=======\n`
-                if (lastRemoved) newline += `>>>>>>> mine:${filePath}\n`
+            function removeYourLine(value, lastRemoved) {
+                var newline = `<<<<<<< mine:${filePath}\n${value}=======\n`
+                if (lastRemoved) newline += `>>>>>>> auto:${filePath}\n`
                 return newline
             }
             if (config.merge) {
-                var diff = jsdiff.diffLines(newFileData, oldFile.toString())
+                var diff = jsdiff.diffLines(oldFile.toString(), newFileData, { newlineIsToken: false, ignoreWhitespace: false })
                 var lastAdded = false
                 var lastRemoved = false
                 var index = 0
                 var content = diff.map(function (part) {
                     if (++index == (diff.length -1) && part.removed) { lastRemoved = true }
-                    var newcontent = part.removed ? autoYourLine(part.value, index == (diff.length -1)) : (part.added ? autoNewLine(part.value, lastAdded): part.value)
+                    var newcontent = part.removed ? removeYourLine(part.value, index == (diff.length -1)) : (part.added ? addNewLine(part.value, lastRemoved): part.value)
                     if (part.added) { lastAdded = true; lastRemoved = false;  }
                     if (part.removed) { lastAdded = false; lastRemoved = true; }
                     return newcontent
@@ -41,8 +41,10 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
                 fs.writeFileSync(filePath, newFileData, encoding);
             }
             if (config.diff) {
-                var patches = jsdiff.createPatch(`${filePath}`, oldFile.toString(), newFileData);
-                fs.writeFileSync(`${filePath}.diff`, patches, encoding);
+                var patcheL = jsdiff.createPatch(`${filePath}`, oldFile.toString(), newFileData);
+                if (jsdiff.parsePatch(patcheL)[0].hunks.length) {
+                    fs.writeFileSync(`${filePath}.diff`, patcheL, encoding);
+                }
             }
         } else {
             fs.writeFileSync(filePath, newFileData, encoding);

@@ -3,7 +3,7 @@
     "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
         "Name": "{{serviceNamePosix}}",
-        "Key": "latest-build.zip"
+        "Key": "python/${DATE_TODAY}"
     },
     "OutputFile": "function-meta.json",
     "Function": {
@@ -11,8 +11,8 @@
         "Handler": "index.handler",
         "MemorySize": 256,
         "Publish": true,
-        "Role": "arn:aws:iam::{{accountId}}:role/{{serviceName}}",
-        "Runtime": "nodejs12.x",
+        "Role": "${Function{{serviceNamePascal}}RoleArn}",
+        "Runtime": "{{serviceRuntimeOrigin}}",
         "Tags": {
             "GroupName": "{{serviceTag}}"
         },

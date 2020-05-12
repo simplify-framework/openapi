@@ -455,12 +455,15 @@ function convertToServices(source, obj, defaults) {
             service.serviceTemplate = service.serviceTemplate || 'javascript'
             if (service.serviceTemplate == 'javascript' || service.serviceTemplate == 'minimalist') {
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
+                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'
                 service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`
             } else if (service.serviceTemplate == 'python') {
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
+                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'python3.7'
                 service.serviceCode = service.serviceCode || `def handler(event, context): return { \"statusCode\": 200, \"body\": \"{}\" }`
             } else {
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
+                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'python3.7'
                 service.serviceCode = service.serviceCode || `def handler(event, context): return { \'statusCode\': 200, \'body'\: \'{}\' }`
             }
             service.serviceModels = [service.serviceModelName]
