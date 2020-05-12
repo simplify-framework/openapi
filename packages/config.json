@@ -16,6 +16,7 @@
         { "input": "code-init.mustache", "output": "code-init.js" }
     ],
     "Applications": [
+        { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
         { "input": "sanitizer.mustache", "output": "{{projectName}}/utils/sanitizer.js" },
         { "input": "openapi.mustache", "output": "{{projectName}}/specs/openapi.yaml" },
         { "input": "logger.mustache", "output": "{{projectName}}/utils/logger.js" },
@@ -30,6 +31,8 @@
     ],
     "Functions": {
         "javascript": [
+            { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
+            { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
             { "input": "openapi.mustache", "output": "{{projectName}}/{{serviceName}}/src/specs/openapi.yaml" },
             { "input": "swagger-yaml.mustache", "output": "{{projectName}}/{{serviceName}}/src/specs/swagger.yaml" },
@@ -49,8 +52,6 @@
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
             { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
-            { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
-            { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
         ],
         "minimalist": [
