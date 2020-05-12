@@ -1,19 +1,19 @@
 {
-  "name": "{{serviceNamePosix}}",
-  "version": "{{appVersion}}",
-  "description": "{{{appDescription}}}",
-  "main": "index.py",
-  "scripts": {
-    "deploy": "node function-push.js",
-    "code-scan": "bash sonarqube-scanner.sh",
-    "start": "python index.py"
-  },
-  "license": "MIT",
-  "private": true,
-  "dependencies": {
-  },
-  "devDependencies": {
-    "aws-sdk": "^2.592.0",
-    "adm-zip": "^0.4.14"
-  }
+    "name": "{{serviceNamePosix}}",
+    "version": "{{appVersion}}",
+    "description": "{{{appDescription}}}",
+    "main": "index.py",
+    "scripts": {
+        "deploy": "node function-push.js",
+        "code-scan": "bash sonarqube-scanner.sh",
+        "start": "python index.py"
+    },
+    "license": "MIT",
+    "private": true,
+    "dependencies": {
+    },
+    "devDependencies": {
+        "aws-sdk": "^2.592.0",
+        "adm-zip": "^0.4.14"
+    }
 }

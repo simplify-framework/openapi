@@ -1,6 +1,6 @@
 {
-    "Profile": "{{deploymentProfile}}",
-    "Region": "{{deploymentRegion}}",
+    "Profile": "{{deploymentProfileOrigin}}",
+    "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
         "Name": "{{deploymentNamePosix}}",
         "Key": "stacks/${DATE_TODAY}"
@@ -9,7 +9,7 @@
     "Deployment": {
         "Name": "{{deploymentName}}",
         "Definition": "{{deploymentNamePosix}}.yaml",
-        "Authorizer": "{{apiAuthorizerId}}",
+        "Authorizer": "{{authorizerIdOrigin}}",
         "Functions": {
             {{#services}}
             "{{serviceName}}": {

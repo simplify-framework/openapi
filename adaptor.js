@@ -42,20 +42,37 @@ function safeSample(schema, options, api) {
     return {};
 }
 
-function convertStringArray(arr) {
-    if (!arr) arr = [];
-    if (arr.length) {
-        arr.isEmpty = false;
-        for (let i = 0; i < arr.length; i++) {
-            if (typeof (arr[i]) == 'string') arr[i] = { value: arr[i] }
-            arr[i]['first'] = (i === 0);
-            arr[i]['last'] = (i === arr.length - 1);
-            arr[i].hasMore = (i < arr.length - 1);
+function getProperties(obj, define, prefix) {
+    var properties = {}
+    Object.keys(obj).map(function (key) {
+        if (key && key.startsWith(define)) {
+            let varName = key.replace(define, '').toCamelCase().split(' ').join('').split('-').join('')
+            varName = prefix ? prefix + varName.toPascalCase() : varName
+            properties[varName + 'Existed'] = true
+            if (typeof (obj[key]) === 'string') {
+                const varData = (obj[key] || '').toCamelCase().split(' ').join('').split('-').join('')
+                properties[varName] = varData
+                properties[varName + 'Title'] = (obj[key] || '').split('-').join(' ')
+                properties[varName + 'Posix'] = Case.snake(varData).split('_').join('-');
+                properties[varName + 'Pascal'] = varData.toPascalCase()
+                properties[varName + 'Origin'] = obj[key]
+                properties[varName + obj[key].toPascalCase()] = true
+            } else if (typeof (obj[key]) === 'number') {
+                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || 0)
+            } else if (typeof (obj[key]) === 'boolean') {
+                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || false)
+            } else if (typeof (obj[key]) === 'object') {
+                if (Array.isArray(obj[key])) {
+                    properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = convertArray(obj[key] || [])
+                } else {
+                    properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || {})
+                } 
+            } else {
+                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || undefined)
+            }
         }
-    }
-    else arr.isEmpty = true;
-    arr.toString = function () { if (arrayMode === 'length') return this.length.toString() };
-    return arr;
+    })
+    return properties
 }
 
 function convertArray(arr) {
@@ -63,6 +80,7 @@ function convertArray(arr) {
     if (arr.length) {
         arr.isEmpty = false;
         for (let i = 0; i < arr.length; i++) {
+            if (typeof (arr[i]) === 'string') arr[i] = { value: arr[i] }
             arr[i]['-first'] = (i === 0);
             arr[i]['-last'] = (i === arr.length - 1);
             arr[i].hasMore = (i < arr.length - 1);
@@ -83,23 +101,13 @@ function specificationExtensions(obj) {
 }
 
 function convertMethodOperation(op, verb, path, pathItem, obj, api) {
-    let operation = {};
+    let operation = { ...getProperties(op, 'x-api-'), ...getProperties(op, 'x-control-') };
     operation.httpMethod = verb.toUpperCase();
     operation.httpMethodLowerCase = verb.toLowerCase();
     operation.httpMethodHasBody = operation.httpMethodLowerCase == 'post' || operation.httpMethodLowerCase == 'put' || operation.httpMethodLowerCase == 'patch'
     if (obj.httpMethodLowerCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
     operation.replacedPathName = path;
-    Object.keys(op).forEach(key => {
-        if (key.startsWith('x-api-service-model-')) {
-            const convertedKey = key.replace('x-api-service-model-', '').toCamelCase().split(' ').join('').split('-').join('')
-            operation[convertedKey] = typeof (op[key]) === 'object' ? convertStringArray(op[key]) : op[key];
-        }
-        if (key.startsWith('x-control-')) {
-            const varName = key.replace('x-control-', '').toCamelCase().split(' ').join('').split('-').join('')
-            operation[varName] = op[key]
-        }
-    })
     operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
@@ -385,33 +393,13 @@ function convertToServices(source, obj, defaults) {
     let services = []
     let paths = [];
     let serviceMetas = {};
-
     for (let p in source.paths) {
-        const serviceName = source.paths[p]['x-api-service-name'] || source.paths[p]['x-event-service-name']
         var serviceMeta = {
-            serviceName: serviceName,
             serviceType: 'aws::lambda',
-            hasServicePath: true
+            hasServicePath: true,
+            ...getProperties(source.paths[p], 'x-api-'),
+            ...getProperties(source.paths[p], 'x-event-')
         }
-        Object.keys(source.paths[p]).map(function (key) {
-            if (key && (key.startsWith('x-api-service-') || key.startsWith('x-event-service-'))) {
-                const varName = key.replace('x-api-', '').replace('x-event-', '').toCamelCase().split(' ').join('').split('-').join('')
-                if (typeof (source.paths[p][key]) === 'string') {
-                    const varData = source.paths[p][key].toCamelCase().split(' ').join('').split('-').join('')
-                    serviceMeta[varName] = varData
-                    serviceMeta[varName + 'Posix'] = Case.snake(varData).split('_').join('-');
-                    serviceMeta[varName + 'Pascal'] = varData.toPascalCase()
-                    serviceMeta[varName + 'Origin'] = source.paths[p][key]
-                } else {
-                    serviceMeta[varName] = serviceMeta[varName + 'Posix'] = serviceMeta[varName + 'Pascal'] = source.paths[p][key]
-                }
-                if (key.startsWith('x-api-service-path')) {
-                    serviceMeta.hasServicePath = source.paths[p]['x-api-service-path']
-                } else if (key.startsWith('x-event-service-path')) {
-                    serviceMeta.hasServicePath = source.paths[p]['x-event-service-path']
-                }
-            }
-        })
         serviceMetas[p] = serviceMeta
         for (let m in source.paths[p]) {
             if ((m !== 'parameters') && (m !== 'summary') && (m !== 'description') && (!m.startsWith('x-'))) {
@@ -429,19 +417,14 @@ function convertToServices(source, obj, defaults) {
                     const split = p.replace(/^\//, '').split(/\//g);
                     const defaultServiceName = split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('').toCamelCase().split(' ').join('').split('-').join('')
                     serviceMetas[p].serviceModelName = serviceMetas[p].serviceModelName || defaultServiceName;
-                    if (serviceName) {
-                        serviceMetas[p] = {
-                            ...serviceMetas[p],
-                            serviceNamePascal: serviceName.toPascalCase(),
-                            serviceNamePosix: Case.snake(serviceName).split('_').join('-')
-                        }
+                    if (serviceMeta.serviceName) {
                         pathEntry = { ...pathEntry, ...serviceMetas[p] }
                         pathEntry.serviceMeta = serviceMetas[p];
                         pathEntry.operations = [];
                         paths.push(pathEntry);
                     }
                 }
-                if (serviceName) {
+                if (serviceMeta.serviceName) {
                     let operation = convertMethodOperation(op, m, p, source.paths[p], obj, source);
                     pathEntry.operations.push({...operation, ...serviceMetas[p]});
                 }
@@ -469,17 +452,14 @@ function convertToServices(source, obj, defaults) {
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
                 serviceEntries: [pathEntry]
             }
-            service.serviceLang = service.serviceLang || 'javascript'
-            if (service.serviceLang == 'javascript') {
-                service.serviceLangExt = 'js'
+            service.serviceTemplate = service.serviceTemplate || 'javascript'
+            if (service.serviceTemplate == 'javascript' || service.serviceTemplate == 'minimalist') {
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
                 service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`
-            } else if (service.serviceLang == 'python') {
-                service.serviceLangExt = 'py'
+            } else if (service.serviceTemplate == 'python') {
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
                 service.serviceCode = service.serviceCode || `def handler(event, context): return { \"statusCode\": 200, \"body\": \"{}\" }`
             } else {
-                service.serviceLangExt = 'py'
                 service.serviceRuntime = service.serviceRuntime || 'python3.7'
                 service.serviceCode = service.serviceCode || `def handler(event, context): return { \'statusCode\': 200, \'body'\: \'{}\' }`
             }
@@ -599,7 +579,6 @@ function removeCustomPrefix(obj) {
 }
 
 function getPrime(api, defaults) {
-    let prime = {};
     let require_fields = ['x-deployment-name', 'x-deployment-region', 'x-project-name']
     require_fields.forEach(function (f) {
         if (typeof api[f] === 'undefined') {
@@ -607,16 +586,11 @@ function getPrime(api, defaults) {
             process.exit(-1)
         }
     })
-    prime.apiName = (api['x-api-gateway-name'] || '').toCamelCase().split(' ').join('').split('-').join('');
-    prime.apiAuthorizerId = (api['x-api-authorizer-id'] || '');
-    prime.hasApiGateway = typeof api['x-api-gateway-name'] !== 'undefined' ? true : false
-    prime.deploymentName = api['x-deployment-name'].toCamelCase().split(' ').join('').split('-').join('');
-    prime.deploymentNamePascal = prime.deploymentName.toPascalCase().split(' ').join('').split('-').join('');
-    prime.deploymentNamePosix = Case.snake(prime.deploymentName).split('_').join('-');
-    prime.deploymentRegion = api['x-deployment-region'];
-    prime.deploymentProfile = api['x-deployment-profile'];
-    prime.controlDashboard = api['x-api-control-dashboard'] || false
-    prime.apiNamePosix = Case.snake(prime.apiName).split('_').join('-');
+    let prime = { ...getProperties(api, 'x-api-'), ...getProperties(api, 'x-deployment-', 'deployment') };
+    prime.quotaUnitOrigin = prime.quotaUnitOrigin || 'DAY'
+    prime.burstLimit = prime.burstLimit || 100
+    prime.rateLimit = prime.rateLimit || 100
+    prime.quotaLimit = prime.quotaLimit || 100
     prime.projectName = api['x-project-name'].toCamelCase().split(' ').join('').split('-').join('');
     prime.projectNamePascal = prime.projectName.toPascalCase().split(' ').join('').split('-').join('');
     prime.projectNamePosix = Case.snake(prime.projectName).split('_').join('-');
@@ -702,10 +676,10 @@ function transform(api, defaults, callback) {
                     return thisFunc(this.paramName);
                 };
                 obj.apiInfo = {
-                    apiName: (api['x-api-gateway-name'] || '').toCamelCase().split(' ').join('').split('-').join(''),
-                    controlDashboard: api['x-api-control-dashboard'] || false
-                };
-                obj.apiInfo.services = convertToServices(api, obj, defaults);
+                    gatewayName: api['x-api-gateway-name'].toCamelCase().replace(/-/g,''),
+                    controlDashboard: api['x-api-control-dashboard'] || false,
+                    services: convertToServices(api, obj, defaults)
+                }
                 obj.produces = convertArray(obj.produces);
                 obj.consumes = convertArray(obj.consumes);
                 if (callback) callback(null, obj);

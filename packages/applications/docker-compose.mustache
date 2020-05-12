@@ -8,7 +8,7 @@ services:
       - LOG_LEVEL=info
     restart: always
   {{/services}}
-  {{apiNamePosix}}:
+  {{gatewayNamePosix}}:
     image: nginx
     ports:
       - 80:8080

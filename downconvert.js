@@ -19,93 +19,93 @@ var YAML = require('js-yaml');
 /**
  * Transforms OpenApi 3.0 to Swagger 2
  */
-var Converter = module.exports = function(data) {
-  this.spec = JSON.parse(JSON.stringify(data.spec));
-  if (!data.source.startsWith('http')) {
-    this.directory = npath.dirname(data.source);
-  }
+var Converter = module.exports = function (data) {
+    this.spec = JSON.parse(JSON.stringify(data.spec));
+    if (!data.source.startsWith('http')) {
+        this.directory = npath.dirname(data.source);
+    }
 }
 
-Converter.prototype.convert = function() {
-  this.spec.swagger = '2.0';
-  this.convertInfos();
-  this.convertOperations();
-  if (this.spec.components) {
-    this.convertSecurityDefinitions();
-    this.spec.definitions = this.spec.components.schemas;
-    delete this.spec.components.schemas;
-    this.spec['x-components'] = this.spec.components;
-    delete this.spec.components;
-    fixRefs(this.spec);
-  }
-  return this.spec;
+Converter.prototype.convert = function () {
+    this.spec.swagger = '2.0';
+    this.convertInfos();
+    this.convertOperations();
+    if (this.spec.components) {
+        this.convertSecurityDefinitions();
+        this.spec.definitions = this.spec.components.schemas;
+        delete this.spec.components.schemas;
+        this.spec['x-components'] = this.spec.components;
+        delete this.spec.components;
+        fixRefs(this.spec);
+    }
+    return this.spec;
 }
 
 function fixRef(ref) {
-  return ref
-      .replace('#/components/schemas/', '#/definitions/')
-      .replace('#/components/', '#/x-components/')
+    return ref
+        .replace('#/components/schemas/', '#/definitions/')
+        .replace('#/components/', '#/x-components/')
 }
 
 function fixRefs(obj) {
-  if (Array.isArray(obj)) {
-    obj.forEach(fixRefs);
-  } else if (typeof obj === 'object') {
-    for (var key in obj) {
-      if (key === '$ref') {
-        obj.$ref = fixRef(obj.$ref);
-      } else {
-        fixRefs(obj[key]);
-      }
+    if (Array.isArray(obj)) {
+        obj.forEach(fixRefs);
+    } else if (typeof obj === 'object') {
+        for (var key in obj) {
+            if (key === '$ref') {
+                obj.$ref = fixRef(obj.$ref);
+            } else {
+                fixRefs(obj[key]);
+            }
+        }
     }
-  }
 }
 
-Converter.prototype.resolveReference = function(base, obj) {
-  if (!obj || !obj.$ref) return obj;
-  var ref = obj.$ref;
-  if (ref.startsWith('#')) {
-    var keys = ref.split('/');
-    keys.shift();
-    var cur = base;
-    keys.forEach(function(k) { cur = cur[k] });
-    return cur;
-  } else if (ref.startsWith('http') || !this.directory) {
-    throw new Error("Remote $ref URLs are not currently supported for openapi_3");
-  } else {
-    let content = fs.readFileSync(npath.join(this.directory, ref), 'utf8');
-    let external = null;
-    try {
-      external = JSON.parse(content);
-    } catch (e) {
-      try {
-        external = YAML.safeLoad(content);
-      } catch (e) {
-        throw new Error("Could not parse $ref " + ref + " as JSON or YAML");
-      }
+Converter.prototype.resolveReference = function (base, obj) {
+    if (!obj || !obj.$ref) return obj;
+    var ref = obj.$ref;
+    if (ref.startsWith('#')) {
+        var keys = ref.split('/');
+        keys.shift();
+        var cur = base;
+        keys.forEach(function (k) { cur = cur[k] });
+        return cur;
+    } else if (ref.startsWith('http') || !this.directory) {
+        throw new Error("Remote $ref URLs are not currently supported for openapi_3");
+    } else {
+        let content = fs.readFileSync(npath.join(this.directory, ref), 'utf8');
+        let external = null;
+        try {
+            external = JSON.parse(content);
+        } catch (e) {
+            try {
+                external = YAML.safeLoad(content);
+            } catch (e) {
+                throw new Error("Could not parse $ref " + ref + " as JSON or YAML");
+            }
+        }
+        return external;
     }
-    return external;
-  }
 }
 
 /**
  * convert main infos and tags
  */
-Converter.prototype.convertInfos = function() {
+Converter.prototype.convertInfos = function () {
     var server = this.spec.servers && this.spec.servers[0];
     if (server) {
         var match = server.url.match(/(\w+):\/\/([^\/]+)(\/.*)?/);
         if (match) {
-          this.spec.schemes = [match[1]];
-          this.spec.host = match[2];
-          this.spec.basePath = match[3] || '/';
+            this.spec.schemes = [match[1]];
+            this.spec.host = match[2];
+            this.spec.basePath = match[3] || '/';
         }
     }
     delete this.spec.servers;
     delete this.spec.openapi;
 }
 
-Converter.prototype.convertOperations = function() {
+Converter.prototype.convertOperations = function () {
     var path, pathObject, method, operation;
     for (path in this.spec.paths) {
         pathObject = this.spec.paths[path] = this.resolveReference(this.spec, this.spec.paths[path]);
@@ -120,7 +120,7 @@ Converter.prototype.convertOperations = function() {
     }
 }
 
-Converter.prototype.convertOperationParameters = function(operation) {
+Converter.prototype.convertOperationParameters = function (operation) {
     var content, param, contentKey;
     operation.parameters = operation.parameters || [];
     if (operation.requestBody) {
@@ -138,10 +138,10 @@ Converter.prototype.convertOperationParameters = function(operation) {
                 param.schema = this.resolveReference(this.spec, param.schema);
                 if (param.schema.type === 'object' && param.schema.properties) {
                     for (var name in param.schema.properties) {
-                      var p = param.schema.properties[name];
-                      p.name = name;
-                      p.in = 'formData';
-                      operation.parameters.push(p);
+                        var p = param.schema.properties[name];
+                        p.name = name;
+                        p.in = 'formData';
+                        operation.parameters.push(p);
                     }
                 } else {
                     operation.parameters.push(param);
@@ -172,7 +172,7 @@ Converter.prototype.convertOperationParameters = function(operation) {
     this.convertParameters(operation);
 }
 
-Converter.prototype.convertParameters = function(obj) {
+Converter.prototype.convertParameters = function (obj) {
     var param;
 
     if (!obj || obj.parameters === undefined) {
@@ -194,39 +194,39 @@ Converter.prototype.convertParameters = function(obj) {
             delete param.example;
         }
         if (param.type === 'array') {
-          let style = param.style || (param.in === 'query' || param.in === 'cookie' ? 'form' : 'simple');
-          if (style === 'matrix') {
-            param.collectionFormat = param.explode ? undefined : 'csv';
-          } else if (style === 'label') {
-            param.collectionFormat = undefined;
-          } else if (style === 'simple') {
-            param.collectionFormat = 'csv';
-          } else if (style === 'spaceDelimited') {
-            param.collectionFormat = 'ssv';
-          } else if (style === 'pipeDelimited') {
-            param.collectionFormat = 'pipes';
-          } else if (style === 'deepOpbject') {
-            param.collectionFormat = 'multi';
-          } else if (style === 'form') {
-            param.collectionFormat = param.explode === false ? 'csv' : 'multi';
-          }
+            let style = param.style || (param.in === 'query' || param.in === 'cookie' ? 'form' : 'simple');
+            if (style === 'matrix') {
+                param.collectionFormat = param.explode ? undefined : 'csv';
+            } else if (style === 'label') {
+                param.collectionFormat = undefined;
+            } else if (style === 'simple') {
+                param.collectionFormat = 'csv';
+            } else if (style === 'spaceDelimited') {
+                param.collectionFormat = 'ssv';
+            } else if (style === 'pipeDelimited') {
+                param.collectionFormat = 'pipes';
+            } else if (style === 'deepOpbject') {
+                param.collectionFormat = 'multi';
+            } else if (style === 'form') {
+                param.collectionFormat = param.explode === false ? 'csv' : 'multi';
+            }
         }
         delete param.style;
         delete param.explode;
     });
 }
 
-Converter.prototype.copySchemaProperties = function(obj, props) {
+Converter.prototype.copySchemaProperties = function (obj, props) {
     let schema = this.resolveReference(this.spec, obj.schema);
     if (!schema) return;
-    props.forEach(function(prop) {
+    props.forEach(function (prop) {
         if (schema[prop] !== undefined) {
             obj[prop] = schema[prop];
         }
     });
 }
 
-Converter.prototype.convertResponses = function(operation) {
+Converter.prototype.convertResponses = function (operation) {
     var code, content, contentType, response, resolved, headers;
     for (code in operation.responses) {
         content = false;
@@ -244,7 +244,7 @@ Converter.prototype.convertResponses = function(operation) {
         if (content) {
             operation.produces = operation.produces || []
             if (!operation.produces.includes(contentType)) {
-              operation.produces.push(contentType);
+                operation.produces.push(contentType);
             }
             response.schema = content.schema;
             resolved = this.resolveReference(this.spec, response.schema);
@@ -264,7 +264,7 @@ Converter.prototype.convertResponses = function(operation) {
                 // Always resolve headers when converting to v2.
                 resolved = this.resolveReference(this.spec, headers[header])
                 // Headers should be converted like parameters.
-                if (resolved.schema){
+                if (resolved.schema) {
                     resolved.type = resolved.schema.type
                     resolved.format = resolved.schema.format
                     delete resolved.schema
@@ -277,7 +277,7 @@ Converter.prototype.convertResponses = function(operation) {
     }
 }
 
-Converter.prototype.convertSecurityDefinitions = function() {
+Converter.prototype.convertSecurityDefinitions = function () {
     this.spec.securityDefinitions = this.spec.components.securitySchemes;
     for (var secKey in this.spec.securityDefinitions) {
         var security = this.spec.securityDefinitions[secKey];

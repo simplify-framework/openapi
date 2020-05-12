@@ -1,12 +1,15 @@
 const path = require('path')
 const fs = require('fs')
-const opName = 'Simplify::FunctionLayer'
+const CBEGIN='\x1b[32m'
+const CERROR='\x1b[31m'
+const CRESET='\x1b[0m'
+const opName = `${CBEGIN}Simplify::${CRESET}FunctionLayer`
 var nodeArgs = process.argv.slice(2);
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
 var configSrcDir =  process.env.LAYER_SOURCE || "layer"
-process.env.OVERRIDEN_PACKAGE_LAYER = process.env.OVERRIDEN_PACKAGE_LAYER || ''
+process.env.ENFORCEMENT_PACKAGE = process.env.ENFORCEMENT_PACKAGE || ''
 process.env.DEPLOYMENT_STAGE = process.env.DEPLOYMENT_STAGE || 'latest'
 while (nodeArgs.length > 1) {
     if (nodeArgs[0] == "--input" || nodeArgs[0] == "-i") {
@@ -40,13 +43,13 @@ try {
                     configInput.Function.Layers = [data.LayerVersionArn]
                     fs.writeFileSync(path.join(__dirname, configInputFile), JSON.stringify(configInput, null, 4))
                 } catch(err) {
-                    console.error(`${opName}-Update-ERROR: ${err}`);
+                    console.error(`${opName}-Update-${CERROR}ERROR${CRESET}: ${err}`);
                 }
             }, function(err) {
-                console.error(`${opName}-Update-ERROR: ${err}`);
+                console.error(`${opName}-Update-${CERROR}ERROR${CRESET}: ${err}`);
             })
         }, function(err) {
-            console.error(`${opName}-UploadZip-ERROR: ${err}`);
+            console.error(`${opName}-UploadZip-${CERROR}ERROR${CRESET}: ${err}`);
         })
     }).catch(function (err) {
         console.error(`${opName}-UploadDirectory: ${err}`)

@@ -1,0 +1,15 @@
+exports.handler = (event, context) => {
+    context.done(null, { statusCode: 403, body: JSON.stringify({
+        code: 'InnerHandlerThrownException',
+        message: 'Not implemented service'
+    })})
+};
+
+exports.proxyHandler = function(req, res) {
+    exports.handler(req, {
+        done: function(err, data) {
+            if (err) res.status(403).send(err)
+            else res.status(data.statusCode).json(JSON.parse(data.body))
+        }
+    })
+}

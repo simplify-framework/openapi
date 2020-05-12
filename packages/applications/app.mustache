@@ -3,7 +3,6 @@
 const path = require('path');
 const express = require('express')
 const bodyParser = require('body-parser')
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 const createSwaggerExpressMiddleware = require('@apidevtools/swagger-express-middleware');
 const customSanitizeParamsMiddleware = require('./utils/sanitizer').customSanitizeParamsMiddleware
 
@@ -16,47 +15,50 @@ let app = express()
 let specYAML = path.join(__dirname, 'specs/swagger.yaml');
 
 createSwaggerExpressMiddleware(specYAML, app, function (err, middleware) {
-  if (err) {
-    console.error(`createSwaggerExpressMiddleware: ${err}`)
-  } else {
-    app.use(bodyParser.json())
-    app.use(awsServerlessExpressMiddleware.eventContext())
-    app.use(middleware.metadata());
-    app.use(middleware.CORS());
-    {{#serviceValidation}}
-    app.use(middleware.parseRequest());
-    function parseRequestErrorHandler(err, req, res, next) {
-      res.status(500).json({
-        code: "ErrorServiceParseRequestException",
-        message: err.message
-      });
-    }
-    app.use(parseRequestErrorHandler);
-    {{/serviceValidation}}
-    app.use(customSanitizeParamsMiddleware);
-    {{#services}}
-    {{#serviceEntries}}
-    {{#operations}}
-    app.{{httpMethodLowerCase}}("{{replacedPathName}}", require("./{{serviceName}}/src/operations/{{operationId}}"));  
-    {{/operations}}
-    {{/serviceEntries}}
-    {{/services}}
-    app.use(function (err, req, res, next, statusCode) {
-      if (res.headersSent) {
-        return next(err);
-      } else {
-        res.status(statusCode || 500).json({
-          code: "ErrorGlobalServiceException",
-          message: err.message
+    if (err) {
+        console.error(`createSwaggerExpressMiddleware: ${err}`)
+    } else {
+        app.use(bodyParser.json())
+        app.use(middleware.metadata());
+        app.use(middleware.CORS());
+        {{#serviceValidation}}
+        app.use(middleware.parseRequest());
+        function parseRequestErrorHandler(err, req, res, next) {
+            res.status(500).json({
+                code: "ErrorServiceParseRequestException",
+                message: err.message
+            });
+        }
+        app.use(parseRequestErrorHandler);
+        {{/serviceValidation}}
+        app.use(customSanitizeParamsMiddleware);
+        {{#services}}
+        {{#serviceEntries}}
+        {{#serviceTemplateMinimalist}}
+        {{#operations}}
+        app.{{httpMethodLowerCase}}("{{replacedPathName}}", require("./{{serviceName}}/src/index").proxyHandler);
+        {{/operations}}
+        {{/serviceTemplateMinimalist}}
+        {{^serviceTemplateMinimalist}}
+        {{#operations}}
+        app.{{httpMethodLowerCase}}("{{replacedPathName}}", require("./{{serviceName}}/src/operations/{{operationId}}"));
+        {{/operations}}
+        {{/serviceTemplateMinimalist}}
+        {{/serviceEntries}}
+        {{/services}}
+        app.use(function (err, req, res, next, statusCode) {
+            if (res.headersSent) {
+                return next(err);
+            } else {
+                res.status(statusCode || 500).json({
+                    code: "ErrorGlobalServiceException",
+                    message: err.message
+                });
+            }
         });
-      }
-    });
 
-    app.listen(3000, function () {// NOSONAR
-      console.log("node express service - ".concat("debugging"));
-    });
-  }
+        app.listen(3000, function () {// NOSONAR
+            console.log("node express service - ".concat("debugging"));
+        });
+    }
 })
-
-// Export your express server so you can import it in the lambda function.
-module.exports = app

@@ -113,15 +113,15 @@ function main(o, config, callback) {
             if (config.Functions) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
-                Object.keys(config.Functions).map(function (language) {
-                    templateFolder = path.join('functions', language);
-                    for (let item of config.Functions[language]) {
+                Object.keys(config.Functions).map(function (pkg) {
+                    templateFolder = path.join('functions', pkg);
+                    for (let item of config.Functions[pkg]) {
                         let fnTemplate = Hogan.compile(item.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, svc, config.apis);
                             serviceModel.serviceControl = svc.serviceEntries.some(op => op.serviceControl)
-                            if (serviceModel.serviceLang == language) {
+                            if (serviceModel.serviceTemplate == pkg) {
                                 let filename = fnTemplate.render(serviceModel, config.partials);
                                 let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                 if (!ff.existsSync(requestDir)) {
@@ -137,14 +137,14 @@ function main(o, config, callback) {
             if (config.ServiceModel) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
-                Object.keys(config.ServiceModel).map(function (language) {
-                    templateFolder = path.join('functions', language);
-                    for (let item of config.ServiceModel[language]) {
+                Object.keys(config.ServiceModel).map(function (pkg) {
+                    templateFolder = path.join('functions', pkg);
+                    for (let item of config.ServiceModel[pkg]) {
                         let fnTemplate = Hogan.compile(item.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             let models = {}
-                            if (svc.serviceLang == language) {
+                            if (svc.serviceTemplate == pkg) {
                                 svc.serviceEntries.map(endpoint => {
                                     if (!models[endpoint.serviceModelName]) {
                                         models[endpoint.serviceModelName] = endpoint
@@ -176,13 +176,13 @@ function main(o, config, callback) {
             if (config.ServiceOperation) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
-                Object.keys(config.ServiceOperation).map(function (language) {
-                    templateFolder = path.join('functions', language);
-                    for (let item of config.ServiceOperation[language]) {
+                Object.keys(config.ServiceOperation).map(function (pkg) {
+                    templateFolder = path.join('functions', pkg);
+                    for (let item of config.ServiceOperation[pkg]) {
                         let fnTemplate = Hogan.compile(item.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
-                            if (svc.serviceLang == language) {
+                            if (svc.serviceTemplate == pkg) {
                                 svc.serviceEntries.map(endpoint => {
                                     endpoint.operations.map(op => {
                                         let operation = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);

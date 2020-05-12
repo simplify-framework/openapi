@@ -139,12 +139,15 @@ function despatch(obj, config, callback) {
 }
 
 function main(o) {
-    console.log(` - Loaded definition ${defName}`);
+    console.log("╓───────────────────────────────────────────────────────────────╖")
+    console.log("║                        Simplify Framework                     ║")
+    console.log("╙───────────────────────────────────────────────────────────────╜")
+    console.log(` - OpenAPI definition ${defName}`);
     if (o && o.openapi) {
         despatch(o, config, function(err) {
-            console.warn(` - Auto merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)':'off (use option --merge to turn on)'}`)
-            console.warn(` - Generate diff file is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)':'off (use option --diff to turn on)'}`)
-            console.log(` - Finish generation ${!err ? `without error. See ${config.outputDir} for your generated code!` : err}`);
+            console.warn(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)':'off (use option --merge to turn on)'}`)
+            console.warn(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)':'off (use option --diff to turn on)'}`)
+            console.log(` - Finished generation ${!err ? `with NO error. See ${config.outputDir} for your generated code!` : err}`);
         });
     }
     else {

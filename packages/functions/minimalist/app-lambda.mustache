@@ -1,0 +1,14 @@
+'use strict';
+
+const express = require('express')
+let app = express()
+
+{{#serviceEntries}}
+{{#operations}}
+app.{{httpMethodLowerCase}}("{{replacedPathName}}", require("./index").proxyHandler);    
+{{/operations}}
+{{/serviceEntries}}
+
+app.listen(3000, function () {// NOSONAR
+    console.log("node express service - ".concat("debugging"));
+});

@@ -26,8 +26,7 @@
         { "input": "package.mustache", "output": "{{projectName}}/package.json" },
         { "input": "test-utils.mustache", "output": "{{projectName}}/tests/test-utils.js" },
         { "input": "sigV4Client.mustache", "output": "{{projectName}}/tests/sigV4Client.js" },
-        { "input": "app.mustache", "output": "{{projectName}}/app.js" },
-        { "input": "index.mustache", "output": "{{projectName}}/index.js" }
+        { "input": "app.mustache", "output": "{{projectName}}/app.js" }
     ],
     "Functions": {
         "javascript": [
@@ -54,13 +53,28 @@
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
         ],
+        "minimalist": [
+            { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
+            { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },        
+            { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
+            { "input": "logger.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/logger.js" },    
+            { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
+            { "input": "docker-entrypoint.mustache", "output": "{{projectName}}/{{serviceName}}/docker-entrypoint.sh" },
+            { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
+            { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" },
+            { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
+            { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
+            { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
+            { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
+            { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" }
+        ],
         "python": [
             { "input": "index.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.py" },
             { "input": "README.mustache", "output": "{{projectName}}/{{serviceName}}/src/README.md" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
-            { "input": "function-create.mustache", "output": "{{projectName}}/{{serviceName}}/function-create.js" },
+            { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
             { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" }
         ]
     },

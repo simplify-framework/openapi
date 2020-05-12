@@ -6,20 +6,16 @@
     "scripts": {
         "deploy": "env FUNCTION_SOURCE=dist node function-push.js",
         "build": "webpack -p --config webpack.config.js",
-        "deploy-layer": "env LAYER_SOURCE=layer node layer-push.js",
-        "build-layer": "webpack -p --config webpack.config.layer.js",
+        "deploy-layer": "echo `Not supported deploy for minimalist function`",
+        "build-layer": "echo `Not supported build for minimalist function`",
         "production": "webpack -p && env LOCAL_DEBUG= node dist/index.js",
         "development": "webpack --mode development && env LOCAL_DEBUG=YES node dist/index.js",
-        "start": "cd src && npm install && env LOCAL_DEBUG=YES DEPLOYMENT_STAGE=latest node app.js",
+        "start": "cd src && npm install && env LOCAL_DEBUG=YES DEPLOYMENT=latest node app.js",
         "code-scan": "bash sonarqube-scanner.sh"
     },
     "license": "MIT",
     "private": true,
     "dependencies": {
-        "yaml": "^1.9.2",
-        {{#serviceControl}}
-        "brakes": "^2.8.0",
-        {{/serviceControl}}
         "debug": "^4.1.1"
     },
     "devDependencies": {

@@ -8,22 +8,33 @@ x-deployment-region: eu-west-1
 x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
 x-api-authorizer-id: eu-west-1_g4zb3L3Iu
+x-api-rate-limit: 100
+#x-api-quota-limit: 1000
+#x-api-quota-unit: DAY
+#x-api-burst-limit: 1000
 #x-api-control-dashboard: false
 paths:
+  '/simplest/api':
+    x-api-service-name: api-service-for-simplest
+    x-api-service-template: minimalist
+    x-api-service-public: true
+    get:
+      responses:
+        '200':
+          description: Success
   '/event-for-pets':
-    x-event-service-key-vault: true
+    #x-event-service-key-vault: true
     x-event-service-name: event-service-for-pets
-    #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:lambda-custom-resource
-    #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/External-DynamoDB-Read-IAMPolicy
+    #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:LambdaExternalResource
+    #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/DynamoDBAccessReadWritePolicy
     x-event-service-schedule: rate(10 days)
-    x-event-service-path: true
     put:
       description: 'Run on event operation'
       responses:
         '200':
           description: Success
   '/pets':
-    x-api-service-path: true
+    x-api-service-public: true
     x-api-service-control: false
     x-api-service-name: api-service-for-pets
     x-api-service-authorizer: false
@@ -44,6 +55,7 @@ paths:
         '200':
           description: Success
     post:
+      x-api-service-name: api-service-update-pets
       tags:
         - Pets Service Group
       description: 'Create Pets Information'
@@ -62,6 +74,7 @@ paths:
         '200':
           description: Success
     put:
+      x-api-service-name: api-service-update-pets
       tags:
         - Pets Service Group
       description: 'Update Pets Information'
@@ -80,7 +93,7 @@ paths:
         '200':
           description: Success
   '/pets/{id}':
-    x-api-service-path: true
+    x-api-service-public: true
     x-api-service-authorizer: false
     x-api-service-api-key: false
     x-api-service-name: api-service-for-pets
