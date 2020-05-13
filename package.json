@@ -19,7 +19,6 @@
     "lambda",
     "aws"
   ],
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
   "author": "Duong Dinh Cuong",
   "license": "Apache-2.0",
   "bugs": {
