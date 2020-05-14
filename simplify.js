@@ -20,7 +20,7 @@ var argv = require('yargs')
     .string('output')
     .alias('o', 'output')
     .describe('output', 'output directory')
-    .default('output', './output')
+    .default('output', '.')
     .boolean('verbose')
     .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
@@ -39,18 +39,30 @@ if (argv._[0] !== 'generate' && argv._[0] !== 'petsample') {
     console.log(` - The command '${argv._[0]}' is not supported or no longer supported. Try with 'generate' command`)
     process.exit(-1)
 }
-
 let configPath = path.resolve(__dirname, 'packages');
 let configFile = path.join(path.join(configPath), 'config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
 let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
-config.outputDir = argv.output;
-
-mkdirp(path.join(__dirname, config.outputDir)).then(function () {
-    fs.writeFileSync(path.join(__dirname, config.outputDir, 'openapi.yaml'), fs.readFileSync(defName, 'utf8'), 'utf8')
+const sampleName = path.join(__dirname, 'openapi.yaml')
+const outputYAML = path.resolve(argv.output, 'openapi.yaml')
+mkdirp(path.resolve(argv.output)).then(function () {
     if (argv._[0] === 'petsample') {
+        console.log("╓───────────────────────────────────────────────────────────────╖")
+        console.log("║                        Simplify Framework                     ║")
+        console.log("╙───────────────────────────────────────────────────────────────╜")
+        console.log(` - Sample definition ${outputYAML}`);
+        fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
         process.exit(-1)
+    } else {
+        console.log("╓───────────────────────────────────────────────────────────────╖")
+        console.log("║                        Simplify Framework                     ║")
+        console.log("╙───────────────────────────────────────────────────────────────╜")
+        console.log(` - OpenAPI definition ${defName}`);
+        fs.writeFileSync(outputYAML, fs.readFileSync(defName, 'utf8'), 'utf8')
+        runCommandLine()
     }
+}, function (err) {
+    console.error(`${err}`)
 })
 
 function mergeArrays(arrObj, moreArrObj) {
@@ -109,6 +121,7 @@ function runCommandLine() {
         processor.fileFunctions.mkdirp = nop;
         processor.fileFunctions.mkdirp.sync = nop;
     }
+    config.outputDir = argv.output;
     config.defaults.source = defName;
     config.defaults.flat = true;
 
@@ -141,20 +154,14 @@ function despatch(obj, config, callback) {
 }
 
 function main(o) {
-    console.log("╓───────────────────────────────────────────────────────────────╖")
-    console.log("║                        Simplify Framework                     ║")
-    console.log("╙───────────────────────────────────────────────────────────────╜")
-    console.log(` - OpenAPI definition ${defName}`);
     if (o && o.openapi) {
         despatch(o, config, function (err) {
             console.warn(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)' : 'off (use option --merge to turn on)'}`)
             console.warn(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)' : 'off (use option --diff to turn on)'}`)
-            console.log(` - Finished generation ${!err ? `with NO error. See ${config.outputDir} for your generated code!` : err}`);
+            console.log(` - Finished generation ${!err ? `with NO error. See ${argv.output} for your generated code!` : err}`);
         });
     }
     else {
         console.error('Unrecognised OpenAPI 3.0 version');
     }
 }
-
-runCommandLine()

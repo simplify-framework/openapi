@@ -26,11 +26,11 @@ npm install -g simplify-codegen@latest
 
 ## Generate Open API specs sample for pets:
 
-`simplify-codegen petsample -o ./specs`
+`simplify-codegen petsample`
 
 ## Generate project using command line:
 
-`simplify-codegen generate -i ./specs/openapi.yaml -o ../projects`
+`simplify-codegen generate -i openapi.yaml -o .`
 
 ## Microservices architecture in AWS:
 + AWS API Gateway REST API
