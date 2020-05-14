@@ -25,12 +25,22 @@ npm install -g simplify-codegen@latest
 ```
 
 ## Generate Open API specs sample for pets:
-
-`simplify-codegen petsample`
+- `mkdir pets-project` to create project folder for pets
+- `simplify-codegen petsample` to generate OpenAPI 3.0 specs
 
 ## Generate project using command line:
+- `simplify-codegen generate -i openapi.yaml` to generate code in the current folder
+- `simplify-codegen generate -i openapi.yaml -o other-folder` to specify another folder
 
-`simplify-codegen generate -i openapi.yaml`
+## Setup AWS configuration profile
+- Create a deployment user in IAM: `simplify-user`
+- Setup IAM Role policy using: `deployment-policy.json`
+- Configure your machine `aws configure --profile simplify-eu`
+
+## You are in the pets project directory
+- `npm install` to install project dependancies
+- `npm run deploy` to provision code containers
+- `npm run latest` to run code as a latest version
 
 ## Microservices architecture in AWS:
 + AWS API Gateway REST API
@@ -46,11 +56,6 @@ npm install -g simplify-codegen@latest
     - AWS Secret Manager  (key vault)
     - Custom resource     (external setup)
     - Manage Policy Arn   (access policy)
-
-## Setup AWS configuration profile
-- Create a deployment user in IAM: `simplify-user`
-- Setup IAM Role policy using: `deployment-policy.json`
-- Configure your machine `aws configure --profile simplify-eu`
 
 ## OpenAPI specs with Simplify definitions:
 - `info.version`: define software package version, set for initial packages

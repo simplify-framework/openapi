@@ -11,9 +11,6 @@ if (nodeArgs.length > 1) {
     configInputFile = (nodeArgs[0] == "--input" || nodeArgs[0] == "-i") ? nodeArgs[1] : configInputFile
 }
 try {
-    console.log("╓───────────────────────────────────────────────────────────────╖")
-    console.log("║                        Simplify Framework                     ║")
-    console.log("╙───────────────────────────────────────────────────────────────╜")
     var config = simplify.getInputConfig(path.join(__dirname, configInputFile))
     var stackData = JSON.parse(fs.readFileSync(path.join(__dirname, config.OutputFile)))
     Object.keys(config.Deployment.Functions).forEach(function(f) {
