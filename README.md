@@ -30,7 +30,7 @@ npm install -g simplify-codegen@latest
 
 ## Generate project using command line:
 
-`simplify-codegen generate -i openapi.yaml -o .`
+`simplify-codegen generate -i openapi.yaml`
 
 ## Microservices architecture in AWS:
 + AWS API Gateway REST API
