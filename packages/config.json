@@ -5,6 +5,8 @@
         ]
     },
     "Deployments": [
+        { "input": ".env.mustache", "output": ".env" },
+        { "input": ".gitignore.mustache", "output": ".gitignore" },
         { "input": "package.mustache", "output": "package.json" },
         { "input": "mermaid.mustache", "output": "mermaid.yaml" },
         { "input": "openapi.mustache", "output": "openapi.yaml" },
@@ -12,7 +14,6 @@
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
-        { "input": "code-push.stable.mustache", "output": "code-push.stable.sh" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
         { "input": "code-init.mustache", "output": "code-init.js" },
         { "input": "README.mustache", "output": "README.md" }

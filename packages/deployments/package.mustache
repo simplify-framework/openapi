@@ -7,8 +7,8 @@
         "gencode": "simplify-codegen generate -i openapi.yaml -o . --merge",
         "deploy": "node deployment.js --input {{deploymentNamePosix}}.json",
         "destroy": "node deployment.js --input {{deploymentNamePosix}}.json --deletion",
-        "stable": "bash code-push.stable.sh",
-        "latest": "bash code-push.sh"
+        "stable": "bash code-push.sh stable",
+        "latest": "bash code-push.sh latest"
     },
     "license": "MIT",
     "private": true,

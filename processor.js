@@ -1,7 +1,5 @@
 // @ts-nocheck
-
 'use strict';
-
 const fs = require('fs');
 const path = require('path');
 const logger = require('./logger');
@@ -11,10 +9,25 @@ const rimraf = require('rimraf');
 const Hogan = require('hogan.js');
 const clone = require('reftools/lib/clone.js').circularClone;
 const adaptor = require('./adaptor.js');
+const onetimeGeneration = [
+    ".env.mustache",
+    ".babelrc.mustache",
+    ".gitignore.mustache",
+    "package.mustache",
+    "package-src.mustache",
+    "function-input.mustache",
+    "webpack.config.mustache",
+    "webpack.config.layer.mustache",
+    "docker-entrypoint.mustache",
+    "Dockerfile.mustache",
+    "README.mustache"
+]
 
 function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
         if (fs.existsSync(filePath)) {
+            if (onetimeGeneration.indexOf(config.input)>=0) return;
+            if (config.verbose) logger.info("R-Generating...", filePath)
             var oldFile = fs.readFileSync(filePath).toString()
             function addNewLine(value, lastRemoved) {
                 return lastRemoved ? `${value}>>>>>>> auto:${filePath}\n` : value
@@ -47,10 +60,12 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
                 }
             }
         } else {
+            if (config.verbose) logger.info("N-Generating...", filePath)
             fs.writeFileSync(filePath, newFileData, encoding);
         }
     }
     catch (_) {
+        if (config.verbose) logger.info("F-Generating...", filePath)
         fs.writeFileSync(filePath, newFileData, encoding);
     }
 }
@@ -112,8 +127,7 @@ function main(o, config, callback) {
                     if (!ff.existsSync(requestDir)) {
                         ff.mkdirp.sync(requestDir);
                     }
-                    if (verbose) logger.info("Generating...", filePath)
-                    creatFileOrPatch(filePath, content, 'utf8', config.defaults);
+                    creatFileOrPatch(filePath, content, 'utf8', { ...config.defaults, input: cfg.input } );
                 }
             }
         }
@@ -125,11 +139,11 @@ function main(o, config, callback) {
                 delete toplevel.apiInfo;
                 Object.keys(config.Functions).map(function (pkg) {
                     templateFolder = path.join('functions', pkg);
-                    for (let item of config.Functions[pkg]) {
-                        let fnTemplate = Hogan.compile(item.output);
-                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
+                    for (let cfg of config.Functions[pkg]) {
+                        let fnTemplate = Hogan.compile(cfg.output);
+                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
-                            let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, svc, config.apis);
+                            let serviceModel = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, svc, config.apis);
                             serviceModel.serviceControl = svc.serviceEntries.some(op => op.serviceControl)
                             if (serviceModel.serviceTemplate == pkg) {
                                 let filename = fnTemplate.render(serviceModel, config.partials);
@@ -137,8 +151,7 @@ function main(o, config, callback) {
                                 if (!ff.existsSync(requestDir)) {
                                     ff.mkdirp.sync(requestDir);
                                 }
-                                if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', config.defaults);
+                                creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', { ...config.defaults, input: cfg.input });
                             }
                         })
                     }
@@ -149,9 +162,9 @@ function main(o, config, callback) {
                 delete toplevel.apiInfo;
                 Object.keys(config.ServiceModel).map(function (pkg) {
                     templateFolder = path.join('functions', pkg);
-                    for (let item of config.ServiceModel[pkg]) {
-                        let fnTemplate = Hogan.compile(item.output);
-                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
+                    for (let cfg of config.ServiceModel[pkg]) {
+                        let fnTemplate = Hogan.compile(cfg.output);
+                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             let models = {}
                             if (svc.serviceTemplate == pkg) {
@@ -169,14 +182,13 @@ function main(o, config, callback) {
                                     }
                                 })
                                 Object.keys(models).forEach(key => {
-                                    let serviceModel = Object.assign({}, config.defaults, item.defaults || {}, toplevel, models[key], config.apis);
+                                    let serviceModel = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, models[key], config.apis);
                                     let filename = fnTemplate.render(serviceModel, config.partials);
                                     let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                     if (!ff.existsSync(requestDir)) {
                                         ff.mkdirp.sync(requestDir);
                                     }
-                                    if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                    creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', config.defaults);
+                                    creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(serviceModel, config.partials), 'utf8', { ...config.defaults, input: cfg.input });
                                 })
                             }
                         })
@@ -188,21 +200,20 @@ function main(o, config, callback) {
                 delete toplevel.apiInfo;
                 Object.keys(config.ServiceOperation).map(function (pkg) {
                     templateFolder = path.join('functions', pkg);
-                    for (let item of config.ServiceOperation[pkg]) {
-                        let fnTemplate = Hogan.compile(item.output);
-                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, item.input), 'utf8'));
+                    for (let cfg of config.ServiceOperation[pkg]) {
+                        let fnTemplate = Hogan.compile(cfg.output);
+                        let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             if (svc.serviceTemplate == pkg) {
                                 svc.serviceEntries.map(endpoint => {
                                     endpoint.operations.map(op => {
-                                        let operation = Object.assign({}, config.defaults, item.defaults || {}, toplevel, endpoint, op, config.apis);
+                                        let operation = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, endpoint, op, config.apis);
                                         let filename = fnTemplate.render(operation, config.partials);
                                         let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                         if (!ff.existsSync(requestDir)) {
                                             ff.mkdirp.sync(requestDir);
                                         }
-                                        if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                                        creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8', config.defaults);
+                                        creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(operation, config.partials), 'utf8', { ...config.defaults, input: cfg.input });
                                     })
                                 })
                             }
