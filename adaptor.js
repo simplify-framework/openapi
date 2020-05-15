@@ -8,6 +8,7 @@ const clone = require('reftools/lib/clone.js').circularClone;
 const validator = require('oas-validator').validateSync;
 const downconverter = require('./downconvert.js');
 const logger = require('./logger');
+const crypto = require('crypto')
 
 const schemaProperties = [
     'format',
@@ -578,6 +579,29 @@ function removeCustomPrefix(obj) {
     return tmp
 }
 
+function cryptoRandomNumber(minimum, maximum){
+	var distance = maximum-minimum;
+	if(minimum>=maximum){
+		console.log('Minimum number should be less than maximum');
+		return false;
+	} else if(distance>281474976710655){
+		console.log('You can not get all possible random numbers if range is greater than 256^6-1');
+		return false;
+	} else if(maximum>Number.MAX_SAFE_INTEGER){
+		console.log('Maximum number should be safe integer limit');
+		return false;
+	} else {
+		var maxBytes = 3;
+		var maxDec = 16777216;
+		var randbytes = parseInt(crypto.randomBytes(maxBytes).toString('hex'), 16);
+		var result = Math.floor(randbytes/maxDec*(maximum-minimum+1)+minimum);
+		if(result>maximum){
+			result = maximum;
+		}
+		return result;
+	}
+}
+
 function getPrime(api, defaults) {
     let require_fields = ['x-deployment-name', 'x-deployment-region', 'x-project-name']
     require_fields.forEach(function (f) {
@@ -601,6 +625,8 @@ function getPrime(api, defaults) {
     prime.appVersion = "0.1.1";
     prime.serviceVersion = "0.1.1";
     prime.projectVersion = "0.1.1";
+    prime.projectId = api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
+    api['x-project-id'] = prime.projectId
     prime.version = api.info.version;
     prime.title = api.info.title;
     prime.generatorVersion = require('./package.json').version;
@@ -655,6 +681,7 @@ function transform(api, defaults, callback) {
     obj["swagger-json"] = JSON.stringify(removeCustomPrefix(obj.swagger), null, 2); // set to original if converted 2.0
     obj["openapi-yaml"] = yaml.stringify(removeCustomPrefix(api));
     obj["openapi-json"] = JSON.stringify(removeCustomPrefix(api), null, 2);
+    obj["openapi-root"] = yaml.stringify(api);
     obj.openapi = {};
     obj.consumes = [];
     obj.produces = [];

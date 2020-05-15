@@ -6,8 +6,8 @@
     "scripts": {
         "deploy": "env FUNCTION_SOURCE=dist node function-push.js",
         "build": "webpack -p --config webpack.config.js",
-        "deploy-layer": "echo `Not supported deploy for minimalist function`",
-        "build-layer": "echo `Not supported build for minimalist function`",
+        "deploy-layer": "env LAYER_SOURCE=layer node layer-push.js",
+        "build-layer": "webpack -p --config webpack.config.layer.js",
         "production": "webpack -p && env LOCAL_DEBUG= node dist/index.js",
         "development": "webpack --mode development && env LOCAL_DEBUG=YES node dist/index.js",
         "start": "cd src && npm install && env LOCAL_DEBUG=YES DEPLOYMENT=latest node app.js",
@@ -19,7 +19,7 @@
         "debug": "^4.1.1"
     },
     "devDependencies": {
-        "simplify": "latest",
+        "simplify-sdk": "^0.1.6",
         "aws-sdk": "^2.635.0",
         "adm-zip": "^0.4.14",
         "@babel/cli": "^7.7.5",

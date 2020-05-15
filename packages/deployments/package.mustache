@@ -6,13 +6,13 @@
         "start": "npm install && npm run gencode",
         "gencode": "simplify-codegen generate -i openapi.yaml -o . --merge",
         "deploy": "node deployment.js --input {{deploymentNamePosix}}.json",
-        "destroy": "node deployment.js --input project-pets-demo.json --deletion",
+        "destroy": "node deployment.js --input {{deploymentNamePosix}}.json --deletion",
         "stable": "bash code-push.stable.sh",
         "latest": "bash code-push.sh"
     },
     "license": "MIT",
     "private": true,
     "devDependencies": {
-        "simplify-sdk": "latest"
+        "simplify-sdk": "^0.1.6"
     }
 }

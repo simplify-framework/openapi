@@ -2,8 +2,8 @@
     "Profile": "{{deploymentProfileOrigin}}",
     "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
-        "Name": "{{serviceNamePosix}}",
-        "Key": "python/${DATE_TODAY}"
+        "Name": "{{serviceNamePosix}}-{{projectId}}",
+        "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
     },
     "OutputFile": "function-meta.json",
     "Function": {
