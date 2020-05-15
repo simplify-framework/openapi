@@ -58,7 +58,6 @@ mkdirp(path.resolve(argv.output)).then(function () {
         console.log("║                        Simplify Framework                     ║")
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - OpenAPI definition ${defName}`);
-        fs.writeFileSync(outputYAML, fs.readFileSync(defName, 'utf8'), 'utf8')
         runCommandLine()
     }
 }, function (err) {

@@ -6,7 +6,8 @@
     },
     "Deployments": [
         { "input": "package.mustache", "output": "package.json" },
-        { "input": "mermaid.mustache", "output": "{{projectName}}/mermaid.yaml" },
+        { "input": "mermaid.mustache", "output": "mermaid.yaml" },
+        { "input": "openapi.mustache", "output": "openapi.yaml" },
         { "input": "deployment.mustache", "output": "{{deploymentNamePosix}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
@@ -57,7 +58,8 @@
         ],
         "flatted": [
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
-            { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },        
+            { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },
+            { "input": "index-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"},
             { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
             { "input": "logger.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/logger.js" },    
             { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
@@ -67,6 +69,7 @@
             { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
+            { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
             { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" }
         ],
