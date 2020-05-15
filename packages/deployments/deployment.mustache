@@ -61,7 +61,7 @@ Resources:
         paths:
           {{#services}}      
           {{#serviceEntries}}
-          {{#servicePublicExisted}}
+          {{#servicePublicBoolean}}
           "{{path}}":            
             {{#hasOptions}}
             options:
@@ -153,7 +153,7 @@ Resources:
                 httpMethod: POST
                 type: aws_proxy
           {{/operations}}
-          {{/servicePublicExisted}}
+          {{/servicePublicBoolean}}
           {{/serviceEntries}}
           {{/services}}
         securityDefinitions:

@@ -58,17 +58,17 @@ function getProperties(obj, define, prefix) {
                 properties[varName + 'Origin'] = obj[key]
                 properties[varName + obj[key].toPascalCase()] = true
             } else if (typeof (obj[key]) === 'number') {
-                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || 0)
+                properties[varName] = properties[varName + 'Number'] = (obj[key] || 0)
             } else if (typeof (obj[key]) === 'boolean') {
-                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || false)
+                properties[varName] = properties[varName + 'Boolean'] = (obj[key] || false)
             } else if (typeof (obj[key]) === 'object') {
                 if (Array.isArray(obj[key])) {
-                    properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = convertArray(obj[key] || [])
+                    properties[varName] = properties[varName + 'Array']  = convertArray(obj[key] || [])
                 } else {
-                    properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || {})
+                    properties[varName] = properties[varName + 'Object'] = (obj[key] || {})
                 } 
             } else {
-                properties[varName] = properties[varName + 'Posix'] = properties[varName + 'Pascal'] = (obj[key] || undefined)
+                properties[varName] = (obj[key] || undefined)
             }
         }
     })
@@ -108,9 +108,6 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
     if (obj.httpMethodLowerCase === 'original') operation.httpMethod = verb; // extension
     operation.path = path;
     operation.replacedPathName = path;
-    operation.operationId = op.operationId || ('operation' + obj.openapi.operationCounter++);
-    operation.operationIdLowerCase = operation.operationId.toLowerCase();
-    operation.operationIdSnakeCase = Case.snake(operation.operationId);
     operation.description = op.description;
     operation.summary = op.summary;
     operation.allParams = [];
@@ -226,7 +223,7 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
             operation.hasHeaderParams = true;
         }
     } // end of effective parameters    
-    operation.operationId = op.operationId || Case.camel((op.tags ? op.tags[0] : '') + (paramList ? '_' + paramList.join('_') + '_' : '') + verb);
+    operation.operationId = op.operationId || Case.camel(operation.httpMethodLowerCase + (operation.path.split('/').join(' ').toPascalCase().split('/').join('')));
     operation.operationIdLowerCase = operation.operationId.toLowerCase();
     operation.operationIdSnakeCase = Case.snake(operation.operationId);
     operation.bodyParams = [];
@@ -452,8 +449,8 @@ function convertToServices(source, obj, defaults) {
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
                 serviceEntries: [pathEntry]
             }
-            service.serviceTemplate = service.serviceTemplate || 'javascript'
-            if (service.serviceTemplate == 'javascript' || service.serviceTemplate == 'minimalist') {
+            service.serviceTemplate = service.serviceTemplate || 'stacked'
+            if (service.serviceTemplate == 'stacked' || service.serviceTemplate == 'flatted') {
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
                 service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'
                 service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`

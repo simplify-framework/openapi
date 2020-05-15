@@ -7,27 +7,28 @@ x-deployment-name: project-pets-demo
 x-deployment-region: eu-west-1
 x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
-x-api-authorizer-id: eu-west-1_g4zb3L3Iu
-x-api-rate-limit: 100
-#x-api-quota-limit: 1000
-#x-api-quota-unit: DAY
-#x-api-burst-limit: 1000
-#x-api-control-dashboard: false
+x-api-authorizer-id: eu-west-1_xxxxxxxx
+x-api-rate-limit: 100 # maximun requests per overall setting
+x-api-quota-limit: 1000 # maximum requests per quota-unit
+x-api-quota-unit: DAY  # can be one of [DAY, WEEK, MONTH]
+x-api-burst-limit: 1000 # maximum burst requests
 paths:
-  '/simplest/api':
-    x-api-service-name: api-service-for-simplest
-    x-api-service-template: minimalist
-    x-api-service-public: true
+  '/shopping/pets':
+    x-api-service-name: function-for-buy-pets
+    x-api-service-template: flatted # default is stacked, can be one of [stacked, flatted, python]
+    x-api-service-public: true # Explicit expose this entry through API Gateway [required]
     get:
       responses:
         '200':
           description: Success
-  '/event-for-pets':
-    #x-event-service-key-vault: true
-    x-event-service-name: event-service-for-pets
+  '/events/feed-pets':
+    x-event-service-schedule: rate(10 days) # or cron(https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html)
+    x-api-service-public: false # DONOT expose this entry through API Gateway
+    x-event-service-name: event-function-for-pets
+    x-event-service-template: flatted # default is stacked, can be one of [stacked, flatted, python]
     #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:LambdaExternalResource
     #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/DynamoDBAccessReadWritePolicy
-    x-event-service-schedule: rate(10 days)
+    x-event-service-key-vault: false # turn on for using SecretManager key vault
     put:
       description: 'Run on event operation'
       responses:
@@ -36,7 +37,7 @@ paths:
   '/pets':
     x-api-service-public: true
     x-api-service-control: false
-    x-api-service-name: api-service-for-pets
+    x-api-service-name: function-for-pets
     x-api-service-authorizer: false
     x-api-service-api-key: false
     x-api-service-tag: devel
@@ -55,7 +56,7 @@ paths:
         '200':
           description: Success
     post:
-      x-api-service-name: api-service-update-pets
+      x-api-service-name: function-for-pets
       tags:
         - Pets Service Group
       description: 'Create Pets Information'
@@ -74,11 +75,11 @@ paths:
         '200':
           description: Success
     put:
-      x-api-service-name: api-service-update-pets
+      x-api-service-name: function-for-pets
       tags:
         - Pets Service Group
       description: 'Update Pets Information'
-      operationId: updatePetWithFields
+      operationId: updatePet
       requestBody:
         description: Optional description in *Markdown*
         required: true
@@ -92,11 +93,11 @@ paths:
       responses:
         '200':
           description: Success
-  '/pets/{id}':
+  '/people/pets/{id}':
     x-api-service-public: true
-    x-api-service-authorizer: false
+    x-api-service-authorizer: true
     x-api-service-api-key: false
-    x-api-service-name: api-service-for-pets
+    x-api-service-name: function-for-people
     x-api-service-model-name: people-pets
     x-api-service-control: true
     post:
@@ -131,8 +132,9 @@ paths:
         '200':
           description: Success
   '/people':
-    x-api-service-name: api-service-for-people
-    x-api-service-model-name: people-pets
+    x-api-service-name: function-for-people
+    x-api-service-model-name: people
+    x-api-service-authorizer: true
     get:
       tags:
         - People Service Group
