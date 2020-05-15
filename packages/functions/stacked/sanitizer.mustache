@@ -37,7 +37,7 @@ exports.customSanitizeParamsMiddleware = function (req, res, next) {
         if (req.apiGateway) {
             req.sanitizer['context'] = req.apiGateway.event
         }
-        return next()
+        return next(null, req, res)
     } catch (err) {
         res.status(400/** BAD REQUEST */).json({
             code: "ErrorServiceParametersError",

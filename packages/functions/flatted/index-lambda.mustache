@@ -10,7 +10,7 @@ const getPackage = function(canary) {
 var {{serviceName}} = getPackage(process.env.DEPLOYMENT_STAGE || 'latest')
 
 exports.handler = (event, context, callback) => {
-    if (allowedCanaries.indexOf(event.headers['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'enforce') {
+    if (allowedCanaries.indexOf(event.headers['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'canary') {
         {{serviceName}} = getPackage(`${event.headers['x-canary-selection']}`)
     }
     {{serviceName}}.handler(event, context, callback)
