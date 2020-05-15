@@ -6,14 +6,15 @@
     },
     "Deployments": [
         { "input": "package.mustache", "output": "package.json" },
-        { "input": "README.mustache", "output": "README.md" },
+        { "input": "mermaid.mustache", "output": "{{projectName}}/mermaid.yaml" },
         { "input": "deployment.mustache", "output": "{{deploymentNamePosix}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
         { "input": "code-push.stable.mustache", "output": "code-push.stable.sh" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
-        { "input": "code-init.mustache", "output": "code-init.js" }
+        { "input": "code-init.mustache", "output": "code-init.js" },
+        { "input": "README.mustache", "output": "README.md" }
     ],
     "Applications": [
         { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
@@ -30,7 +31,7 @@
         { "input": "app.mustache", "output": "{{projectName}}/app.js" }
     ],
     "Functions": {
-        "javascript": [
+        "stacked": [
             { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
@@ -54,7 +55,7 @@
             { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
             { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
         ],
-        "minimalist": [
+        "flatted": [
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
             { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },        
             { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
@@ -80,14 +81,14 @@
         ]
     },
     "ServiceModel": {
-        "javascript": [
+        "stacked": [
             { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/layered/{{serviceModelName}}.js" },                
             { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
             { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
         ]
     },
     "ServiceOperation": {
-        "javascript": [
+        "stacked": [
             { "input": "operation.mustache", "output": "{{projectName}}/{{serviceName}}/src/operations/{{operationId}}.js" }
         ]
     }

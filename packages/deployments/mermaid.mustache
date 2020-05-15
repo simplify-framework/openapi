@@ -1,0 +1,40 @@
+stateDiagram
+  [*] --> {{gatewayName}}
+  {{#services}}
+  {{#servicePublicBoolean}}
+    {{gatewayName}} --> {{serviceName}}
+  {{/servicePublicBoolean}}
+  {{/services}}
+
+  {{#services}}
+  {{#servicePublicBoolean}}
+    {{serviceName}}: {{#serviceApiKey}}API Key{{/serviceApiKey}}{{#serviceAuthorizer}}{{#authorizerIdExisted}}Cognito Authorizer{{/authorizerIdExisted}}{{^authorizerIdExisted}}Sigv4 IAM{{/authorizerIdExisted}}{{/serviceAuthorizer}}{{^serviceAuthorizer}}{{^serviceApiKey}}Sigv4 IAM{{/serviceApiKey}}{{/serviceAuthorizer}}
+  {{/servicePublicBoolean}}
+  {{/services}}
+
+  {{#services}}
+  {{#serviceEntries}}
+  {{#servicePublicBoolean}}
+  {{#operations}}
+    {{serviceName}} --> {{operationId}}: {{httpMethod}} {{path}}
+  {{/operations}}
+  {{/servicePublicBoolean}}
+  {{#serviceScheduleExisted}}
+  {{#operations}}
+    {{serviceName}} --> {{serviceName}}: scheduled by {{serviceScheduleOrigin}}
+  {{/operations}}
+  {{/serviceScheduleExisted}}
+  {{/serviceEntries}}
+  {{/services}}
+    
+  {{#services}}
+  {{#serviceEntries}}
+  {{#serviceTemplateMinimalist}}
+  {{/serviceTemplateMinimalist}}
+  {{^serviceTemplateMinimalist}}
+  {{#operations}}
+    {{operationId}} --> {{serviceModelName}}
+  {{/operations}}
+  {{/serviceTemplateMinimalist}}
+  {{/serviceEntries}}
+  {{/services}}

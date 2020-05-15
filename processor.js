@@ -92,6 +92,7 @@ function main(o, config, callback) {
         }
         function parseContent(type, model, config) {
             if (config[type]) {
+                let mermaidContent = { mermaidBase64JSON: '' }
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
                 templateFolder = type.toLowerCase();
@@ -99,13 +100,20 @@ function main(o, config, callback) {
                     let fnTemplate = Hogan.compile(cfg.output);
                     let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                     let rootModel = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, model.apiInfo, config.apis);
+                    rootModel.mermaidBase64JSON = mermaidContent.mermaidBase64JSON
                     let filename = fnTemplate.render(rootModel, config.partials);
                     let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
+                    const content = template.render(rootModel, config.partials)
+                    let textContent = JSON.stringify({"code": content,"mermaid":{"theme":"default"},"updateEditor":false})
+                    const filePath = path.join(outputDir, subDir, filename)
+                    if (cfg.input == "mermaid.mustache") {
+                        mermaidContent.mermaidBase64JSON = new Buffer.alloc(textContent.length, textContent).toString('base64')
+                    }
                     if (!ff.existsSync(requestDir)) {
                         ff.mkdirp.sync(requestDir);
                     }
-                    if (verbose) logger.info("Generating...", path.join(outputDir, filename))
-                    creatFileOrPatch(path.join(outputDir, subDir, filename), template.render(rootModel, config.partials), 'utf8', config.defaults);
+                    if (verbose) logger.info("Generating...", filePath)
+                    creatFileOrPatch(filePath, content, 'utf8', config.defaults);
                 }
             }
         }
