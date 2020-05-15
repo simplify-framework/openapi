@@ -39,7 +39,7 @@ var {{{operationId}}}CircuitBreakerBrake = null;
  **/
 
 module.exports = function (req, res, next) {
-    if (allowedCanaries.indexOf(req.headers['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'enforce') {
+    if (allowedCanaries.indexOf(req.headers['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'canary') {
         {{serviceModelName}} = getPackage(`${req.headers['x-canary-selection']}`)
     }
     {{#servicePassthrough}}

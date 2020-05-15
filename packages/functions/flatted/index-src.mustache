@@ -1,3 +1,6 @@
 exports.handler = (event, context, callback) => {
-    callback(null, { statusCode: 200, body: JSON.stringify({}) })
+    callback(null, { statusCode: 403, body: JSON.stringify({
+        "code": "ErrorServiceNotImplemetedException",
+        "message": `The '{{serviceNamePosix}}' was not Implemented. [TODO: Update your code then deploy again!]`
+    })})
 };

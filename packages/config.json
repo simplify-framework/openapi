@@ -66,6 +66,7 @@
             { "input": "docker-entrypoint.mustache", "output": "{{projectName}}/{{serviceName}}/docker-entrypoint.sh" },
             { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
             { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" },
+            { "input": "layer-push.mustache", "output": "{{projectName}}/{{serviceName}}/layer-push.js" },
             { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },

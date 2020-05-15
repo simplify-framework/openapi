@@ -12,8 +12,8 @@ exports.register = function (event, context, operations) {
         "X-Content-Type-Options": "nosniff",
         "Content-Type": "application/json"
     }
-    var requestParams = event.pathParameters
-    var eventPath = event.resource.replace(/{/g,':').replace(/}/g,'')
+    let requestParams = event.pathParameters
+    let eventPath = event.resource.replace(/{/g,':').replace(/}/g,'')
     const operation = operations.find(o => {
         if (o.method == event.httpMethod) {
             return o.path == eventPath
@@ -29,9 +29,10 @@ exports.register = function (event, context, operations) {
             swagger: {
                 params: swaggerParams
             },
+            headers: event.headers,
             params: requestParams
         }
-        var res = {
+        let res = {
             writeHead: function (status, headers) {
                 this.status = status
                 this.headers = headers
@@ -48,7 +49,7 @@ exports.register = function (event, context, operations) {
                 context.succeed({ statusCode: this.status, body: JSON.stringify(obj), headers: this.headers || defaultHeaders })
             }
         }
-        sanitizer.customSanitizeParamsMiddleware(req, res, function () {
+        sanitizer.customSanitizeParamsMiddleware(req, res, function (_, req, res) {
             operation.handler(req, res)
         })
     } else {
