@@ -43,9 +43,11 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 
 ## You are in the pets project directory
 - `npm install` to install project dependancies and tools
-- `npm run deploy` to provision code containers (AWS Lambda empty functions)
-- `npm run latest` to deploy and run code as a latest version (DEPLOYMENT_STAGE=latest)
-- `npm run stable` to deploy and run code as a stable version (DEPLOYMENT_STAGE=stable)
+- `npm run stack-deploy` to provision code containers (AWS Lambda empty functions)
+- `npm run push-code` to deploy and run code as declared in .env variables (ENV_*)
+  + ENV_functionName_DEPLOYMENT_STAGE=(`latest`|`stable`|`enfoce`|`canary`) to setup running mode
+  + ENV_functionName_ENFORCEMENT_PACKAGE=specific-package-name-with-version (`enforce` mode only)
+- `npm run stack-destroy` to provision code containers (AWS Lambda empty functions)
 
 ## Microservices architecture in AWS:
 + AWS API Gateway REST API

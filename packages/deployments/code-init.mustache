@@ -4,6 +4,7 @@ const simplify = require('simplify-sdk')
 const CBEGIN='\x1b[32m'
 const CERROR='\x1b[31m'
 const CRESET='\x1b[0m'
+const CDONE='\x1b[37m'
 const opName = `${CBEGIN}Simplify::${CRESET}Deployment`
 var nodeArgs = process.argv.slice(2);
 var configInputFile = process.env.DEPLOYMENT_INPUT || "deployment.json"
@@ -26,5 +27,5 @@ try {
         fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
     })
 } catch (err) {
-    console.error(`${opName}-LoadConfig-${CERROR}ERROR${CRESET}: ${err}`)
+    console.error(`${opName}-LoadConfig: ${CERROR}(ERROR)${CRESET} ${err}`)
 }

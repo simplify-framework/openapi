@@ -50,6 +50,9 @@ function getProperties(obj, define, prefix) {
             let varName = key.replace(define, '').toCamelCase().split(' ').join('').split('-').join('')
             varName = prefix ? prefix + varName.toPascalCase() : varName
             properties[varName + 'Existed'] = true
+            if (key.startsWith('x-event-service-name')) {
+                properties['eventServiceType'] = properties['eventServiceTypeBoolean'] = true 
+            }
             if (typeof (obj[key]) === 'string') {
                 const varData = (obj[key] || '').toCamelCase().split(' ').join('').split('-').join('')
                 properties[varName] = varData
@@ -450,7 +453,7 @@ function convertToServices(source, obj, defaults) {
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
                 serviceEntries: [pathEntry]
             }
-            service.serviceTemplate = service.serviceTemplate || 'stacked'
+            service.serviceTemplate = service.serviceTemplate || (service.eventServiceTypeBoolean ? 'flatted' : 'stacked')
             if (service.serviceTemplate == 'stacked' || service.serviceTemplate == 'flatted') {
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
                 service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'

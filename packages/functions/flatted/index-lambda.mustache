@@ -1,3 +1,8 @@
+'use strict';
+/**
+ * Use __non_webpack_require__ when require('a-package') that is underlying &
+ * pre-installed in your runtime such as 'aws-sdk' or in node_modules layers
+ **/
 const enforcementPackage = process.env.ENFORCEMENT_PACKAGE || '{{serviceNamePosix}}'
 const allowedCanaries = [ "latest", "stable", "enforce" ]
 const getPackage = function(canary) {
@@ -10,9 +15,13 @@ const getPackage = function(canary) {
 var {{serviceName}} = getPackage(process.env.DEPLOYMENT_STAGE || 'latest')
 
 exports.handler = (event, context, callback) => {
-    if (allowedCanaries.indexOf(event.headers['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'canary') {
-        {{serviceName}} = getPackage(`${event.headers['x-canary-selection']}`)
+    {{#eventServiceTypeBoolean}}
+    {{/eventServiceTypeBoolean}}
+    {{^eventServiceTypeBoolean}}
+    if (allowedCanaries.indexOf((event.headers || {})['x-canary-selection']) >=0 && process.env.DEPLOYMENT_STAGE === 'canary') {
+        functionForGetTimetables = getPackage(`${(event.headers || {})['x-canary-selection']}`)
     }
+    {{/eventServiceTypeBoolean}}
     {{serviceName}}.handler(event, context, callback)
 };
 

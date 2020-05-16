@@ -87,7 +87,7 @@
     },
     "ServiceModel": {
         "stacked": [
-            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/layered/{{serviceModelName}}.js" },                
+            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/{{serviceModelName}}.js" },                
             { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
             { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
         ]

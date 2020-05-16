@@ -3,10 +3,10 @@
     "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
         "Name": "{{projectNamePosix}}-{{projectId}}",
-        "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
+        "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/dist"
     },
     "OutputFile": "function-meta.json",
-    "Layer": {
+    "LayerConfig": {
         "CompatibleRuntimes": [
             "{{serviceRuntimeOrigin}}"
         ],

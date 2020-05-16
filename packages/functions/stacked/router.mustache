@@ -27,10 +27,10 @@ exports.register = function (event, context, operations) {
             cookies: event.headers.cookie || event.headers.Cookie || "",
             body: JSON.parse(event.body || "{}") || {},
             swagger: {
-                params: swaggerParams
+                params: swaggerParams || {}
             },
-            headers: event.headers,
-            params: requestParams
+            headers: event.headers || {},
+            params: requestParams || {}
         }
         let res = {
             writeHead: function (status, headers) {

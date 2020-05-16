@@ -4,13 +4,17 @@
     "description": "{{{appDescription}}}",
     "main": "index.py",
     "scripts": {
-        "deploy": "node function-push.js",
+        "push-update": "node function-push.js --ops update",
+        "push-code": "env FUNCTION_SOURCE=./ node function-push.js",
+        "push-layer": "echo `Python is not supported pushing layer yet`",
+        "build-code": "echo `Python is not supported building code yet`",
+        "build-layer": "echo `Python is not supported building layer yet`",
         "code-scan": "bash sonarqube-scanner.sh",
         "start": "python index.py"
     },
     "license": "MIT",
     "private": true,
     "devDependencies": {
-        "simplify-sdk": "^0.1.6"
+        "simplify-sdk": "^0.1.7"
     }
 }
