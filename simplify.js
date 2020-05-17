@@ -52,7 +52,7 @@ mkdirp(path.resolve(argv.output)).then(function () {
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - Sample definition ${outputYAML}`);
         fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
-        process.exit(-1)
+        process.exit(0)
     } else {
         console.log("╓───────────────────────────────────────────────────────────────╖")
         console.log("║                        Simplify Framework                     ║")
