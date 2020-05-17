@@ -2,13 +2,13 @@
     "Profile": "{{deploymentProfileOrigin}}",
     "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
-        "Name": "{{deploymentNamePosix}}-{{projectId}}",
+        "Name": "{{deploymentNameSnake}}-{{projectId}}",
         "Key": "stacks/${DATE_TODAY}"
     },
-    "OutputFile": "{{deploymentNamePosix}}-meta.json",
+    "OutputFile": "{{deploymentNameSnake}}-meta.json",
     "Deployment": {
         "Name": "{{deploymentName}}",
-        "Definition": "{{deploymentNamePosix}}.yaml",
+        "Definition": "{{deploymentNameSnake}}.yaml",
         "Authorizer": "{{authorizerIdOrigin}}",
         "Functions": {
             {{#services}}

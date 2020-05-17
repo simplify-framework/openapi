@@ -7,7 +7,7 @@ server {
 
     {{#services}}
     location /{{serviceName}} {
-        proxy_pass http://{{serviceNamePosix}}:3000;
+        proxy_pass http://{{serviceNameSnake}}:3000;
         rewrite ^/{{serviceName}}(.*)$ $1 break;
     }
     {{/services}}

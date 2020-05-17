@@ -1,17 +1,33 @@
-### Simplify Deployment Guideline
+### {{projectNamePascal}} Deployment Guideline
 
-### Create infrastructure and default functions
-`npm install && npm run deploy`
+## Setup AWS configuration profile
+- Create a deployment user in IAM: `simplify-user`
+- Setup IAM Role policy using: `deployment-policy.json`
+- Configure your machine `aws configure --profile simplify-eu`
 
-### Push latest code and run as emerging solution
-`npm run latest`
+*** Install deployment project dependancies ***
+`npm install`
 
-### Push stable code and run as released solution
-`npm run stable`
+*** Create stack resources and default function configurations ***
+`npm run stack-deploy`
 
-### Cleanup AWS Cloud stack resources or Kubernetes
-`npm run destroy`
+*** Push source code of every functions defined in .env and function-input.json ***
+`npm run push-code`
 
-### Project Architecture Diagram
+*** Run unit tests and local express server for debugging ***
+`cd {{projectName}} && npm install`
+`npm run test-units`
+`npm start`
+
+*** Run test remote APIs against {{projectNamePascal}} API Gateway ***
+`npm run test-apis`
+
+*** Push configuration of every functions defined in .env and function-input.json ***
+`npm run push-update`
+
+*** Cleanup stack resources and destroy every function's dependancies (including layers) ***
+`npm run stack-destroy`
+
+*** Project Architecture Diagram ***
 
 ![ImageDiagram](https://mermaid-js.github.io/mermaid-live-editor/#/view/{{mermaidBase64JSON}})

@@ -3,13 +3,13 @@
  * Use __non_webpack_require__ when require('a-package') that is underlying &
  * pre-installed in your runtime such as 'aws-sdk' or in node_modules layers
  **/
-const enforcementPackage = process.env.ENFORCEMENT_PACKAGE || '{{serviceNamePosix}}'
+const enforcementPackage = process.env.ENFORCEMENT_PACKAGE || '{{serviceNameSnake}}'
 const allowedCanaries = [ "latest", "stable", "enforce" ]
 const getPackage = function(canary) {
     let runtimePackage = undefined
-    if (canary === 'stable') runtimePackage = __non_webpack_require__('{{serviceNamePosix}}')
+    if (canary === 'stable') runtimePackage = __non_webpack_require__('{{serviceNameSnake}}')
     else if (canary === 'enforce') runtimePackage = __non_webpack_require__(`${enforcementPackage}`)
-    else runtimePackage = require('./{{serviceNamePosix}}')
+    else runtimePackage = require('./{{serviceNameSnake}}')
     return runtimePackage
 }
 var {{serviceName}} = getPackage(process.env.DEPLOYMENT_STAGE || 'latest')

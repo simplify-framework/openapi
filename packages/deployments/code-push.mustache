@@ -1,7 +1,7 @@
 #!/bin/bash
 # Simplify Automatic Deployment Script
-# Project: {{projectNamePosix}}
-# Deployment: {{deploymentNamePosix}}
+# Project: {{projectNameSnake}}
+# Deployment: {{deploymentNameSnake}}
 # Region: {{deploymentRegionOrigin}}
 # Profile: {{deploymentProfileOrigin}}
 # Version: {{projectVersion}}
@@ -11,7 +11,7 @@ FUNC_OPS=${2:-"push"}
 
 export $(egrep -v '^#' ${ENV_FILE} | xargs)
 
-node code-init.js --input {{deploymentNamePosix}}.json
+node code-init.js --input {{deploymentNameSnake}}.json
 
 declare -a DEPLOYMENT_PACKAGES=({{#services}}"{{serviceName}}"{{#hasMore}} {{/hasMore}}{{/services}})
 for i in "${DEPLOYMENT_PACKAGES[@]}"

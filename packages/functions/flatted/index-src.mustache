@@ -15,7 +15,7 @@ exports.handler = (event, context, callback) => {
     {{^eventServiceTypeBoolean}}
     callback(null, { statusCode: 403, body: JSON.stringify({
         "code": "ErrorServiceNotImplemetedException",
-        "message": `The '{{serviceNamePosix}}' was not Implemented. [TODO: Update your code then deploy again!]`
+        "message": `The '{{serviceNameSnake}}' was not Implemented. [TODO: Update your code then deploy again!]`
     })})
     {{/eventServiceTypeBoolean}}
 };
