@@ -1,0 +1,36 @@
+var chai = require('chai');
+var chaiAsPromised = require('chai-as-promised');
+chai.use(chaiAsPromised).should();
+
+process.env.DEBUG="LOGGING_TURN_OFF_NO_MATCH"
+if (typeof __non_webpack_require__ === 'undefined') global.__non_webpack_require__ = require
+const {{serviceName}}Service = require('../../../{{serviceName}}/src/{{serviceNameSnake}}');
+
+describe('({{projectName}}) {{serviceName}} [*]:', function () {
+    var event = { requestContext: { identity: { user: {} }, authorizer: { claims: {} } } }
+    before('Prepare for {{serviceName}} [*] test specs', function () {
+        event.requestContext.identity.user = "XXXXXXXXXXXXXXXXXXXX:CognitoIdentityCredentials"
+        event.requestContext.authorizer.claims.sub=  "9999-0000-33333333-2222-333333333333"
+        {{#eventServiceTypeBoolean}}
+        event.eventSource = "{{serviceName}}-EVENT"
+        {{/eventServiceTypeBoolean}}
+    });
+
+    it('Should be resolved with ErrorServiceNotImplemetedException when calling {{{operationId}}}', function () {
+        {{serviceName}}Service.handler(event, {}, function(err, data) {
+            {{#eventServiceTypeBoolean}}
+            return new Promise(function(resolve, _) { resolve(data) }).should.eventually.deep.equal({
+                eventType: event.eventSource
+            })
+            {{/eventServiceTypeBoolean}}
+            {{^eventServiceTypeBoolean}}
+            return new Promise(function(resolve, _) { resolve(data) }).should.eventually.deep.equal({ statusCode: 403, body: JSON.stringify({
+                "code": "ErrorServiceNotImplemetedException",
+                "message": `The '{{serviceNameSnake}}' was not Implemented. [TODO: Update your code then deploy again!]`
+            })})
+            {{/eventServiceTypeBoolean}}
+        })
+    });
+
+    after('Cleanup {{serviceName}} [*] test specs', function () {});
+});

@@ -94,7 +94,7 @@ Resources:
             {{/hasOptions}}
             {{^hasOptions}}
             {{/hasOptions}}
-            {{#operations}}            
+            {{#operations}}
             {{httpMethodLowerCase}}:
               consumes:
               - application/json
@@ -217,7 +217,7 @@ Resources:
     Type: AWS::ApiGateway::UsagePlan
     Properties:
       Description: The quota limits of {{gatewayName}} API.
-      UsagePlanName: DefaultPlan
+      UsagePlanName: {{gatewayName}}-DefaultPlan
       ApiStages:
       - ApiId: !Ref {{gatewayName}}
         Stage: !Ref DeploymentStage
@@ -227,6 +227,22 @@ Resources:
       Quota:
         Limit: {{quotaLimit}}
         Period: "{{quotaUnitOrigin}}"
+
+  {{gatewayName}}APIGateWayApiKey:
+    Type: AWS::ApiGateway::ApiKey
+    Properties:
+      Enabled: true
+      StageKeys: 
+        - RestApiId: !Ref {{gatewayName}}
+          StageName: !Ref DeploymentStage
+      Value: {{gatewayApiKey}}
+  
+  {{gatewayName}}APIGateWayUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties: 
+      KeyId: !Ref {{gatewayName}}APIGateWayApiKey
+      KeyType: API_KEY
+      UsagePlanId: !Ref {{gatewayName}}APIGateWayUsagePlan
 
 {{/gatewayNameExisted}}
 {{#services}}

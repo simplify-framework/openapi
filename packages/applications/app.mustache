@@ -5,6 +5,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const createSwaggerExpressMiddleware = require('@apidevtools/swagger-express-middleware');
 const customSanitizeParamsMiddleware = require('./utils/sanitizer').customSanitizeParamsMiddleware
+if (typeof __non_webpack_require__ === 'undefined') global.__non_webpack_require__ = require
 
 {{#serviceHystrixStream}}
 var Brakes = require('brakes');

@@ -10,10 +10,10 @@
         { "input": "package.mustache", "output": "package.json" },
         { "input": "mermaid.mustache", "output": "mermaid.yaml" },
         { "input": "openapi.mustache", "output": "openapi.yaml" },
-        { "input": "deployment.mustache", "output": "{{deploymentNamePosix}}.yaml" },
+        { "input": "deployment.mustache", "output": "{{deploymentNameSnake}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
-        { "input": "deployment-input.mustache", "output": "{{deploymentNamePosix}}.json" },
+        { "input": "deployment-input.mustache", "output": "{{deploymentNameSnake}}.json" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
         { "input": "code-init.mustache", "output": "code-init.js" },
         { "input": "README.mustache", "output": "README.md" }
@@ -28,8 +28,8 @@
         { "input": "swagger-json.mustache", "output": "{{projectName}}/specs/swagger.json" },
         { "input": "docker-compose.mustache", "output": "{{projectName}}/docker-compose.yml" },
         { "input": "package.mustache", "output": "{{projectName}}/package.json" },
-        { "input": "test-utils.mustache", "output": "{{projectName}}/tests/test-utils.js" },
-        { "input": "sigV4Client.mustache", "output": "{{projectName}}/tests/sigV4Client.js" },
+        { "input": "api-utils.mustache", "output": "{{projectName}}/utils/api-utils.js" },
+        { "input": "sigV4Client.mustache", "output": "{{projectName}}/utils/sigV4Client.js" },
         { "input": "app.mustache", "output": "{{projectName}}/app.js" }
     ],
     "Functions": {
@@ -41,7 +41,7 @@
             { "input": "swagger-yaml.mustache", "output": "{{projectName}}/{{serviceName}}/src/specs/swagger.yaml" },
             { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },        
             { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
-            { "input": "package-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/package.json" },
+            { "input": "package-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/package.json" },
             { "input": "sanitizer.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/sanitizer.js" },
             { "input": "router.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/router.js" },
             { "input": "logger.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/logger.js" },    
@@ -55,12 +55,14 @@
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "webpack.config.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.js" },
             { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
-            { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"}
+            { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/index.js"}
         ],
         "flatted": [
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
             { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },
-            { "input": "index-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/index.js"},
+            { "input": "index-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/index.js"},
+            { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
+            { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" },
             { "input": "package-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/package.json" },
             { "input": "logger.mustache", "output": "{{projectName}}/{{serviceName}}/src/utils/logger.js" },    
             { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
@@ -87,7 +89,7 @@
     },
     "ServiceModel": {
         "stacked": [
-            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNamePosix}}/layered/{{serviceModelName}}.js" },                
+            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/{{serviceModelName}}.js" },                
             { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
             { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
         ]

@@ -1,21 +1,53 @@
 #!/bin/bash
 # Simplify Automatic Deployment Script
-# Project: {{projectNamePosix}}
-# Deployment: {{deploymentNamePosix}}
+# Project: {{projectNameSnake}}
+# Deployment: {{deploymentNameSnake}}
 # Region: {{deploymentRegionOrigin}}
 # Profile: {{deploymentProfileOrigin}}
 # Version: {{projectVersion}}
 INITIAL_DIR=$PWD
-export $(egrep -v '^#' .env | xargs)
+ENV_FILE=${1:-".env"}
+FUNC_OPS=${2:-"push"}
 
-node code-init.js --input {{deploymentNamePosix}}.json
+export $(egrep -v '^#' ${ENV_FILE} | xargs)
 
-{{#services}}
-export DEPLOYMENT_STAGE=${ENV_{{serviceName}}_DEPLOYMENT_STAGE}
-export ENFORCEMENT_PACKAGE=${ENV_{{serviceName}}_ENFORCEMENT_PACKAGE}
-cd ${INITIAL_DIR}/{{projectName}}/{{serviceName}} && npm install && npm run build && npm run deploy && cd -
-if [ $? -ne 0 ]; then
-    echo "Publishing {{serviceName}} (latest) version has failed!"
-    exit 255
-fi
-{{/services}}
+node code-init.js --input {{deploymentNameSnake}}.json
+
+declare -a DEPLOYMENT_PACKAGES=({{#services}}"{{serviceName}}"{{#hasMore}} {{/hasMore}}{{/services}})
+for i in "${DEPLOYMENT_PACKAGES[@]}"
+do
+    export ENFORCEMENT_PACKAGE=
+    DeploymentStageName="ENV_${i}_DEPLOYMENT_STAGE"
+    export DEPLOYMENT_STAGE="${!DeploymentStageName}"
+    EnforcementPackageName="ENV_${i}_ENFORCEMENT_PACKAGE"
+    export ENFORCEMENT_PACKAGE="${!EnforcementPackageName}"
+    if [ -z "${DEPLOYMENT_STAGE}" ]; then
+        echo "Pushing {{serviceName}} with blank DEPLOYMENT_STAGE is not satified!"
+        continue
+    fi
+    cd ${INITIAL_DIR}/{{projectName}}/${i} && npm install
+    if [ "${FUNC_OPS}" == "update" ]; then
+        npm run push-update
+    else
+        if [ "${DEPLOYMENT_STAGE}" == "latest" ]; then
+        npm run build-code && npm run push-code
+        elif [ "${DEPLOYMENT_STAGE}" == "stable" ]; then
+            npm run build-code && npm run push-code && npm run build-layer && npm run push-layer
+        elif [ "${DEPLOYMENT_STAGE}" == "enforce" ]; then
+            DeploymentLayerName="ENV_${i}_DEPLOYMENT_LAYER"
+            if [ ! -z "${ENFORCEMENT_PACKAGE}" ]; then
+                npm run build-code && npm run push-code && npm run build-layer 
+                mv layer/nodejs/node_modules/${!DeploymentLayerName} layer/nodejs/node_modules/${ENFORCEMENT_PACKAGE}
+                npm run push-layer
+            fi
+        else
+            npm run build-code && npm run push-code
+        fi
+    fi
+    if [ $? -ne 0 ]; then
+        echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) version has failed!"
+        cd ${INITIAL_DIR}
+        exit 255
+    fi
+    cd ${INITIAL_DIR}
+done

@@ -1,15 +1,16 @@
 {
-    "name": "{{serviceNamePosix}}",
+    "name": "{{serviceNameSnake}}",
     "version": "{{serviceVersion}}",
     "description": "{{{serviceDescription}}}",
     "main": "app.js",
     "scripts": {
-        "deploy": "env FUNCTION_SOURCE=dist node function-push.js",
-        "build": "webpack -p --config webpack.config.js",
-        "deploy-layer": "env LAYER_SOURCE=layer node layer-push.js",
+        "push-update": "node function-push.js --ops update",
+        "push-code": "env FUNCTION_SOURCE=build node function-push.js",
+        "build-code": "webpack -p --config webpack.config.js",
+        "push-layer": "env LAYER_SOURCE=layer node layer-push.js",
         "build-layer": "webpack -p --config webpack.config.layer.js",
-        "production": "webpack -p && env LOCAL_DEBUG= node dist/index.js",
-        "development": "webpack --mode development && env LOCAL_DEBUG=YES node dist/index.js",
+        "production": "webpack -p && env LOCAL_DEBUG= node build/index.js",
+        "development": "webpack --mode development && env LOCAL_DEBUG=YES node build/index.js",
         "start": "cd src && npm install && env LOCAL_DEBUG=YES DEPLOYMENT_STAGE=latest node app.js",
         "code-scan": "bash sonarqube-scanner.sh"
     },
@@ -23,7 +24,7 @@
         "debug": "^4.1.1"
     },
     "devDependencies": {
-        "simplify-sdk": "^0.1.6",
+        "simplify-sdk": "^0.1.8",
         "aws-sdk": "^2.635.0",
         "adm-zip": "^0.4.14",
         "@babel/cli": "^7.8.4",

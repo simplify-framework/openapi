@@ -1,18 +1,18 @@
 {
-    "name": "{{projectNamePosix}}",
+    "name": "{{projectNameSnake}}",
     "version": "{{projectVersion}}",
     "description": "{{{projectDescription}}}",
     "scripts": {
-        "start": "npm install && npm run gencode",
+        "start": "npm install && npm run stack-deploy && cd {{projectName}} && npm install && npm run test-apis",
         "gencode": "simplify-codegen generate -i openapi.yaml -o . --merge",
-        "deploy": "node deployment.js --input {{deploymentNamePosix}}.json",
-        "destroy": "node deployment.js --input {{deploymentNamePosix}}.json --deletion",
-        "stable": "bash code-push.sh stable",
-        "latest": "bash code-push.sh latest"
+        "stack-deploy": "node deployment.js --input {{deploymentNameSnake}}.json",
+        "stack-destroy": "node deployment.js --input {{deploymentNameSnake}}.json --deletion",
+        "push-update": "bash code-push.sh .env update",
+        "push-code": "bash code-push.sh .env push"
     },
     "license": "MIT",
     "private": true,
     "devDependencies": {
-        "simplify-sdk": "^0.1.6"
+        "simplify-sdk": "^0.1.8"
     }
 }

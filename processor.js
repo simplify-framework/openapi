@@ -175,8 +175,7 @@ function main(o, config, callback) {
                                         models[endpoint.serviceModelName] = {
                                             serviceModelName: endpoint.serviceModelName,
                                             serviceName: endpoint.serviceName,
-                                            serviceNamePosix: endpoint.serviceNamePosix,
-                                            serviceModelLegacy: endpoint.serviceModelLegacy,
+                                            serviceNameSnake: endpoint.serviceNameSnake,
                                             operations: [...models[endpoint.serviceModelName].operations, ...endpoint.operations]
                                         }
                                     }

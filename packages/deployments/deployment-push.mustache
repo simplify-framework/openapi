@@ -3,6 +3,7 @@ const fs = require('fs')
 const CBEGIN = '\x1b[32m'
 const CERROR = '\x1b[31m'
 const CRESET = '\x1b[0m'
+const CDONE='\x1b[37m'
 const opName = `${CBEGIN}Simplify::${CRESET}Deployment`
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
@@ -32,6 +33,16 @@ try {
                 }
             }).then(function (stackData) {
                 console.log(`${opName}-CleanupResource: Resource Status - ${stackData.StackStatus}`)
+                Object.keys(config.Deployment.Functions).forEach(function (f) {
+                    const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
+                    var fConfig = JSON.parse(fs.readFileSync(fInputPath))
+                    simplify.deleteFunctionLayerVersions({
+                        adaptor: provider.getFunction(),
+                        functionConfig: fConfig.Function
+                    }).then(function(data) {
+                        console.log(`${opName}-CleanupResource: Function Layers - ${data.length}`)
+                    }).catch(err => console.error(`${opName}-CleanupResource: ${err}`))
+                })
             }).catch(function(err) {
                 console.error(`\n - Resource wasn't cleanned successfully: ${err} \n`)
             })
@@ -58,7 +69,7 @@ try {
                         stackTemplate: TemplateURL
                     }
                 }).then(function (stackData) {
-                    stackData.apiConfig = {}
+                    stackData.apiConfig = { Region: config.Region, Profile: config.Profile }
                     stackData.Outputs.map(function (o) {
                         if (o.OutputKey == `GatewayUrl`) {
                             stackData.apiConfig.GatewayURL = o.OutputValue
@@ -91,18 +102,18 @@ try {
                             fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
                         })
                     } catch (err) {
-                        console.error(`${opName}-UpdateFunctionInput-${CERROR}ERROR${CRESET}:`, err.message)
+                        console.error(`${opName}-UpdateFunctionInput: ${CERROR}(ERROR)${CRESET}`, err.message)
                     }
                 }, function (err) {
-                    console.error(`${opName}-CreateDeployment-${CERROR}ERROR${CRESET}:`, err.message || err.StackId)
+                    console.error(`${opName}-CreateDeployment: ${CERROR}(ERROR)${CRESET}`, err.message || err.StackId)
                 })
             }, function (err) {
                 console.error(`${opName}-UploadDirectory: ${err}`)
             })
         }
     }).catch(function (err) {
-        console.error(`${opName}-LoadCredentials-${CERROR}ERROR${CRESET}: ${err}`)
+        console.error(`${opName}-LoadCredentials: ${CERROR}(ERROR)${CRESET} ${err}`)
     })
 } catch (err) {
-    console.error(`${opName}-LoadConfig-${CERROR}ERROR${CRESET}: ${err}`)
+    console.error(`${opName}-LoadConfig: ${CERROR}(ERROR)${CRESET} ${err}`)
 }

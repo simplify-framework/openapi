@@ -1,14 +1,14 @@
 var chai = require('chai');
-var rewire = require('rewire');
 var chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised).should();
-require('../../../utils/sanitizer');
 
-const {{serviceModelName}}Service = require('../../../{{serviceName}}/src/{{serviceNamePosix}}').{{serviceModelName}};
+process.env.DEBUG="LOGGING_TURN_OFF_NO_MATCH"
+if (typeof __non_webpack_require__ === 'undefined') global.__non_webpack_require__ = require
+const {{serviceModelName}}Service = require('../../../{{serviceName}}/src/{{serviceNameSnake}}').{{serviceModelName}};
 
-describe('({{projectName}}) {{serviceModelName}}:', function () {
+describe('({{projectName}}) {{serviceName}} [{{serviceModelName}}]:', function () {
     var context = { requestContext: { identity: { user: {} }, authorizer: { claims: {} } } }
-    before('Prepare for {{serviceModelName}} test specs', function () {
+    before('Prepare for {{serviceName}} [{{serviceModelName}}] test specs', function () {
         context.requestContext.identity.user = "XXXXXXXXXXXXXXXXXXXX:CognitoIdentityCredentials"
         context.requestContext.authorizer.claims.sub=  "9999-0000-33333333-2222-333333333333"
     });
@@ -16,9 +16,13 @@ describe('({{projectName}}) {{serviceModelName}}:', function () {
     {{#operations}}
     it('Should be rejected with ErrorOperationNotImplemetedException when calling {{{operationId}}}', function () {
         var data = { {{#allParams}}{{paramName}}: {{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isInteger}}10{{/isInteger}}{{^isInteger}}{{#isNumber}}1.0{{/isNumber}}{{^isNumber}}{{#isArray}}[]{{/isArray}}{{^isArray}}{{#isBodyParam}}{}{{/isBodyParam}}{{^isBodyParam}}'{{paramName}}'{{/isBodyParam}}{{/isArray}}{{/isNumber}}{{/isInteger}}{{/isBoolean}}{{#hasMore}}, {{/hasMore}}{{/allParams}} }
-        return {{serviceModelName}}Service.{{{operationId}}}(context{{#hasParams}}, {{/hasParams}}{{#allParams}}data.{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}).should.eventually.rejected;
+        return {{serviceModelName}}Service.{{{operationId}}}(context{{#hasParams}}, {{/hasParams}}{{#allParams}}data.{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}).should.eventually.be.rejectedWith({
+            "code": "ErrorServiceNotImplemetedException",
+            "message": `The '{{serviceNameSnake}}' was not Implemented. [TODO: Update your code then deploy again!]`
+        });
     });
+    
     {{/operations}}
 
-    after('Cleanup {{serviceModelName}} test specs', function () {});
+    after('Cleanup {{serviceName}} [{{serviceModelName}}] test specs', function () {});
 });

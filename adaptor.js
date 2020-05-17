@@ -50,11 +50,14 @@ function getProperties(obj, define, prefix) {
             let varName = key.replace(define, '').toCamelCase().split(' ').join('').split('-').join('')
             varName = prefix ? prefix + varName.toPascalCase() : varName
             properties[varName + 'Existed'] = true
+            if (key.startsWith('x-event-service-name')) {
+                properties['eventServiceType'] = properties['eventServiceTypeBoolean'] = true 
+            }
             if (typeof (obj[key]) === 'string') {
                 const varData = (obj[key] || '').toCamelCase().split(' ').join('').split('-').join('')
                 properties[varName] = varData
                 properties[varName + 'Title'] = (obj[key] || '').split('-').join(' ')
-                properties[varName + 'Posix'] = Case.snake(varData).split('_').join('-');
+                properties[varName + 'Snake'] = Case.snake(varData).split('_').join('-');
                 properties[varName + 'Pascal'] = varData.toPascalCase()
                 properties[varName + 'Origin'] = obj[key]
                 properties[varName + obj[key].toPascalCase()] = true
@@ -450,7 +453,7 @@ function convertToServices(source, obj, defaults) {
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
                 serviceEntries: [pathEntry]
             }
-            service.serviceTemplate = service.serviceTemplate || 'stacked'
+            service.serviceTemplate = service.serviceTemplate || (service.eventServiceTypeBoolean ? 'flatted' : 'stacked')
             if (service.serviceTemplate == 'stacked' || service.serviceTemplate == 'flatted') {
                 service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
                 service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'
@@ -579,6 +582,10 @@ function removeCustomPrefix(obj) {
     return tmp
 }
 
+function cryptoRandomApiKey(size) {
+    return crypto.randomBytes(size).toString('hex').slice(0, size)
+}
+
 function cryptoRandomNumber(minimum, maximum){
 	var distance = maximum-minimum;
 	if(minimum>=maximum){
@@ -617,7 +624,7 @@ function getPrime(api, defaults) {
     prime.quotaLimit = prime.quotaLimit || 100
     prime.projectName = api['x-project-name'].toCamelCase().split(' ').join('').split('-').join('');
     prime.projectNamePascal = prime.projectName.toPascalCase().split(' ').join('').split('-').join('');
-    prime.projectNamePosix = Case.snake(prime.projectName).split('_').join('-');
+    prime.projectNameSnake = Case.snake(prime.projectName).split('_').join('-');
     prime.appDescription = api.info.description || api.info.title || 'Missing description in info.title or info.description';
     prime.projectDescription = prime.appDescription;
     prime.serviceDescription = prime.appDescription;
@@ -627,6 +634,8 @@ function getPrime(api, defaults) {
     prime.projectVersion = "0.1.1";
     prime.projectId = api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
     api['x-project-id'] = prime.projectId
+    prime.gatewayApiKey = api['x-api-key'] || cryptoRandomApiKey(40)
+    api['x-api-key'] = prime.gatewayApiKey
     prime.version = api.info.version;
     prime.title = api.info.title;
     prime.generatorVersion = require('./package.json').version;

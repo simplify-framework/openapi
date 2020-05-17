@@ -2,15 +2,15 @@
     "Profile": "{{deploymentProfileOrigin}}",
     "Region": "{{deploymentRegionOrigin}}",
     "Bucket": {
-        "Name": "{{projectNamePosix}}-{{projectId}}",
-        "Key": "functions/{{serviceNamePosix}}/${DATE_TODAY}/builds"
+        "Name": "{{projectNameSnake}}-{{projectId}}",
+        "Key": "functions/{{serviceNameSnake}}/${DATE_TODAY}/dist"
     },
     "OutputFile": "function-meta.json",
-    "Layer": {
+    "LayerConfig": {
         "CompatibleRuntimes": [
             "{{serviceRuntimeOrigin}}"
         ],
-        "LayerName": "{{serviceNamePosix}}"
+        "LayerName": "{{serviceNameSnake}}"
     },
     "Function": {
         "FunctionName": "{{serviceName}}",

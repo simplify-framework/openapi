@@ -7,7 +7,7 @@ x-deployment-name: project-pets-demo
 x-deployment-region: eu-west-1
 x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
-x-api-authorizer-id: eu-west-1_xxxxxxxx
+x-api-authorizer-id: eu-west-1_xxxxxxxx # set to Coginito UserPoolId
 x-api-rate-limit: 100 # maximun requests per overall setting
 x-api-quota-limit: 1000 # maximum requests per quota-unit
 x-api-quota-unit: DAY  # can be one of [DAY, WEEK, MONTH]
@@ -15,31 +15,30 @@ x-api-burst-limit: 1000 # maximum burst requests
 paths:
   '/shopping/pets':
     x-api-service-name: function-for-buy-pets
-    x-api-service-template: flatted # default is stacked, can be one of [stacked, flatted, python]
-    x-api-service-public: true # Explicit expose this entry through API Gateway [required]
+    x-api-service-template: flatted # default is stacked for API, can be one of [stacked, flatted, python]
+    x-api-service-public: true # explicit to expose this entry through API Gateway [required]
     get:
       responses:
         '200':
           description: Success
   '/events/feed-pets':
     x-event-service-schedule: rate(10 days) # or cron(https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html)
-    x-api-service-public: false # DONOT expose this entry through API Gateway
+    x-event-service-public: false # explicit to NOT expose this entry through API Gateway
     x-event-service-name: event-function-for-pets
-    x-event-service-template: flatted # default is stacked, can be one of [stacked, flatted, python]
+    x-event-service-template: flatted # default is flatted for EVENT, can be one of [stacked, flatted, python]
     #x-event-service-custom: arn:aws:lambda:eu-west-1:xxxxxxxxxxxx:function:LambdaExternalResource
     #x-event-service-policy: arn:aws:iam::xxxxxxxxxxxx:policy/DynamoDBAccessReadWritePolicy
     x-event-service-key-vault: false # turn on for using SecretManager key vault
     put:
-      description: 'Run on event operation'
+      description: 'Run on event operation, method is not used'
       responses:
         '200':
           description: Success
   '/pets':
-    x-api-service-public: true
-    x-api-service-control: false
+    x-api-service-public: true # explicit to expose this entry through API Gateway [required]
     x-api-service-name: function-for-pets
-    x-api-service-authorizer: false
-    x-api-service-api-key: false
+    x-api-service-authorizer: false # if x-api-authorizer-id is set, using Cognito Authorizer, otherwise using Sigv4 IAM
+    x-api-service-api-key: false # using API Key with Quota Limit plan if set. Ca be set along with service authorizer
     x-api-service-tag: devel
     get:
       tags:
@@ -57,6 +56,9 @@ paths:
           description: Success
     post:
       x-api-service-name: function-for-pets
+      #x-api-service-public: true => if not set, use the same setting with the first entry method
+      #x-api-service-authorizer: false => if not set, use the same setting with the first entry method
+      #x-api-service-api-key: false => if not set, use the ssame settingame with the first entry method
       tags:
         - Pets Service Group
       description: 'Create Pets Information'
@@ -76,6 +78,9 @@ paths:
           description: Success
     put:
       x-api-service-name: function-for-pets
+      #x-api-service-public: true => if not set, use the same setting with the first entry method
+      #x-api-service-authorizer: false => if not set, use the same setting with the first entry method
+      #x-api-service-api-key: false => if not set, use the same setting with the first entry method
       tags:
         - Pets Service Group
       description: 'Update Pets Information'
@@ -94,12 +99,12 @@ paths:
         '200':
           description: Success
   '/people/pets/{id}':
-    x-api-service-public: true
-    x-api-service-authorizer: true
-    x-api-service-api-key: false
+    x-api-service-public: true # explicit to expose this entry through API Gateway [required]
+    x-api-service-authorizer: true # if x-api-authorizer-id is set, using Cognito Authorizer, otherwise using Sigv4 IAM
+    x-api-service-api-key: false # using API Key with Quota Limit plan if set. Ca be set along with service authorizer
     x-api-service-name: function-for-people
     x-api-service-model-name: people-pets
-    x-api-service-control: true
+    x-api-service-control: true # this mode is valid for Docker/Kubernetes or local running mode. Otherwise not work as expected.
     post:
       x-control-service-timeout: 60000
       x-control-service-duration: 30000
@@ -134,7 +139,7 @@ paths:
   '/people':
     x-api-service-name: function-for-people
     x-api-service-model-name: people
-    x-api-service-authorizer: true
+    x-api-service-authorizer: true # if x-api-authorizer-id is set, using Cognito Authorizer, otherwise using Sigv4 IAM
     get:
       tags:
         - People Service Group

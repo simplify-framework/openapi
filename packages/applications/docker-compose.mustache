@@ -1,14 +1,14 @@
 version: '3.3'
 services:
   {{#services}}  
-  {{serviceNamePosix}}:
+  {{serviceNameSnake}}:
     build:
       context: ./{{serviceName}}/    
     environment:
       - LOG_LEVEL=info
     restart: always
   {{/services}}
-  {{gatewayNamePosix}}:
+  {{gatewayNameSnake}}:
     image: nginx
     ports:
       - 80:8080
@@ -17,7 +17,7 @@ services:
     restart: always
     depends_on:
     {{#services}}
-    - {{serviceNamePosix}}
+    - {{serviceNameSnake}}
     {{/services}}
   {{#controlDashboard}}
   hystrix-dashboard:
@@ -26,7 +26,7 @@ services:
       - 8080:8080
     depends_on:
     {{#services}}
-    - {{serviceNamePosix}}
+    - {{serviceNameSnake}}
     {{/services}}
     restart: always
   {{/controlDashboard}}

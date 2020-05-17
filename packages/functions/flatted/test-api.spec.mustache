@@ -4,12 +4,13 @@ chai.should()
 const apiConfig = require('../../../../{{deploymentNameSnake}}-meta.json').apiConfig;
 const apiService = require('../../../utils/api-utils');
 
-describe('({{projectName}}) {{serviceName}} [{{serviceModelName}}]:', function () {
+describe('({{projectName}}) {{serviceName}} [*]:', function () {
 
-    before('Prepare for {{serviceName}} [{{serviceModelName}}] test specs', async function () {
+    before('Prepare for {{serviceName}} [*] test specs', async function () {
         await apiService.config({ ...apiConfig });
     });
-    
+    {{#serviceEntries}}
+    {{#servicePublicBoolean}}
     {{#operations}}
     it('Should be resolved with Response (Object) when calling {{httpMethod}} {{path}}', async function () {
         var data = { {{#allParams}}{{paramName}}: {{#isBoolean}}true{{/isBoolean}}{{^isBoolean}}{{#isInteger}}10{{/isInteger}}{{^isInteger}}{{#isNumber}}1.0{{/isNumber}}{{^isNumber}}{{#isArray}}[]{{/isArray}}{{^isArray}}{{#isBodyParam}}{}{{/isBodyParam}}{{^isBodyParam}}'{{paramName}}'{{/isBodyParam}}{{/isArray}}{{/isNumber}}{{/isInteger}}{{/isBoolean}}{{#hasMore}}, {{/hasMore}}{{/allParams}} }
@@ -28,9 +29,10 @@ describe('({{projectName}}) {{serviceName}} [{{serviceModelName}}]:', function (
         const result = await apiService.executeIAM(pathWithParams.join('/'), '{{httpMethod}}'{{#httpMethodHasBody}}, data.body{{/httpMethodHasBody}})
         {{/serviceApiKeyBoolean}}
         result.should.be.an('object') && expect(result).to.have.property('errors')
-        expect(JSON.parse(result.errors.message).code).to.be.equal('ErrorOperationNotImplemetedException')
+        expect(JSON.parse(result.errors.message).code).to.be.equal('ErrorServiceNotImplemetedException')
     });
     {{/operations}}
-
-    after('Cleanup {{serviceName}} [{{serviceModelName}}] test specs', function () {});
+    {{/servicePublicBoolean}}
+    {{/serviceEntries}}
+    after('Cleanup {{serviceName}} [*] test specs', function () {});
 });
