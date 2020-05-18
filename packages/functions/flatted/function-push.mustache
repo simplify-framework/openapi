@@ -1,11 +1,15 @@
+'use strict';
+/** 
+ * Simplify Framework - CodeGen {{generatorVersion}}
+ * GitHub URL   : https://github.com/simplify-framework
+ * ProjectName  : {{projectNamePascal}}
+ * ProjectId    : {{projectId}}
+ * License      : Apache-2.0 (Free)
+ */
 const path = require('path')
 const fs = require('fs')
-const CBEGIN = '\x1b[32m'
-const CERROR = '\x1b[31m'
-const CRESET = '\x1b[0m'
-const CDONE='\x1b[37m'
 var nodeArgs = process.argv.slice(2);
-const opName = `${CBEGIN}Simplify::${CRESET}Function`
+const opName = `Function`
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
@@ -38,14 +42,14 @@ try {
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     ...metaOutput, ...data
                 }, null, 4));
-            }).catch(err => console.error(`${opName}-Update: ${CERROR}(ERROR)${CRESET}: ${err}`))
+            }).catch(err => simplify.finishWithErrors(`${opName}-Update`, err))
         } else if (functionOps === 'update') {
             simplify.updateFunctionConfiguration({ adaptor: provider.getFunction(), functionConfig}).then(data => {
                 let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, configInput.OutputFile)))
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     Configuration: { ...metaOutput.Configuration, ...data }
                 }, null, 4));
-            }).catch(err => console.error(`${opName}-Update: ${CERROR}(ERROR)${CRESET}: ${err}`))
+            }).catch(err => simplify.finishWithErrors(`${opName}-Update`, err))
         } else {
             simplify.uploadDirectoryAsZip({
                 adaptor: provider.getStorage(), ...{
@@ -61,15 +65,15 @@ try {
                         Configuration: data
                     }, null, 4));
                 }, function (err) {
-                    console.error(`${opName}-Update: ${CERROR}(ERROR)${CRESET}: ${err}`);
+                    simplify.finishWithErrors(`${opName}-Update`, err);
                 })
             }, function (err) {
-                console.error(`${opName}-UploadZip: ${CERROR}(ERROR)${CRESET}: ${err}`);
+                simplify.finishWithErrors(`${opName}-UploadZip`, err);
             })
         }
     }).catch(function (err) {
-        console.error(`${opName}-UploadDirectory: ${err}`)
+        simplify.finishWithErrors(`${opName}-UploadDirectory`, err)
     })
 } catch (err) {
-    console.error(`${opName}-LoadConfig: ${err}`)
+    simplify.finishWithErrors(`${opName}-LoadConfig`, err)
 }

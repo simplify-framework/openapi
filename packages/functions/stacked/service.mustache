@@ -11,13 +11,12 @@ const logger = require('../utils/logger')
 
 {{#servicePassthrough}}
 exports.{{{operationId}}} = function(event, context, callback) {
-    var f = __function
-    logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
-    logger.warn(__function, __line, "Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
-    logger.error(__function, __line, "Enable Debug Error Only: process.env.DEBUG=ERROR")
+    logger.info("Enable Debug Info Only: process.env.DEBUG=INFO")
+    logger.warn("Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
+    logger.error("Enable Debug Error Only: process.env.DEBUG=ERROR")
     callback({
         "code": "ErrorOperationNotImplemetedException",
-        "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
+        "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code...]`
     })
 }
 {{/servicePassthrough}}
@@ -42,14 +41,13 @@ exports.{{{operationId}}} = function(event, context, callback) {
 {{/returnType}}
  **/
 exports.{{{operationId}}} = function(context{{#hasParams}}, {{/hasParams}}{{#allParams}}{{paramName}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) {
-    var f = __function
-    logger.info(__function, __line, "Enable Debug Info Only: process.env.DEBUG=INFO")
-    logger.warn(__function, __line, "Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
-    logger.error(__function, __line, "Enable Debug Error Only: process.env.DEBUG=ERROR")
+    logger.info("Enable Debug Info Only: process.env.DEBUG=INFO")
+    logger.warn("Enable INFO and WARNING: process.env.DEBUG=INFO,WARNING")
+    logger.error("Enable Debug Error Only: process.env.DEBUG=ERROR")
     return new Promise(function(resolve, reject) {    
         reject({
             "code": "ErrorOperationNotImplemetedException",
-            "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code at line:${__line} of ${f}]`
+            "message": `The '{{{operationId}}}' was not Implemented. [TODO: Update your service code...]`
         });    
     });
 }

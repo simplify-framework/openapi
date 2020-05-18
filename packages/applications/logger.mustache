@@ -1,39 +1,16 @@
+'use strict';
+/** 
+ * Simplify Framework - CodeGen {{generatorVersion}}
+ * GitHub URL   : https://github.com/simplify-framework
+ * ProjectName  : {{projectNamePascal}}
+ * ProjectId    : {{projectId}}
+ * License      : Apache-2.0 (Free)
+ */
 const {{projectName}} = require('debug')('{{projectName}}')
+
 exports.info = {{projectName}}.extend('INFO')
 exports.warn = {{projectName}}.extend('WARNING')
 exports.error = {{projectName}}.extend('ERROR')
 exports.debug = {{projectName}}.extend('DEBUG')
-
-if (typeof global.__stack === 'undefined') {
-    Object.defineProperty(global, '__stack', {
-        get: function () {
-            var orig = Error.prepareStackTrace;
-            Error.prepareStackTrace = function (_, stack) {
-                return stack;
-            };
-            var err = new Error;
-            Error.captureStackTrace(err, arguments.callee);
-            var stack = err.stack;
-            Error.prepareStackTrace = orig;
-            return stack;
-        }
-    });
-}
-
-if (typeof global.__line === 'undefined') {
-    Object.defineProperty(global, '__line', {
-        get: function () {
-            return __stack[1].getLineNumber();
-        }
-    });
-}
-
-if (typeof global.__function === 'undefined') {
-    Object.defineProperty(global, '__function', {
-        get: function () {
-            return __stack[1].getFunctionName();
-        }
-    });
-}
 
 require('debug').enable(process.env.DEBUG || '{{projectName}}:INFO,{{projectName}}:WARNING,{{projectName}}:ERROR')

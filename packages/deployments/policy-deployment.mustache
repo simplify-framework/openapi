@@ -1,0 +1,95 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "DeploymentStorage{{deploymentNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "s3:*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::{{deploymentNameSnake}}-{{projectId}}",
+                "arn:aws:s3:::{{deploymentNameSnake}}-{{projectId}}/*"
+            ]
+        },
+        {{#services}}
+        {
+            "Sid": "IAMRolePolicy{{serviceNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "iam:*Role",
+                "iam:*RolePolicy",
+                "iam:*PolicyVersions",
+                "secretsmanager:*",
+                "iam:*Policy",
+                "logs:*",
+                "events:*",
+                "lambda:*"
+            ],
+            "Resource": [
+                "arn:aws:secretsmanager:{{deploymentRegionOrigin}}:{{deploymentAccount}}:{{serviceName}}Secret-*",
+                "arn:aws:events:{{deploymentRegionOrigin}}:{{deploymentAccount}}:rule/{{deploymentName}}-{{serviceName}}Schedule*-*",
+                "arn:aws:iam::{{deploymentAccount}}:role/{{deploymentName}}-{{serviceName}}Lambda*-*",
+                "arn:aws:iam::{{deploymentAccount}}:policy/{{deploymentName}}-{{serviceName}}Lambda*-*",
+                "arn:aws:logs:{{deploymentRegionOrigin}}:{{deploymentAccount}}:log-group:/aws/lambda/{{deploymentName}}-{{serviceName}}Lambda*-*:log-stream:*",
+                "arn:aws:logs:{{deploymentRegionOrigin}}:{{deploymentAccount}}:log-group:/aws/lambda/{{deploymentName}}-{{serviceName}}Lambda*-*",
+                "arn:aws:lambda:{{deploymentRegionOrigin}}:{{deploymentAccount}}:function:{{deploymentName}}-{{serviceName}}Lambda*-*"
+            ]
+        },
+        {{/services}}
+        {
+            "Sid": "DescribeLogGroups{{deploymentNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "logs:DescribeLogGroups"
+            ],
+            "Resource": [
+                "arn:aws:logs:{{deploymentRegionOrigin}}:{{deploymentAccount}}:log-group::log-stream:*"
+            ]
+        },
+        {
+            "Sid": "APIGatewayDenyAction{{deploymentNamePascal}}",
+            "Effect": "Deny",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": [
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/account",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/account/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/clientcertificates",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/clientcertificates/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/domainnames",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/domainnames/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/vpclinks",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/vpclinks/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/apis",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/apis/*"
+            ]
+        },
+        {
+            "Sid": "APIGatewayManageAction{{deploymentNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "apigateway:*"
+            ],
+            "Resource": [
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/restapis",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/restapis/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/usageplans",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/usageplans/*",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/apikeys",
+                "arn:aws:apigateway:{{deploymentRegionOrigin}}::/apikeys/*"
+            ]
+        },
+        {
+            "Sid": "CloudFormationSpecificBucket{{deploymentNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "cloudformation:*"
+            ],
+            "Resource": [
+                "arn:aws:cloudformation:{{deploymentRegionOrigin}}:{{deploymentAccount}}:stack/{{deploymentName}}/*"
+            ]
+        }
+    ]
+}
