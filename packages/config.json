@@ -12,11 +12,13 @@
         { "input": "openapi.mustache", "output": "openapi.yaml" },
         { "input": "deployment.mustache", "output": "{{deploymentNameSnake}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
-        { "input": "deployment-policy.mustache", "output": "deployment-policy.json" },
+        { "input": "policy-deployment.mustache", "output": "policy-deployment.json" },
+        { "input": "policy-execute-api.mustache", "output": "policy-execute-api.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNameSnake}}.json" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
         { "input": "code-init.mustache", "output": "code-init.js" },
-        { "input": "README.mustache", "output": "README.md" }
+        { "input": "README.mustache", "output": "README.md" },
+        { "input": "debug-tree.mustache", "output": "debug-tree.txt" }
     ],
     "Applications": [
         { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },

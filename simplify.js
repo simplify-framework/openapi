@@ -21,6 +21,14 @@ var argv = require('yargs')
     .alias('o', 'output')
     .describe('output', 'output directory')
     .default('output', '.')
+    .string('pid')
+    .alias('p', 'pid')
+    .describe('pid', 'project Id')
+    .default('pid', '')
+    .string('account')
+    .alias('a', 'account')
+    .describe('account', 'account Id')
+    .default('pid', '')
     .boolean('verbose')
     .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
@@ -31,6 +39,10 @@ var argv = require('yargs')
     .boolean('diff')
     .default('diff', false)
     .describe('diff', 'Generate diff file')
+    .string('ignores')
+    .default('ignores', false)
+    .alias('n', 'ignores')
+    .describe('ignores', 'eg: keep-your-code.js;keep-your-data.json')
     .demandOption(['o'])
     .demandCommand(1)
     .argv;
@@ -52,7 +64,7 @@ mkdirp(path.resolve(argv.output)).then(function () {
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - Sample definition ${outputYAML}`);
         fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
-        process.exit(-1)
+        process.exit(0)
     } else {
         console.log("╓───────────────────────────────────────────────────────────────╖")
         console.log("║                        Simplify Framework                     ║")
@@ -113,6 +125,15 @@ function runCommandLine() {
     }
     if (argv.merge) {
         config.defaults.merge = true;
+    }
+    if (argv.pid) {
+        config.defaults.pid = argv.pid;
+    }
+    if (argv.account) {
+        config.defaults.account = argv.account;
+    }
+    if (argv.ignores) {
+        config.defaults.ignores = argv.ignores;
     }
     if (argv.zip) {
         processor.fileFunctions.createFile = zipFile;

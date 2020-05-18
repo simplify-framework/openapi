@@ -1,10 +1,14 @@
+'use strict';
+/** 
+ * Simplify Framework - CodeGen {{generatorVersion}}
+ * GitHub URL   : https://github.com/simplify-framework
+ * ProjectName  : {{projectNamePascal}}
+ * ProjectId    : {{projectId}}
+ * License      : Apache-2.0 (Free)
+ */
 const path = require('path')
 const fs = require('fs')
-const CBEGIN='\x1b[32m'
-const CERROR='\x1b[31m'
-const CRESET='\x1b[0m'
-const CDONE='\x1b[37m'
-const opName = `${CBEGIN}Simplify::${CRESET}FunctionLayer`
+const opName = `FunctionLayer`
 var nodeArgs = process.argv.slice(2);
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
@@ -51,17 +55,17 @@ try {
                     metaOutput.Configuration.Environment.Variables[`SHA256_LAYER_${LAYER_NAME}_HASH`] = uploadInfor.FileSha256
                     fs.writeFileSync(path.join(__dirname, configInput.OutputFile), JSON.stringify(metaOutput, null, 4));
                 } catch(err) {
-                    console.error(`${opName}-Update: ${CERROR}(ERROR)${CRESET} ${err}`);
+                    simplify.finishWithErrors(`${opName}-Update`, err);
                 }
             }, function(err) {
-                console.error(`${opName}-Update: ${CERROR}(ERROR)${CRESET} ${err}`);
+                simplify.finishWithErrors(`${opName}-Update`, err);
             })
         }, function(err) {
-            console.error(`${opName}-UploadZip: ${CERROR}(ERROR)${CRESET} ${err}`);
+            simplify.finishWithErrors(`${opName}-UploadZip`, err);
         })
     }).catch(function (err) {
-        console.error(`${opName}-UploadDirectory: ${err}`)
+        simplify.finishWithErrors(`${opName}-UploadDirectory`, err)
     })
 } catch (err) {
-    console.error(`${opName}-LoadConfig: ${err}`)
+    simplify.finishWithErrors(`${opName}-LoadConfig`, err)
 }

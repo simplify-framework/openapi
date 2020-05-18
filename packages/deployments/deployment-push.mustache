@@ -1,10 +1,14 @@
+'use strict';
+/** 
+ * Simplify Framework - CodeGen {{generatorVersion}}
+ * GitHub URL   : https://github.com/simplify-framework
+ * ProjectName  : {{projectNamePascal}}
+ * ProjectId    : {{projectId}}
+ * License      : Apache-2.0 (Free)
+ */
 const path = require('path')
 const fs = require('fs')
-const CBEGIN = '\x1b[32m'
-const CERROR = '\x1b[31m'
-const CRESET = '\x1b[0m'
-const CDONE='\x1b[37m'
-const opName = `${CBEGIN}Simplify::${CRESET}Deployment`
+const opName = `Deployment`
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var nodeArgs = process.argv.slice(2);
@@ -22,29 +26,31 @@ while (nodeArgs.length > 0) {
 try {
     var config = simplify.getInputConfig(path.join(__dirname, configInputFile))
     const distYamlFile = path.join(__dirname, config.Deployment.Definition)
+    const bucketName = config.Bucket.Name
     const bucketKey = config.Bucket.Key
     provider.setConfig(config).then(function () {
         if (configResourceDeletion) {
-            console.log(`${opName}-CleanupResource: Resource Name - ${config.Deployment.Name}`)
+            simplify.consoleWithMessage(`${opName}-CleanupResource`, `Deployment Name - (${config.Deployment.Name})`)
             simplify.deleteStackOnComplete({
                 adaptor: provider.getResource(),
                 ...{
                     stackName: config.Deployment.Name
                 }
             }).then(function (stackData) {
-                console.log(`${opName}-CleanupResource: Resource Status - ${stackData.StackStatus}`)
-                Object.keys(config.Deployment.Functions).forEach(function (f) {
-                    const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
-                    var fConfig = JSON.parse(fs.readFileSync(fInputPath))
-                    simplify.deleteFunctionLayerVersions({
-                        adaptor: provider.getFunction(),
-                        functionConfig: fConfig.Function
-                    }).then(function(data) {
-                        console.log(`${opName}-CleanupResource: Function Layers - ${data.length}`)
-                    }).catch(err => console.error(`${opName}-CleanupResource: ${err}`))
-                })
+                simplify.deleteDeploymentBucket({ adaptor: provider.getStorage(), bucketName: bucketName }).then(function() {
+                    Object.keys(config.Deployment.Functions).forEach(function (f) {
+                        const fInputPath = path.join(__dirname, config.Deployment.Functions[f].FunctionInput)
+                        var fConfig = JSON.parse(fs.readFileSync(fInputPath))
+                        simplify.deleteFunctionLayerVersions({
+                            adaptor: provider.getFunction(),
+                            functionConfig: fConfig.Function
+                        }).then(function(data) {
+                            simplify.consoleWithMessage(`${opName}-CleanupFunction`, `Function Layers - ${data.length}`)
+                        }).catch(err => simplify.finishWithErrors(`${opName}-CleanupFunction`, err))
+                    })
+                }).catch(err => simplify.finishWithErrors(`${opName}-CleanupBucket`, err))
             }).catch(function(err) {
-                console.error(`\n - Resource wasn't cleanned successfully: ${err} \n`)
+                simplify.finishWithErrors(`${opName}-CleanupResource:`, err)
             })
         } else {
             simplify.uploadLocalFile({
@@ -79,14 +85,6 @@ try {
                             stackData.apiConfig.GatewayId = o.OutputValue
                         }
                     })
-                    simplify.updateAPIGatewayDeployment({
-                        adaptor: provider.getAPIGateway(),
-                        apiConfig: stackData.apiConfig
-                    }).then(function (data) {
-                        console.log(`\n - API Gateway URL: ${stackData.apiConfig.GatewayURL} \n`)
-                    }).catch(function (err) {
-                        console.log(`\n - API Gateway Stage: ${stackData.apiConfig.StageName} Update Failed!\n`)
-                    })
                     try {
                         fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify(stackData, null, 4));
                         Object.keys(config.Deployment.Functions).forEach(function (f) {
@@ -101,19 +99,27 @@ try {
                             })
                             fs.writeFileSync(fInputPath, JSON.stringify(fConfig, null, 4));
                         })
+                        simplify.updateAPIGatewayDeployment({
+                            adaptor: provider.getAPIGateway(),
+                            apiConfig: stackData.apiConfig
+                        }).then(function (data) {
+                            simplify.finishWithSuccess(`API Gateway URL: ${stackData.apiConfig.GatewayURL}`)
+                        }).catch(function (err) {
+                            simplify.finishWithSuccess(`API Gateway Stage: ${stackData.apiConfig.StageName} Update Failed!`)
+                        })
                     } catch (err) {
-                        console.error(`${opName}-UpdateFunctionInput: ${CERROR}(ERROR)${CRESET}`, err.message)
+                        simplify.finishWithErrors(`${opName}-UpdateFunctionInput`, err.message)
                     }
                 }, function (err) {
-                    console.error(`${opName}-CreateDeployment: ${CERROR}(ERROR)${CRESET}`, err.message || err.StackId)
+                    simplify.finishWithErrors(`${opName}-CreateDeployment`, err.message || err.StackId)
                 })
             }, function (err) {
-                console.error(`${opName}-UploadDirectory: ${err}`)
+                simplify.finishWithErrors(`${opName}-UploadDirectory`, err)
             })
         }
     }).catch(function (err) {
-        console.error(`${opName}-LoadCredentials: ${CERROR}(ERROR)${CRESET} ${err}`)
+        simplify.finishWithErrors(`${opName}-LoadCredentials`, err)
     })
 } catch (err) {
-    console.error(`${opName}-LoadConfig: ${CERROR}(ERROR)${CRESET} ${err}`)
+    simplify.finishWithErrors(`${opName}-LoadConfig`, err)
 }

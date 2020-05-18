@@ -1,5 +1,7 @@
 # Simplify Framework - CodeGen
   
+![Node.js CI](https://github.com/simplify-framework/pets-project/workflows/Node.js%20CI/badge.svg)
+
 Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
 *Node.js-based codegen for OpenAPI specs. This project was initially by tailoring from openapi-codegen to use the core code generation functionality to generate the lambda based node projects and AWS CloudFormation stack. There was many tailored code to become a powerful tool nowaday. Thanks to the initial openapi-codegen project that has saved time for developing an initial idea.*
@@ -38,7 +40,8 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 
 ## Setup AWS configuration profile
 - Create a deployment user in IAM: `simplify-user`
-- Setup IAM Role policy using: `deployment-policy.json`
+- Setup IAM Role Policy using: `policy-deployment.json`
+- Setup IAM Role Policy using: `policy-execute-api.json`
 - Configure your machine `aws configure --profile simplify-eu`
 
 ## You are in the pets project directory

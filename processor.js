@@ -9,25 +9,38 @@ const rimraf = require('rimraf');
 const Hogan = require('hogan.js');
 const clone = require('reftools/lib/clone.js').circularClone;
 const adaptor = require('./adaptor.js');
-const onetimeGeneration = [
-    ".env.mustache",
-    ".babelrc.mustache",
-    ".gitignore.mustache",
-    "package.mustache",
-    "package-src.mustache",
-    "function-input.mustache",
-    "webpack.config.mustache",
-    "webpack.config.layer.mustache",
-    "docker-entrypoint.mustache",
-    "Dockerfile.mustache",
-    "README.mustache"
-]
+const CBEGIN = '\x1b[32m'
+const CERROR = '\x1b[31m'
+const CRESET = '\x1b[0m'
+const CDONE = '\x1b[37m'
 
 function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
-        if (fs.existsSync(filePath)) {
-            if (onetimeGeneration.indexOf(config.input)>=0) return;
-            if (config.verbose) logger.info("R-Generating...", filePath)
+        if (fs.existsSync(filePath)) {            
+            let ignoreOverridenFiles = [
+                ".env.mustache",
+                ".babelrc.mustache",
+                ".gitignore.mustache",
+                "package.mustache",
+                "package-src.mustache",
+                "function-input.mustache",
+                "webpack.config.mustache",
+                "webpack.config.layer.mustache",
+                "docker-entrypoint.mustache",
+                "Dockerfile.mustache",
+                "README.mustache"
+            ]            
+            if (config.ignores) {
+                config.ignores.split(';').forEach(function(ignore) {
+                    const parts = ignore.split('.')
+                    const ignoredFile = parts.splice(0, parts.length - 1).join('.') + '.mustache'
+                    ignoreOverridenFiles.push(ignoredFile)
+                })
+            }
+            if (ignoreOverridenFiles.indexOf(config.input)>=0) {
+                if (config.verbose) logger.debug("F-Ignoring...", filePath)                
+                return undefined
+            } 
             var oldFile = fs.readFileSync(filePath).toString()
             function addNewLine(value, lastRemoved) {
                 return lastRemoved ? `${value}>>>>>>> auto:${filePath}\n` : value
@@ -50,7 +63,13 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
                     return newcontent
                 }).join('');
                 fs.writeFileSync(filePath, content, encoding);
+                if (config.verbose) logger.info("M-Generating...", filePath)
+                var patcheL = jsdiff.createPatch(`${filePath}`, oldFile.toString(), newFileData);
+                if (jsdiff.parsePatch(patcheL)[0].hunks.length) {
+                    console.log(` * ${CERROR}Require Review${CRESET} *: ${filePath}`)
+                }
             } else {
+                if (config.verbose) logger.info("R-Generating...", filePath)
                 fs.writeFileSync(filePath, newFileData, encoding);
             }
             if (config.diff) {

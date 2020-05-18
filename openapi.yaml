@@ -7,7 +7,7 @@ x-deployment-name: project-pets-demo
 x-deployment-region: eu-west-1
 x-deployment-profile: simplify-eu
 x-api-gateway-name: api-gateway-restapi-name
-x-api-authorizer-id: eu-west-1_xxxxxxxx # set to Coginito UserPoolId
+#x-api-authorizer-id: eu-west-1_xxxxxxxx # set to Coginito UserPoolId
 x-api-rate-limit: 100 # maximun requests per overall setting
 x-api-quota-limit: 1000 # maximum requests per quota-unit
 x-api-quota-unit: DAY  # can be one of [DAY, WEEK, MONTH]
@@ -95,6 +95,37 @@ paths:
               properties:
                 dataObject:
                   type: object
+      responses:
+        '200':
+          description: Success
+  '/pets/{id}/feed/{count}':
+    x-api-service-public: true # explicit to expose this entry through API Gateway [required]
+    x-api-service-name: function-for-pets
+    x-api-service-model-name: pets-foods
+    x-api-service-authorizer: false # if x-api-authorizer-id is set, using Cognito Authorizer, otherwise using Sigv4 IAM
+    x-api-service-api-key: false # using API Key with Quota Limit plan if set. Ca be set along with service authorizer
+    x-api-service-tag: devel
+    get:
+      tags:
+        - Pets Service Group
+      description: 'Feed your pet by id with food count'
+      operationId: feedPetById
+      parameters:
+      - name: id
+        in: path        
+        schema:
+          type: string
+        required: true
+      - name: count
+        in: path        
+        schema:
+          type: integer
+        required: true
+      - name: diet
+        in: query  
+        schema:
+          type: boolean
+        required: false
       responses:
         '200':
           description: Success

@@ -1,3 +1,11 @@
+'use strict';
+/** 
+ * Simplify Framework - CodeGen {{generatorVersion}}
+ * GitHub URL   : https://github.com/simplify-framework
+ * ProjectName  : {{projectNamePascal}}
+ * ProjectId    : {{projectId}}
+ * License      : Apache-2.0 (Free)
+ */
 const path = require('path')
 require('dotenv').config({ path: path.join(__dirname, '../../.env') })
 global.fetch = require('node-fetch')
@@ -5,6 +13,7 @@ const AWS = require('aws-sdk')
 const sigV4Client = require('./sigV4Client')
 const AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 if (typeof __non_webpack_require__ === 'undefined') global.__non_webpack_require__ = require
+process.env.AWS_SDK_LOAD_CONFIG= process.env.AWS_SDK_LOAD_CONFIG || true
 let apiConfig = {}
 
 export const config = function(config) {
@@ -101,7 +110,7 @@ export const executeIAM = function(path, method, data, apiKey) {
         }
     }
     if (method === 'POST' || method === 'PUT') {
-        options.body = data.body
+        options.body = data
     } else {
         options.queryParams = data
     }

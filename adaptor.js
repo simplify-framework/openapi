@@ -79,18 +79,23 @@ function getProperties(obj, define, prefix) {
     return properties
 }
 
-function convertArray(arr) {
+function convertArray(arr, debug) {
     if (!arr) arr = [];
     if (arr.length) {
         arr.isEmpty = false;
         for (let i = 0; i < arr.length; i++) {
-            if (typeof (arr[i]) === 'string') arr[i] = { value: arr[i] }
+            if (typeof (arr[i]) === 'string') {
+                arr[i] = { value: arr[i] }
+            } if (Array.isArray(arr[i])) {
+                console.log(arr[i])
+            }
             arr[i]['-first'] = (i === 0);
             arr[i]['-last'] = (i === arr.length - 1);
             arr[i].hasMore = (i < arr.length - 1);
         }
+    } else { 
+        arr.isEmpty = true;
     }
-    else arr.isEmpty = true;
     arr.toString = function () { if (arrayMode === 'length') return this.length.toString() };
     return arr;
 }
@@ -377,7 +382,7 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
         }
     }
     operation.pathParams.map(p => {
-        operation.replacedPathName = operation.path.replace(`{${p.paramName}}`, `:${p.paramName}`)
+        operation.replacedPathName = operation.path.replace(/{/g, ':').replace(/}/g, '')
     })
     operation.queryParams = convertArray(operation.queryParams);
     operation.headerParams = convertArray(operation.headerParams);
@@ -429,6 +434,7 @@ function convertToServices(source, obj, defaults) {
                     let operation = convertMethodOperation(op, m, p, source.paths[p], obj, source);
                     pathEntry.operations.push({...operation, ...serviceMetas[p]});
                 }
+                pathEntry.operations = convertArray(pathEntry.operations)
             }
         }
     }
@@ -479,12 +485,14 @@ function convertToServices(source, obj, defaults) {
             } else {
                 serviceOperations.operations.push({...pathEntry.operations[0], ...pathEntry.serviceMeta})
             }
-            service.serviceModels = service.serviceEntries.filter((v, i, a) => a.findIndex(t => (t.serviceModelName === v.serviceModelName)) === i)
+            service.serviceModels = convertArray(service.serviceEntries.filter((v, i, a) => a.findIndex(t => (t.serviceModelName === v.serviceModelName)) === i))
             serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodLowerCase == 'post' || op.httpMethodLowerCase == 'put' || op.httpMethodLowerCase == 'patch')
             service.serviceHystrixStream = service.serviceEntries.some(sp => sp.serviceHystrixStream == true)
+            serviceOperations.operations = convertArray(serviceOperations.operations, "op")
         }
+        service.serviceEntries = convertArray(service.serviceEntries, "path")
     }
-    return convertArray(services);
+    return convertArray(services, "svc");
 }
 
 const typeMaps = {
@@ -632,7 +640,8 @@ function getPrime(api, defaults) {
     prime.appVersion = "0.1.1";
     prime.serviceVersion = "0.1.1";
     prime.projectVersion = "0.1.1";
-    prime.projectId = api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
+    prime.deploymentAccount = defaults.account || prime.deploymentAccount
+    prime.projectId = defaults.pid || api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
     api['x-project-id'] = prime.projectId
     prime.gatewayApiKey = api['x-api-key'] || cryptoRandomApiKey(40)
     api['x-api-key'] = prime.gatewayApiKey

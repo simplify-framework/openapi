@@ -229,6 +229,7 @@ Resources:
         Period: "{{quotaUnitOrigin}}"
 
   {{gatewayName}}APIGateWayApiKey:
+    DependsOn: {{gatewayName}}APIGateWayDeployment
     Type: AWS::ApiGateway::ApiKey
     Properties:
       Enabled: true
@@ -238,6 +239,7 @@ Resources:
       Value: {{gatewayApiKey}}
   
   {{gatewayName}}APIGateWayUsagePlanKey:
+    DependsOn: {{gatewayName}}APIGateWayApiKey
     Type: AWS::ApiGateway::UsagePlanKey
     Properties: 
       KeyId: !Ref {{gatewayName}}APIGateWayApiKey

@@ -1,0 +1,19 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {{#services}}
+        {{#servicePublicBoolean}}
+        {
+            "Sid": "APiGatewayExecution{{serviceNamePascal}}",
+            "Effect": "Allow",
+            "Action": [
+                "execute-api:Invoke"
+            ],
+            "Resource": [
+                {{#serviceEntries}}{{#operations}}"arn:aws:execute-api:{{deploymentRegionOrigin}}:{{deploymentAccount}}:*/latest/{{httpMethod}}{{path}}","arn:aws:execute-api:{{deploymentRegionOrigin}}:{{deploymentAccount}}:*/latest/{{httpMethod}}{{path}}/*"{{#hasMore}},{{/hasMore}}{{/operations}}{{#hasMore}},{{/hasMore}}{{^hasMore}}{{/hasMore}}{{/serviceEntries}}
+            ]
+        }{{#hasMore}},{{/hasMore}}{{^hasMore}}{{/hasMore}}
+        {{/servicePublicBoolean}}
+        {{/services}}
+    ]
+}
