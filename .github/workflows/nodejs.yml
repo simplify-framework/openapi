@@ -29,13 +29,33 @@ jobs:
     - run: sed -i '/^x-deployment-name/s/:.*$/:\ codegen-pets-demo/' openapi.yaml
     - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
     - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' $PWD/ci-test/.env
-    
-  deploy-code:
+    - name: Check file existence
+      id: check_files
+      uses: andstor/file-existence-action@v1
+      with:
+        files: "codegen-pets-demo.json, codegen-pets-demo.yaml, policy-deployment.json, policy-execute-api.json, .env"
+    - name: File exists
+      if: steps.check_files.outputs.files_exists == 'true'
+      run: echo All files exists!
+
+  test-code:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [12.x]
-    steps:      
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm link
+    - run: npm link simplify-codegen
+    - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
+    - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
+    - run: sed -i '/^x-deployment-name/s/:.*$/:\ codegen-pets-demo/' openapi.yaml
+    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
+    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' $PWD/ci-test/.env
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
