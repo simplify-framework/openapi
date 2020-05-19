@@ -39,10 +39,10 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         role-session-name: GitHubCISession
         role-duration-seconds: 1200
-    - run: cd ./ci-test
-    - run: npm install
-    - run: npm run stack-deploy
-    - run: npm run push-code
+    - run: cd $PWD/ci-test && ls
+    - run: cd $PWD/ci-test && npm install
+    - run: cd $PWD/ci-test && npm run stack-deploy
+    - run: cd $PWD/ci-test && npm run push-code
     - run: npm run test
     - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=enforce/' .env
     - run: sed -i '/^ENV_functionForPets_ENFORCEMENT_PACKAGE/s/=.*$/=function-for-pets-v10/' .env
