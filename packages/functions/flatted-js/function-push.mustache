@@ -38,14 +38,14 @@ try {
     provider.setConfig(config).then(function () {
         if (functionOps === 'fetch') {
             simplify.getFunctionMetaInfos({ adaptor: provider.getFunction(), functionConfig}).then(data => {
-                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, configInput.OutputFile)))
+                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, config.OutputFile)))
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     ...metaOutput, ...data
                 }, null, 4));
             }).catch(err => simplify.finishWithErrors(`${opName}-Update`, err))
         } else if (functionOps === 'update') {
             simplify.updateFunctionConfiguration({ adaptor: provider.getFunction(), functionConfig}).then(data => {
-                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, configInput.OutputFile)))
+                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, config.OutputFile)))
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     Configuration: { ...metaOutput.Configuration, ...data }
                 }, null, 4));

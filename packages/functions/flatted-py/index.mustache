@@ -1,0 +1,11 @@
+#!/bin/python
+import os
+import sys
+
+if os.environ['DEPLOYMENT_STAGE'] == "latest":
+    service = __import__('{{serviceNameSnake}}')
+else:
+    import {{serviceNameUnderscore}} as service
+
+def handler(event, context):
+    return service.{{serviceModelName}}(event, context)

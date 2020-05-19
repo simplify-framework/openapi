@@ -13,41 +13,84 @@ export $(egrep -v '^#' ${ENV_FILE} | xargs)
 
 node code-init.js --input {{deploymentNameSnake}}.json
 
-declare -a DEPLOYMENT_PACKAGES=({{#services}}"{{serviceName}}"{{#hasMore}} {{/hasMore}}{{/services}})
-for i in "${DEPLOYMENT_PACKAGES[@]}"
-do
-    export ENFORCEMENT_PACKAGE=
-    DeploymentStageName="ENV_${i}_DEPLOYMENT_STAGE"
+declare -a DEPLOYMENT_PACKAGES=(
+{{#services}}
+    "{{serviceName}}"
+{{/services}})
+declare -a DEPLOYMENT_LANGUAGES=({{#services}}"{{serviceLanguage}}"{{#hasMore}} {{/hasMore}}{{/services}})
+declare -a DEPLOYMENT_RUNTIMES=({{#services}}"{{serviceRuntime}}"{{#hasMore}} {{/hasMore}}{{/services}})
+
+for i in "${!DEPLOYMENT_PACKAGES[@]}"; do
+    DeploymentPackageName=${DEPLOYMENT_PACKAGES[$i]}
+    DeploymentStageName="ENV_${DeploymentPackageName}_DEPLOYMENT_STAGE"
     export DEPLOYMENT_STAGE="${!DeploymentStageName}"
-    EnforcementPackageName="ENV_${i}_ENFORCEMENT_PACKAGE"
+    EnforcementPackageName="ENV_${DeploymentPackageName}_ENFORCEMENT_PACKAGE"
     export ENFORCEMENT_PACKAGE="${!EnforcementPackageName}"
+    DeploymentLayerName="ENV_${DeploymentPackageName}_DEPLOYMENT_LAYER"
     if [ -z "${DEPLOYMENT_STAGE}" ]; then
         echo "Pushing {{serviceName}} with blank DEPLOYMENT_STAGE is not satified!"
         continue
     fi
-    cd ${INITIAL_DIR}/{{projectName}}/${i} && npm install
+    cd ${INITIAL_DIR}/{{projectName}}/${DeploymentPackageName} && npm install
     if [ "${FUNC_OPS}" == "update" ]; then
         npm run push-update
+        if [ $? -ne 0 ]; then
+            echo "Update {{serviceName}} (${DEPLOYMENT_STAGE}) has failed!"
+            cd ${INITIAL_DIR}
+            exit 255
+        fi
     else
         if [ "${DEPLOYMENT_STAGE}" == "latest" ]; then
         npm run build-code && npm run push-code
+        if [ $? -ne 0 ]; then
+            echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) code has failed!"
+            cd ${INITIAL_DIR}
+            exit 255
+        fi
         elif [ "${DEPLOYMENT_STAGE}" == "stable" ]; then
-            npm run build-code && npm run push-code && npm run build-layer && npm run push-layer
+            npm run build-code && npm run push-code
+            if [ $? -ne 0 ]; then
+                echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) code has failed!"
+                cd ${INITIAL_DIR}
+                exit 255
+            fi
+            npm run build-layer && npm run push-layer
+            if [ $? -ne 0 ]; then
+                echo "Pushing {{serviceName}}:${!DeploymentLayerName} (${DEPLOYMENT_STAGE}) layer has failed!"
+                cd ${INITIAL_DIR}
+                exit 255
+            fi
         elif [ "${DEPLOYMENT_STAGE}" == "enforce" ]; then
-            DeploymentLayerName="ENV_${i}_DEPLOYMENT_LAYER"
             if [ ! -z "${ENFORCEMENT_PACKAGE}" ]; then
-                npm run build-code && npm run push-code && npm run build-layer 
-                mv layer/nodejs/node_modules/${!DeploymentLayerName} layer/nodejs/node_modules/${ENFORCEMENT_PACKAGE}
+                npm run build-code && npm run push-code
+                if [ $? -ne 0 ]; then
+                    echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) code has failed!"
+                    cd ${INITIAL_DIR}
+                    exit 255
+                fi
+                npm run build-layer 
+                if [ "${DEPLOYMENT_LANGUAGES[$i]}" == "js" ]; then
+                    mv layer/nodejs/node_modules/${!DeploymentLayerName} layer/nodejs/node_modules/${ENFORCEMENT_PACKAGE}
+                elif [ "${DEPLOYMENT_LANGUAGES[$i]}" == "py" ]; then
+                    mv layer/python/${!DeploymentLayerName//-/_}.py layer/python/${ENFORCEMENT_PACKAGE//-/_}.py
+                else
+                    mv layer/java/${!DeploymentLayerName}.jar layer/java/${ENFORCEMENT_PACKAGE}.jar
+                fi
                 npm run push-layer
+                if [ $? -ne 0 ]; then
+                    echo "Pushing {{serviceName}}:${ENFORCEMENT_PACKAGE} (${DEPLOYMENT_STAGE}) layer has failed!"
+                    cd ${INITIAL_DIR}
+                    exit 255
+                fi
             fi
         else
             npm run build-code && npm run push-code
+            if [ $? -ne 0 ]; then
+                echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) code has failed!"
+                cd ${INITIAL_DIR}
+                exit 255
+            fi
         fi
-    fi
-    if [ $? -ne 0 ]; then
-        echo "Pushing {{serviceName}} (${DEPLOYMENT_STAGE}) version has failed!"
-        cd ${INITIAL_DIR}
-        exit 255
     fi
     cd ${INITIAL_DIR}
 done

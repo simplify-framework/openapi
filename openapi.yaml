@@ -21,6 +21,15 @@ paths:
       responses:
         '200':
           description: Success
+  '/etranger/pets':
+    x-api-service-name: function-for-etranger-pets
+    x-api-service-template: flatted # default is stacked for API, can be one of [stacked, flatted, python]
+    x-api-service-runtime: python3.7
+    x-api-service-public: true # explicit to expose this entry through API Gateway [required]
+    get:
+      responses:
+        '200':
+          description: Success
   '/events/feed-pets':
     x-event-service-schedule: rate(10 days) # or cron(https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html)
     x-event-service-public: false # explicit to NOT expose this entry through API Gateway

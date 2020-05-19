@@ -12,31 +12,6 @@
                 "arn:aws:s3:::{{deploymentNameSnake}}-{{projectId}}/*"
             ]
         },
-        {{#services}}
-        {
-            "Sid": "IAMRolePolicy{{serviceNamePascal}}",
-            "Effect": "Allow",
-            "Action": [
-                "iam:*Role",
-                "iam:*RolePolicy",
-                "iam:*PolicyVersions",
-                "secretsmanager:*",
-                "iam:*Policy",
-                "logs:*",
-                "events:*",
-                "lambda:*"
-            ],
-            "Resource": [
-                "arn:aws:secretsmanager:{{deploymentRegionOrigin}}:{{deploymentAccount}}:{{serviceName}}Secret-*",
-                "arn:aws:events:{{deploymentRegionOrigin}}:{{deploymentAccount}}:rule/{{deploymentName}}-{{serviceName}}Schedule*-*",
-                "arn:aws:iam::{{deploymentAccount}}:role/{{deploymentName}}-{{serviceName}}Lambda*-*",
-                "arn:aws:iam::{{deploymentAccount}}:policy/{{deploymentName}}-{{serviceName}}Lambda*-*",
-                "arn:aws:logs:{{deploymentRegionOrigin}}:{{deploymentAccount}}:log-group:/aws/lambda/{{deploymentName}}-{{serviceName}}Lambda*-*:log-stream:*",
-                "arn:aws:logs:{{deploymentRegionOrigin}}:{{deploymentAccount}}:log-group:/aws/lambda/{{deploymentName}}-{{serviceName}}Lambda*-*",
-                "arn:aws:lambda:{{deploymentRegionOrigin}}:{{deploymentAccount}}:function:{{deploymentName}}-{{serviceName}}Lambda*-*"
-            ]
-        },
-        {{/services}}
         {
             "Sid": "DescribeLogGroups{{deploymentNamePascal}}",
             "Effect": "Allow",

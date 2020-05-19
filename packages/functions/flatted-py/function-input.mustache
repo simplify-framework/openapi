@@ -6,6 +6,12 @@
         "Key": "functions/{{serviceNameSnake}}/${DATE_TODAY}/dist"
     },
     "OutputFile": "function-meta.json",
+    "LayerConfig": {
+        "CompatibleRuntimes": [
+            "{{serviceRuntimeOrigin}}"
+        ],
+        "LayerName": "{{serviceNameSnake}}"
+    },
     "Function": {
         "FunctionName": "{{serviceName}}",
         "Handler": "index.handler",
@@ -18,11 +24,12 @@
         },
         "Timeout": 15,
         "TracingConfig": {
-            "Mode": "Active"
+            "Mode": "PassThrough"
         },
         "Environment": {
             "Variables": {
-                "ENVIRONMENT": "development"
+                "DEPLOYMENT_STAGE": "${DEPLOYMENT_STAGE}",
+                "ENFORCEMENT_PACKAGE": "${ENFORCEMENT_PACKAGE}"
             }
         }
     }

@@ -1,13 +1,10 @@
 {
   "name": "simplify-codegen",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "Simplify Code Generator from OpenAPI 3.0 Specs",
-  "main": "simplify.js",
+  "main": "entrypoint.js",
   "bin": {
-    "simplify-codegen": "simplify.js"
-  },
-  "scripts": {
-    "start": "node simplify.js create -i spec.yaml -o ../output/functions"
+    "simplify-codegen": "entrypoint.js"
   },
   "repository": {
     "type": "git",
@@ -15,8 +12,11 @@
   },
   "keywords": [
     "codegen",
+    "openapi",
     "serverless",
+    "docker",
     "lambda",
+    "faas",
     "aws"
   ],
   "author": "Duong Dinh Cuong",

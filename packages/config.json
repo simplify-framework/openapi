@@ -10,9 +10,12 @@
         { "input": "package.mustache", "output": "package.json" },
         { "input": "mermaid.mustache", "output": "mermaid.yaml" },
         { "input": "openapi.mustache", "output": "openapi.yaml" },
+        { "input": "policy-relationship-role.mustache", "output": "policy-relationship-role.json" },
+        { "input": "policy-assume-role.mustache", "output": "policy-assume-role.json" },
         { "input": "deployment.mustache", "output": "{{deploymentNameSnake}}.yaml" },
         { "input": "deployment-push.mustache", "output": "deployment.js" },
         { "input": "policy-deployment.mustache", "output": "policy-deployment.json" },
+        { "input": "policy-services.mustache", "output": "policy-services.json" },
         { "input": "policy-execute-api.mustache", "output": "policy-execute-api.json" },
         { "input": "deployment-input.mustache", "output": "{{deploymentNameSnake}}.json" },
         { "input": "code-push.mustache", "output": "code-push.sh" },
@@ -35,7 +38,7 @@
         { "input": "app.mustache", "output": "{{projectName}}/app.js" }
     ],
     "Functions": {
-        "stacked": [
+        "stacked-js": [
             { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
@@ -59,7 +62,7 @@
             { "input": "webpack.config.layer.mustache", "output": "{{projectName}}/{{serviceName}}/webpack.config.layer.js" },
             { "input": "index-layer.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/index.js"}
         ],
-        "flatted": [
+        "flatted-js": [
             { "input": "app-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/app.js" },      
             { "input": "index-lambda.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.js" },
             { "input": "index-src.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/index.js"},
@@ -79,25 +82,31 @@
             { "input": ".babelrc.mustache", "output": "{{projectName}}/{{serviceName}}/.babelrc" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" }
         ],
-        "python": [
+        "flatted-py": [
+            { "input": "__init__.mustache", "output": "{{projectName}}/{{serviceName}}/src/__init__.py" },
+            { "input": "main.mustache", "output": "{{projectName}}/{{serviceName}}/src/main.py" },
             { "input": "index.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.py" },
+            { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}.py" },
             { "input": "README.mustache", "output": "{{projectName}}/{{serviceName}}/src/README.md" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },
+            { "input": "requirements.mustache", "output": "{{projectName}}/{{serviceName}}/src/requirements.txt" },
+            { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" },
             { "input": "sonar-project.mustache", "output": "{{projectName}}/{{serviceName}}/sonar-project.properties" },
             { "input": "sonarqube-scanner.mustache", "output": "{{projectName}}/{{serviceName}}/sonarqube-scanner.sh" },
             { "input": "function-push.mustache", "output": "{{projectName}}/{{serviceName}}/function-push.js" },
-            { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" }
+            { "input": "function-input.mustache", "output": "{{projectName}}/{{serviceName}}/function-input.json" },
+            { "input": "layer-push.mustache", "output": "{{projectName}}/{{serviceName}}/layer-push.js" }
         ]
     },
     "ServiceModel": {
-        "stacked": [
+        "stacked-js": [
             { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}/{{serviceModelName}}.js" },                
             { "input": "test-unit.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/units/{{serviceModelName}}.spec.js" },
             { "input": "test-api.spec.mustache", "output": "{{projectName}}/tests/{{serviceName}}/apis/{{serviceModelName}}.spec.js" }
         ]
     },
     "ServiceOperation": {
-        "stacked": [
+        "stacked-js": [
             { "input": "operation.mustache", "output": "{{projectName}}/{{serviceName}}/src/operations/{{operationId}}.js" }
         ]
     }
