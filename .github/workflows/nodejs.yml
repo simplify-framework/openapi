@@ -10,11 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  
   build:
-    defaults:
-      run:
-        working-directory: ./ci-test
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,12 +22,13 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install -g simplify-codegen
+    - run: npm link
+    - run: npm link simplify-codegen
     - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
     - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
-    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o .
-    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' .env
-    - run: cat .env
+    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o ./ci-test
+    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' ./ci-test/.env
+    - run: cat ./ci-test/.env
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -42,6 +39,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
         role-session-name: GitHubCISession
         role-duration-seconds: 1200
+    - run: cd ./ci-test
     - run: npm install
     - run: npm run stack-deploy
     - run: npm run push-code
