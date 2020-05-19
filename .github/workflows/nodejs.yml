@@ -26,9 +26,8 @@ jobs:
     - run: npm link simplify-codegen
     - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
     - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
-    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o ./ci-test
-    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' ./ci-test/.env
-    - run: cat ./ci-test/.env
+    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
+    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' $PWD/ci-test/.env
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
@@ -43,12 +42,12 @@ jobs:
     - run: cd $PWD/ci-test && npm install
     - run: cd $PWD/ci-test && npm run stack-deploy
     - run: cd $PWD/ci-test && npm run push-code
-    - run: npm run test
-    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=enforce/' .env
-    - run: sed -i '/^ENV_functionForPets_ENFORCEMENT_PACKAGE/s/=.*$/=function-for-pets-v10/' .env
-    - run: npm run push-code
-    - run: npm run test
-    #- run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=canary/' .env
-    #- run: npm run push-update
-    #- run: npm run test-apis
-    - run: npm run stack-destroy
+    - run: cd $PWD/ci-test && npm run test
+    - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=enforce/' .env
+    - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_ENFORCEMENT_PACKAGE/s/=.*$/=function-for-pets-v10/' .env
+    - run: cd $PWD/ci-test && npm run push-code
+    - run: cd $PWD/ci-test && npm run test
+    #- run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=canary/' .env
+    #- run: cd $PWD/ci-test && npm run push-update
+    #- run: cd $PWD/ci-test && npm run test-apis
+    - run: cd $PWD/ci-test && npm run stack-destroy
