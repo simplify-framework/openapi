@@ -25,15 +25,13 @@ jobs:
     - run: npm link
     - run: npm link simplify-codegen
     - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
-    - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
-    - run: sed -i '/^x-deployment-name/s/:.*$/:\ codegen-pets-demo/' openapi.yaml
+    - run: sed -i '/^x-deployment-name/s/:.*$/:\ test-pets-demo/' openapi.yaml
     - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
-    - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' $PWD/ci-test/.env
     - name: Check file existence
       id: check_files
       uses: andstor/file-existence-action@v1
       with:
-        files: "codegen-pets-demo.json, codegen-pets-demo.yaml, policy-deployment.json, policy-execute-api.json, .env"
+        files: "ci-test/test-pets-demo.json, ci-test/test-pets-demo.yaml, ci-test/policy-deployment.json, ci-test/policy-execute-api.json, ci-test/.env"
     - name: File exists
       if: steps.check_files.outputs.files_exists == 'true'
       run: echo All files exists!
