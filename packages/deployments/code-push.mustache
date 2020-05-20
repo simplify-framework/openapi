@@ -72,7 +72,9 @@ for i in "${!DEPLOYMENT_PACKAGES[@]}"; do
                 if [ "${DEPLOYMENT_LANGUAGES[$i]}" == "js" ]; then
                     mv layer/nodejs/node_modules/${!DeploymentLayerName} layer/nodejs/node_modules/${ENFORCEMENT_PACKAGE}
                 elif [ "${DEPLOYMENT_LANGUAGES[$i]}" == "py" ]; then
-                    mv layer/python/${!DeploymentLayerName//-/_}.py layer/python/${ENFORCEMENT_PACKAGE//-/_}.py
+                    DeploymentLayerNameUnderscore=`echo "${!DeploymentLayerName}" | tr '-' '_'`
+                    EnforcementPackageUnderscore=`echo "${ENFORCEMENT_PACKAGE}" | tr '-' '_'`
+                    mv layer/python/${DeploymentLayerNameUnderscore}.py layer/python/${EnforcementPackageUnderscore}.py
                 else
                     mv layer/java/${!DeploymentLayerName}.jar layer/java/${ENFORCEMENT_PACKAGE}.jar
                 fi

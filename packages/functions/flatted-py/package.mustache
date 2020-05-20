@@ -8,7 +8,7 @@
         "push-code": "env FUNCTION_SOURCE=src node function-push.js",
         "push-layer": "env LAYER_SOURCE=layer node layer-push.js",
         "build-code": "cd src/ && pip3 install -r requirements.txt",
-        "build-layer": "mkdir -p layer/python && file={{serviceNameSnake}} && cp src/${file}.py layer/python/${file//-/_}.py",
+        "build-layer": "mkdir -p layer/python && file={{serviceNameSnake}} && file_underscore=$(echo ${file} | tr '-' '_') && cp src/${file}.py layer/python/${file_underscore}.py",
         "code-scan": "bash sonarqube-scanner.sh",
         "start": "python index.py"
     },
