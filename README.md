@@ -1,6 +1,8 @@
 # Simplify Framework - CodeGen
   
 ![Node.js CI](https://github.com/simplify-framework/pets-project/workflows/Node.js%20CI/badge.svg)
+![NPM Downloads](https://img.shields.io/npm/dw/codegen)
+![Package Version](https://img.shields.io/github/package-json/v/simplify-framework/codegen?color=green)
 
 Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 

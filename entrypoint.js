@@ -12,7 +12,7 @@ const mkdirp = require('mkdirp');
 const processor = require('./processor.js');
 
 var argv = require('yargs')
-    .usage('simplify generate|reverse [options]')
+    .usage('simplify generate|templates|ui [options]')
     .describe('openapi', 'OpenAPI 3.0 spec YAML')
     .string('openapi')
     .alias('i', 'openapi')
@@ -58,16 +58,16 @@ let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
 const sampleName = path.join(__dirname, 'openapi.yaml')
 const outputYAML = path.resolve(argv.output, 'openapi.yaml')
 mkdirp(path.resolve(argv.output)).then(function () {
-    if (argv._[0] === 'petsample') {
+    if (argv._[0] === 'templates') {
         console.log("╓───────────────────────────────────────────────────────────────╖")
-        console.log("║                        Simplify Framework                     ║")
+        console.log("║               Simplify Framework  - CodeGen                   ║")
         console.log("╙───────────────────────────────────────────────────────────────╜")
-        console.log(` - Sample definition ${outputYAML}`);
-        fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
+        //console.log(` - Sample definition ${outputYAML}`);
+        //fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
         process.exit(0)
     } else {
         console.log("╓───────────────────────────────────────────────────────────────╖")
-        console.log("║                        Simplify Framework                     ║")
+        console.log("║               Simplify Framework  - CodeGen                   ║")
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - OpenAPI definition ${defName}`);
         runCommandLine()
