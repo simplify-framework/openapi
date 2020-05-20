@@ -4,41 +4,13 @@
 name: CodeGen Deployment-Check
 
 on:
-  #pull_request:
-  #  branches: [ master ]
-  #push:
-  #  branches: [ master ]
-  schedule:
-    - cron: '0 18 * * *' # Daily at 18:00 UTC
+  pull_request:
+    branches: [ master ]
+  push:
+    branches: [ master ]
 
 jobs:
-  gen-code:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [12.x]
-      
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm link
-    - run: npm link simplify-codegen
-    - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
-    - run: sed -i '/^x-deployment-name/s/:.*$/:\ test-pets-demo/' openapi.yaml
-    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
-    - name: Check file existence
-      id: check_files
-      uses: andstor/file-existence-action@v1
-      with:
-        files: "ci-test/test-pets-demo.json, ci-test/test-pets-demo.yaml, ci-test/policy-deployment.json, ci-test/policy-execute-api.json, ci-test/.env"
-    - name: File exists
-      if: steps.check_files.outputs.files_exists == 'true'
-      run: echo All files exists!
-
-  test-code:
+  test-petsample:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -68,14 +40,19 @@ jobs:
         role-duration-seconds: 1200
     - run: cd $PWD/ci-test && ls
     - run: cd $PWD/ci-test && npm install
+    - run: cd $PWD/ci-test && npm run test-units
     - run: cd $PWD/ci-test && npm run stack-deploy
     - run: cd $PWD/ci-test && npm run push-code
-    - run: cd $PWD/ci-test && npm run test
+    - run: cd $PWD/ci-test && npm run test-apis
+    - run: cd $PWD/ci-test && sed -i '/^ENV_eventFunctionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' .env
+    - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPeple_DEPLOYMENT_STAGE/s/=.*$/=stable/' .env
+    - run: cd $PWD/ci-test && sed -i '/^ENV_functionForEtrangerPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' .env
     - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=enforce/' .env
     - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_ENFORCEMENT_PACKAGE/s/=.*$/=function-for-pets-v10/' .env
     - run: cd $PWD/ci-test && npm run push-code
-    - run: cd $PWD/ci-test && npm run test
-    #- run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=canary/' .env
-    #- run: cd $PWD/ci-test && npm run push-update
-    #- run: cd $PWD/ci-test && npm run test-apis
+    - run: cd $PWD/ci-test && npm run test-apis
+    - run: cd $PWD/ci-test && sed -i '/^ENV_eventFunctionForPets_DEPLOYMENT_STAGE/s/=.*$/=canary/' .env
+    - run: cd $PWD/ci-test && sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=canary/' .env
+    - run: cd $PWD/ci-test && npm run push-update
+    - run: cd $PWD/ci-test && npm run test-apis
     - run: cd $PWD/ci-test && npm run stack-destroy

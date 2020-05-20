@@ -1,9 +1,9 @@
 name: CodeGen Security-Check
 on:
-  #schedule:
-  #  - cron: '0 18 * * *' # Daily at 18:00 UTC
-  pull_request:
-    branches: [ master ]
+  schedule:
+    - cron: '0 1 * * *' # Daily at 01:00 UTC
+  #push:
+  #  branches: [ master ]
 
 jobs:
   latest:

@@ -35,7 +35,8 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 ## Generate Open API specs sample for pets:
 - `mkdir pets-project` to create project folder for pets
 - `cd pets-project && npm link simplify-codegen` if you install from github
-- `simplify-codegen petsample` to generate OpenAPI 3.0 specs
+- `simplify-codegen template -i petsample` to create a `petsample` OpenAPI 3.0 specs
+- `simplify-codegen template -i othername` to create a `othername` OpenAPI 3.0 specs
 
 ## Generate project using command line:
 - `simplify-codegen generate -i openapi.yaml` to generate code in the current folder
