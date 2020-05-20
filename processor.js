@@ -164,7 +164,7 @@ function main(o, config, callback) {
                         model.apiInfo.services.map(svc => {
                             let serviceModel = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, svc, config.apis);
                             serviceModel.serviceControl = svc.serviceEntries.some(op => op.serviceControl)
-                            if (serviceModel.serviceTemplate == pkg) {
+                            if (`${svc.serviceTemplate}-${svc.serviceLanguage}` == pkg) {
                                 let filename = fnTemplate.render(serviceModel, config.partials);
                                 let requestDir = require('path').dirname(path.join(outputDir, subDir, filename))
                                 if (!ff.existsSync(requestDir)) {
@@ -186,7 +186,7 @@ function main(o, config, callback) {
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
                             let models = {}
-                            if (svc.serviceTemplate == pkg) {
+                            if (`${svc.serviceTemplate}-${svc.serviceLanguage}` == pkg) {
                                 svc.serviceEntries.map(endpoint => {
                                     if (!models[endpoint.serviceModelName]) {
                                         models[endpoint.serviceModelName] = endpoint
@@ -222,7 +222,7 @@ function main(o, config, callback) {
                         let fnTemplate = Hogan.compile(cfg.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
                         model.apiInfo.services.map(svc => {
-                            if (svc.serviceTemplate == pkg) {
+                            if (`${svc.serviceTemplate}-${svc.serviceLanguage}` == pkg) {
                                 svc.serviceEntries.map(endpoint => {
                                     endpoint.operations.map(op => {
                                         let operation = Object.assign({}, config.defaults, cfg.defaults || {}, toplevel, endpoint, op, config.apis);

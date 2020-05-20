@@ -13,7 +13,7 @@ const opName = `Function`
 const simplify = require('simplify-sdk')
 const provider = require('simplify-sdk/provider')
 var configInputFile = process.env.FUNCTION_INPUT || "function-input.json"
-var configSrcDir =  process.env.FUNCTION_SOURCE || "."
+var configSrcDir =  process.env.FUNCTION_SOURCE || "src"
 var functionOps = process.env.FUNCTION_OPS || "push"
 process.env.ENFORCEMENT_PACKAGE = process.env.ENFORCEMENT_PACKAGE || ''
 process.env.DEPLOYMENT_STAGE = process.env.DEPLOYMENT_STAGE || 'latest'
@@ -38,14 +38,14 @@ try {
     provider.setConfig(config).then(function() {
         if (functionOps === 'fetch') {
             simplify.getFunctionMetaInfos({ adaptor: provider.getFunction(), functionConfig}).then(data => {
-                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, configInput.OutputFile)))
+                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, config.OutputFile)))
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     ...metaOutput, ...data
                 }, null, 4));
             }).catch(err => simplify.finishWithErrors(`${opName}-Update`, err))
         } else if (functionOps === 'update') {
             simplify.updateFunctionConfiguration({ adaptor: provider.getFunction(), functionConfig}).then(data => {
-                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, configInput.OutputFile)))
+                let metaOutput = JSON.parse(fs.readFileSync(path.join(__dirname, config.OutputFile)))
                 fs.writeFileSync(path.join(__dirname, config.OutputFile), JSON.stringify({
                     Configuration: { ...metaOutput.Configuration, ...data }
                 }, null, 4));

@@ -58,6 +58,7 @@ function getProperties(obj, define, prefix) {
                 properties[varName] = varData
                 properties[varName + 'Title'] = (obj[key] || '').split('-').join(' ')
                 properties[varName + 'Snake'] = Case.snake(varData).split('_').join('-');
+                properties[varName + 'Underscore'] = Case.snake(varData);
                 properties[varName + 'Pascal'] = varData.toPascalCase()
                 properties[varName + 'Origin'] = obj[key]
                 properties[varName + obj[key].toPascalCase()] = true
@@ -395,6 +396,27 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
     return operation;
 }
 
+function serviceRuntimeTemplateParse(service) {
+    service.serviceTemplate = service.serviceTemplate || (service.eventServiceTypeBoolean ? 'flatted' : 'stacked')
+    service.serviceRuntime = (service.serviceRuntime || 'nodejs12.x').toLowerCase()
+    service.serviceLanguage = 'js'
+    if (service.serviceRuntime.startsWith('python')) {
+        service.serviceLanguage = 'py'
+        service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'python3.7'
+        service.serviceCode = service.serviceCode || `def handler(event, context): return { \'statusCode\': 200, \'body'\: \'{}\' }`
+    } else if (service.serviceRuntime.startsWith('java')) {
+        service.serviceLanguage = 'java'
+    } else if (service.serviceRuntime.startsWith('nodej')) {
+        service.serviceLanguage = 'js'
+        service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'
+        service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`
+    } else {
+        console.error(` - Service Runtime ${service.serviceRuntime} is not supported!`)
+        process.exit(255)
+    }
+    return service
+}
+
 function convertToServices(source, obj, defaults) {
     let services = []
     let paths = [];
@@ -459,20 +481,7 @@ function convertToServices(source, obj, defaults) {
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
                 serviceEntries: [pathEntry]
             }
-            service.serviceTemplate = service.serviceTemplate || (service.eventServiceTypeBoolean ? 'flatted' : 'stacked')
-            if (service.serviceTemplate == 'stacked' || service.serviceTemplate == 'flatted') {
-                service.serviceRuntime = service.serviceRuntime || 'nodejs12.x'
-                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'nodejs12.x'
-                service.serviceCode = service.serviceCode || `exports.handler = function (event, context) { context.succeed({ statusCode: 200, body: JSON.stringify({}) })}`
-            } else if (service.serviceTemplate == 'python') {
-                service.serviceRuntime = service.serviceRuntime || 'python3.7'
-                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'python3.7'
-                service.serviceCode = service.serviceCode || `def handler(event, context): return { \"statusCode\": 200, \"body\": \"{}\" }`
-            } else {
-                service.serviceRuntime = service.serviceRuntime || 'python3.7'
-                service.serviceRuntimeOrigin = service.serviceRuntimeOrigin || 'python3.7'
-                service.serviceCode = service.serviceCode || `def handler(event, context): return { \'statusCode\': 200, \'body'\: \'{}\' }`
-            }
+            service = serviceRuntimeTemplateParse(service)
             service.serviceModels = [service.serviceModelName]
             services.push(service)
         } else {
