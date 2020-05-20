@@ -4,8 +4,8 @@
     "description": "{{{projectDescription}}}",
     "scripts": {
         "test": "cd {{projectName}} && npm install && npm run test",
-        "test": "cd {{projectName}} && npm install && npm run test-units",
-        "test": "cd {{projectName}} && npm install && npm run test-apis",
+        "test-units": "cd {{projectName}} && npm install && npm run test-units",
+        "test-apis": "cd {{projectName}} && npm install && npm run test-apis",
         "start": "npm install && npm run stack-deploy && cd {{projectName}} && npm install && npm run test-apis",
         "gencode": "simplify-codegen generate -i openapi.yaml -o . --merge",
         "stack-deploy": "node deployment.js --input {{deploymentNameSnake}}.json",
