@@ -1,4 +1,4 @@
-name: CodeGen Security-Check
+name: Coverity CI
 on:
   schedule:
     - cron: '0 1 * * *' # Daily at 01:00 UTC
