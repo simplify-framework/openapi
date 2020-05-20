@@ -6,6 +6,7 @@
 /output
 **/build/
 **/apps/
+cov-int
 .scannerwork
 # local env files
 .env.local
