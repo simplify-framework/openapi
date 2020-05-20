@@ -1,11 +1,15 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: Node.js CI
+name: CodeGen Deployment-Check
 
 on:
-  pull_request:
-    branches: [ master ]
+  #pull_request:
+  #  branches: [ master ]
+  #push:
+  #  branches: [ master ]
+  schedule:
+    - cron: '0 18 * * *' # Daily at 18:00 UTC
 
 jobs:
   gen-code:
