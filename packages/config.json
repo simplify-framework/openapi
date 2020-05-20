@@ -86,6 +86,8 @@
             { "input": "__init__.mustache", "output": "{{projectName}}/{{serviceName}}/src/__init__.py" },
             { "input": "main.mustache", "output": "{{projectName}}/{{serviceName}}/src/main.py" },
             { "input": "index.mustache", "output": "{{projectName}}/{{serviceName}}/src/index.py" },
+            { "input": "Dockerfile.mustache", "output": "{{projectName}}/{{serviceName}}/Dockerfile" },
+            { "input": "docker-entrypoint.mustache", "output": "{{projectName}}/{{serviceName}}/docker-entrypoint.sh" },
             { "input": "service.mustache", "output": "{{projectName}}/{{serviceName}}/src/{{serviceNameSnake}}.py" },
             { "input": "README.mustache", "output": "{{projectName}}/{{serviceName}}/src/README.md" },
             { "input": "package.mustache", "output": "{{projectName}}/{{serviceName}}/package.json" },

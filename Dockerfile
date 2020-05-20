@@ -1,15 +1,20 @@
 FROM node:alpine
-LABEL maintainer="mike.ralphson@gmail.com" description="OpenAPI 2.0/3.0 CodeGen"
-ENV NODE_ENV=production
-WORKDIR /app
+ENV LOG_LEVEL "info"
 
-# install deps first (enables layer reuse)
-COPY package.json .
-RUN apk update && apk upgrade && \
-    apk add --no-cache bash git openssh
-RUN npm config set cache /tmp && npm i && rm -rf /tmp/*
+COPY . /home/nodeapp
+RUN chmod +x /home/nodeapp/docker-entrypoint.sh
+RUN apk --update add curl ca-certificates &&\
+    addgroup -g 1001 nodeapp && \
+    adduser -u 1001 -G nodeapp -s /bin/sh -D nodeapp && \
+    cd /home/nodeapp && npm install && \
+    rm -rf /var/lib/apt/lists/* &&\
+    rm -rf /var/cache/apk/*
 
-# now load the app source
-COPY . .
+# Run as the node user ID.
+USER nodeapp
+
+WORKDIR /home/nodeapp
+
 EXPOSE 3000
-CMD [ "node", "cg", "--help" ]
+
+CMD ["npm","start"]

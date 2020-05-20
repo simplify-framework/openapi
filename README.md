@@ -1,6 +1,9 @@
 # Simplify Framework - CodeGen
   
-![Node.js CI](https://github.com/simplify-framework/codegen/workflows/Node.js%20CI/badge.svg)
+![Node.js CI](https://github.com/simplify-framework/pets-project/workflows/Node.js%20CI/badge.svg)
+![NPM Downloads](https://img.shields.io/npm/dw/codegen)
+![Package Version](https://img.shields.io/github/package-json/v/simplify-framework/codegen?color=green)
+![Coverity Scan](https://scan.coverity.com/projects/21173/badge.svg)
 
 Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
 
@@ -32,7 +35,8 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 ## Generate Open API specs sample for pets:
 - `mkdir pets-project` to create project folder for pets
 - `cd pets-project && npm link simplify-codegen` if you install from github
-- `simplify-codegen petsample` to generate OpenAPI 3.0 specs
+- `simplify-codegen template -i petsample` to create a `petsample` OpenAPI 3.0 specs
+- `simplify-codegen template -i othername` to create a `othername` OpenAPI 3.0 specs
 
 ## Generate project using command line:
 - `simplify-codegen generate -i openapi.yaml` to generate code in the current folder
