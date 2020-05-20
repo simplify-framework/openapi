@@ -23,7 +23,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm link
     - run: npm link simplify-codegen
-    - run: simplify-codegen petsample -p ${{ secrets.PROJECT_ID }}
+    - run: simplify-codegen template -i petsample
     - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
     - run: sed -i '/^x-deployment-name/s/:.*$/:\ codegen-pets-demo/' openapi.yaml
     - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
