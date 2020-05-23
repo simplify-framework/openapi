@@ -423,7 +423,6 @@ function convertToServices(source, obj, defaults) {
     let serviceMetas = {};
     for (let p in source.paths) {
         var serviceMeta = {
-            serviceType: 'aws::lambda',
             hasServicePath: true,
             ...getProperties(source.paths[p], 'x-api-'),
             ...getProperties(source.paths[p], 'x-event-')
