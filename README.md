@@ -1,7 +1,7 @@
 # Simplify Framework - CodeGen
   
 ![Devops CI/CD](https://github.com/simplify-framework/codegen/workflows/DevOps%20CI/CD/badge.svg)
-![NPM Downloads](https://img.shields.io/npm/dw/codegen)
+![NPM Downloads](https://img.shields.io/npm/dw/simplify-codegen)
 ![Package Version](https://img.shields.io/github/package-json/v/simplify-framework/codegen?color=green)
 ![Coverity Scan](https://scan.coverity.com/projects/21173/badge.svg)
 
