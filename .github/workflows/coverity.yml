@@ -17,9 +17,9 @@ jobs:
           sudo apt-get install ruby2.5
           sudo apt-get build-dep ruby2.5
 
-      - name: Checkout simplify-framework/simplify-codegen
+      - name: Checkout simplify-framework/openapi
         run: |
-          git clone --depth=1 https://github.com/simplify-framework/codegen .
+          git clone --depth=1 https://github.com/simplify-framework/openapi .
 
       - name: Download Coverity Build Tool
         run: |
@@ -39,14 +39,14 @@ jobs:
 
       - name: Submit the result to Coverity Scan
         run: |
-          tar czvf simplify-codegen.tgz cov-int
+          tar czvf simplify-openapi.tgz cov-int
           curl \
             --form project=simplify-codegen \
             --form token=$TOKEN \
-            --form email=codegen@simplify-framwork.org \
-            --form file=@simplify-codegen.tgz \
+            --form email=openapi@simplify-framwork.org \
+            --form file=@simplify-openapi.tgz \
             --form version=latest \
             --form description="Simplify Codegen Security Scan" \
-            https://scan.coverity.com/builds?project=simplify-codegen
+            https://scan.coverity.com/builds?project=simplify-openapi
         env:
           TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}

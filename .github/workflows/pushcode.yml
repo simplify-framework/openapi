@@ -22,11 +22,11 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm link
-    - run: npm link simplify-codegen
-    - run: simplify-codegen template -i petsample
+    - run: npm link simplify-openapi
+    - run: simplify-openapi template -i petsample
     - run: sed -i '/^x-deployment-profile:/d' openapi.yaml
     - run: sed -i '/^x-deployment-name/s/:.*$/:\ codegen-pets-demo/' openapi.yaml
-    - run: simplify-codegen generate -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
+    - run: simplify-openapi -i openapi.yaml -p ${{ secrets.PROJECT_ID }} -a ${{ secrets.AWS_ACCOUNT_ID }} -o $PWD/ci-test
     - run: sed -i '/^ENV_functionForPets_DEPLOYMENT_STAGE/s/=.*$/=stable/' $PWD/ci-test/.env
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1

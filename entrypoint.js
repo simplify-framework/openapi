@@ -12,7 +12,7 @@ const mkdirp = require('mkdirp');
 const processor = require('./processor.js');
 
 var argv = require('yargs')
-    .usage('simplify generate|template|ui [options]')
+    .usage('simplify [generate]|template [options]')
     .describe('openapi', 'OpenAPI 3.0 spec YAML')
     .string('openapi')
     .alias('i', 'openapi')
@@ -44,30 +44,29 @@ var argv = require('yargs')
     .alias('n', 'ignores')
     .describe('ignores', 'eg: keep-your-code.js;keep-your-data.json')
     .demandOption(['o'])
-    .demandCommand(1)
+    .demandCommand(0)
     .argv;
 
-if (argv._[0] !== 'generate' && argv._[0] !== 'template') {
-    console.log(` - The command '${argv._[0]}' is not supported or no longer supported. Try with 'generate' command`)
-    process.exit(-1)
+if (argv._[0] === 'generate') {
+    console.log(` - The command '${argv._[0]}' is now supported by default. You can ignore it for your short hand.`)
 }
-let configPath = path.resolve(__dirname, 'packages');
-let configFile = path.join(path.join(configPath), 'config.json');
+const templatePath = require("simplify-templates")
+let configFile = path.join(path.join(templatePath), 'openapi-config.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
 let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
 const sampleName = path.join(__dirname, 'templates', (argv.input || 'petsample') + '.yaml')
 const outputYAML = path.resolve(argv.output, 'openapi.yaml')
 mkdirp(path.resolve(argv.output)).then(function () {
-    if (argv._[0] === 'template') {
+    if (argv._.length && argv._[0] === 'template') {
         console.log("╓───────────────────────────────────────────────────────────────╖")
-        console.log("║               Simplify Framework  - CodeGen                   ║")
+        console.log("║               Simplify Framework  - OpenAPI                   ║")
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - Sample definition ${outputYAML}`);
         fs.writeFileSync(outputYAML, fs.readFileSync(sampleName, 'utf8'), 'utf8')
         process.exit(0)
     } else {
         console.log("╓───────────────────────────────────────────────────────────────╖")
-        console.log("║               Simplify Framework  - CodeGen                   ║")
+        console.log("║               Simplify Framework  - OpenAPI                   ║")
         console.log("╙───────────────────────────────────────────────────────────────╜")
         console.log(` - OpenAPI definition ${defName}`);
         runCommandLine()
@@ -111,11 +110,7 @@ function mergeObjects(obj, moreObj) {
 }
 
 function runCommandLine() {
-
-    if (config.generator) {
-        let generator_path = path.resolve(configPath, config.generator);
-        config.generator = require(generator_path);
-    }
+    config.generator = templatePath
     if (argv.verbose) {
         config.defaults.verbose = true;
         logger.debug('Loaded configuration.');

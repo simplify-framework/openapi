@@ -1,8 +1,11 @@
-# Simplify Framework - CodeGen
-  
+# Simplify Framework - OpenAPI RESTful Based Serverless  
+
+This REST API model has moved to `npm install simplify-openapi -g` from version 0.1.9.
+With new branch of GraphQL Serverless Model at `npm install simplify-graphql -g` 
+
 ![Devops CI/CD](https://github.com/simplify-framework/codegen/workflows/DevOps%20CI/CD/badge.svg)
-![NPM Downloads](https://img.shields.io/npm/dw/simplify-codegen)
-![Package Version](https://img.shields.io/github/package-json/v/simplify-framework/codegen?color=green)
+![NPM Downloads](https://img.shields.io/npm/dw/simplify-openapi)
+![Package Version](https://img.shields.io/github/package-json/v/simplify-framework/openapi?color=green)
 ![Coverity Scan](https://scan.coverity.com/projects/21173/badge.svg)
 
 Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codegen)
@@ -26,21 +29,21 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 - Local and independant development code run (http://localhost:3000) by node `express`
 
 ## Install from published NPM packages
-- `npm install -g simplify-codegen`
+- `npm install -g simplify-openapi`
 
 ## Install codegen from github sourcode, link to dependancy system
-- `git clone https://github.com/simplify-framework/codegen.git`
-- `cd codegen && npm install && npm link`
+- `git clone https://github.com/simplify-framework/openapi.git`
+- `cd openapi && npm install && npm link`
 
 ## Generate Open API specs sample for pets:
 - `mkdir pets-project` to create project folder for pets
-- `cd pets-project && npm link simplify-codegen` if you install from github
-- `simplify-codegen template -i petsample` to create a `petsample` OpenAPI 3.0 specs
-- `simplify-codegen template -i othername` to create a `othername` OpenAPI 3.0 specs
+- `cd pets-project && npm link simplify-openapi` if you install from github
+- `simplify-openapi template -i petsample` to create a `petsample` OpenAPI 3.0 specs
+- `simplify-openapi template -i othername` to create a `othername` OpenAPI 3.0 specs
 
 ## Generate project using command line:
-- `simplify-codegen generate -i openapi.yaml` to generate code in the current folder
-- `simplify-codegen generate -i openapi.yaml -o other-folder` to specify another folder
+- `simplify-openapi -i openapi.yaml` to generate code in the current folder
+- `simplify-openapi -i openapi.yaml -o other-folder` to specify another folder
 
 ## Setup AWS configuration profile
 - Create a deployment user in IAM: `simplify-user`
