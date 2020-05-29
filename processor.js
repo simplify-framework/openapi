@@ -98,17 +98,16 @@ let ff = {
 };
 
 function tpl(...segments) {
-    return path.join(__dirname, 'packages', ...segments)
+    return path.join(...segments)
 }
 
 function main(o, config, callback) {
     let outputDir = path.join(config.outputDir || './out/');
     let verbose = config.defaults.verbose;
     let cleanUp = config.cleanUp || false;
-    let templateFolder = '';
+    let templateFolder = config.generator;
     adaptor.transform(o, config.defaults, function (err, model) {
-        const subDir = (config.defaults.flat ? '' : templateFolder);
-        let actions = [];
+        const subDir = (config.defaults.flat ? '' : 'output');
         if (verbose) logger.info('Making/cleaning output directories');
         var outputDirPath = path.join(outputDir, subDir)
         if (!err) {
@@ -124,12 +123,12 @@ function main(o, config, callback) {
         } else {
             callback && callback(err, null)
         }
-        function parseContent(type, model, config) {
+        function parseContent(type, model, config, locationDir) {
             if (config[type]) {
                 let mermaidContent = { mermaidBase64JSON: '' }
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
-                templateFolder = type.toLowerCase();
+                templateFolder = path.join(config.generator, locationDir);
                 for (let cfg of config[type]) {
                     let fnTemplate = Hogan.compile(cfg.output);
                     let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
@@ -151,13 +150,13 @@ function main(o, config, callback) {
             }
         }
         function generate() {
-            parseContent('Deployments', model, config)
-            parseContent('Applications', model, config)
+            parseContent('Deployments', model, config, "deployments")
+            parseContent('Applications', model, config, "restapi")
             if (config.Functions) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
                 Object.keys(config.Functions).map(function (pkg) {
-                    templateFolder = path.join('functions', pkg);
+                    templateFolder = path.join(config.generator, 'functions', pkg);
                     for (let cfg of config.Functions[pkg]) {
                         let fnTemplate = Hogan.compile(cfg.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
@@ -180,7 +179,7 @@ function main(o, config, callback) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
                 Object.keys(config.ServiceModel).map(function (pkg) {
-                    templateFolder = path.join('functions', pkg);
+                    templateFolder = path.join(config.generator, 'functions', pkg);
                     for (let cfg of config.ServiceModel[pkg]) {
                         let fnTemplate = Hogan.compile(cfg.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));
@@ -217,7 +216,7 @@ function main(o, config, callback) {
                 let toplevel = clone(model);
                 delete toplevel.apiInfo;
                 Object.keys(config.ServiceOperation).map(function (pkg) {
-                    templateFolder = path.join('functions', pkg);
+                    templateFolder = path.join(config.generator, 'functions', pkg);
                     for (let cfg of config.ServiceOperation[pkg]) {
                         let fnTemplate = Hogan.compile(cfg.output);
                         let template = Hogan.compile(ff.readFileSync(tpl(templateFolder, cfg.input), 'utf8'));

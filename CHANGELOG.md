@@ -1,4 +1,6 @@
-# simplify-codegen (0.9.3)
+# simplify-openapi (0.1.19)
+
+# simplify-codegen (0.1.7)
 
 * Rewritten almost adaptor.js, processor.js (local.js) and refactoring solution
 * Customized to be simplify-framework AWS Lambda Serverless Toolkit 
