@@ -49,7 +49,7 @@ if (argv._[0] === 'generate') {
     console.log(` - The command '${argv._[0]}' is now supported by default. You can ignore it for your short hand.`)
 }
 const templatePath = require("simplify-templates")
-let configFile = path.join(path.join(templatePath), 'openapi-config.json');
+let configFile = path.join(path.join(templatePath), 'config-openapi.json');
 let config = yaml.parse(fs.readFileSync(configFile, 'utf8'), { prettyErrors: true });
 let defName = path.resolve(path.join(argv.openapi || 'openapi.yaml'));
 const sampleName = path.join(__dirname, 'templates', (argv.input || 'petsample') + '.yaml')
@@ -169,9 +169,9 @@ function despatch(obj, config, callback) {
 function main(o) {
     if (o && o.openapi) {
         despatch(o, config, function (err) {
-            console.warn(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)' : 'off (use option --merge to turn on)'}`)
-            console.warn(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)' : 'off (use option --diff to turn on)'}`)
-            console.log(` - Finished generation ${!err ? `with NO error. See ${argv.output} for your generated code!` : err}`);
+            console.log(` - Automatic code merge is ${config.defaults.merge ? 'on (use option --merge=false to turn off)' : 'off (use option --merge to turn on)'}`)
+            console.log(` - Diff file generation is ${config.defaults.diff ? 'on (automatic turn on if --merge=false)' : 'off (use option --diff to turn on)'}`)
+            console.log(` - Finish code generation ${!err ? `with NO error. See ${argv.output=="./"?"current folder":argv.output} for your code!` : err}`);
         });
     }
     else {
