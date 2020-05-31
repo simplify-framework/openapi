@@ -16,6 +16,7 @@ const CDONE = '\x1b[37m'
 
 function creatFileOrPatch(filePath, newFileData, encoding, config) {
     try {
+        const inputFileName = path.basename(config.input)
         if (fs.existsSync(filePath)) {            
             let ignoreOverridenFiles = [
                 ".env.mustache",
@@ -37,7 +38,7 @@ function creatFileOrPatch(filePath, newFileData, encoding, config) {
                     ignoreOverridenFiles.push(ignoredFile)
                 })
             }
-            if (ignoreOverridenFiles.indexOf(config.input)>=0) {
+            if (ignoreOverridenFiles.indexOf(inputFileName)>=0) {
                 if (config.verbose) logger.debug("F-Ignoring...", filePath)                
                 return undefined
             } 

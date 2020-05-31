@@ -649,7 +649,7 @@ function getPrime(api, defaults) {
     prime.serviceVersion = "0.1.1";
     prime.projectVersion = "0.1.1";
     prime.deploymentAccount = defaults.account || prime.deploymentAccount
-    prime.projectId = defaults.pid || api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
+    prime.projectId = defaults.project || api['x-project-id'] || cryptoRandomNumber(10000000, 99999999)
     api['x-project-id'] = prime.projectId
     prime.gatewayApiKey = api['x-api-key'] || cryptoRandomApiKey(40)
     api['x-api-key'] = prime.gatewayApiKey
