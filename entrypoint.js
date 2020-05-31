@@ -21,14 +21,12 @@ var argv = require('yargs')
     .alias('o', 'output')
     .describe('output', 'output directory')
     .default('output', '.')
-    .string('pid')
-    .alias('p', 'pid')
-    .describe('pid', 'project Id')
-    .default('pid', '')
+    .string('project')
+    .alias('p', 'project')
+    .describe('project', 'project Id')
     .string('account')
     .alias('a', 'account')
     .describe('account', 'account Id')
-    .default('pid', '')
     .boolean('verbose')
     .default('verbose', false)
     .describe('verbose', 'Increase verbosity')
@@ -121,8 +119,8 @@ function runCommandLine() {
     if (argv.merge) {
         config.defaults.merge = true;
     }
-    if (argv.pid) {
-        config.defaults.pid = argv.pid;
+    if (argv.project) {
+        config.defaults.project = argv.project;
     }
     if (argv.account) {
         config.defaults.account = argv.account;
