@@ -21,12 +21,18 @@ paths:
       responses:
         '200':
           description: Success
-  '/etranger/pets':
+  '/etranger/pets/{id}':
     x-api-service-name: function-for-etranger-pets
     x-api-service-template: flatted # default is stacked for API, can be one of [stacked, flatted, python]
     x-api-service-runtime: python3.7
     x-api-service-public: true # explicit to expose this entry through API Gateway [required]
     get:
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: Success
