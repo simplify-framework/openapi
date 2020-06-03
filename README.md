@@ -1,4 +1,4 @@
-# Simplify Framework - OpenAPI RESTful Based Serverless  
+# Simplify Framework - OpenAPI Based Serverless  
 
 This REST API model has moved to `npm install simplify-openapi -g` from version 0.1.9.
 With new branch of GraphQL Serverless Model at `npm install simplify-graphql -g` 
@@ -31,7 +31,7 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 ## Install from published NPM packages
 - `npm install -g simplify-openapi`
 
-## Install codegen from github sourcode, link to dependancy system
+## Install codegen from github sourcode
 - `git clone https://github.com/simplify-framework/openapi.git`
 - `cd openapi && npm install && npm link`
 
@@ -45,13 +45,21 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
 - `simplify-openapi -i openapi.yaml` to generate code in the current folder
 - `simplify-openapi -i openapi.yaml -o other-folder` to specify another folder
 
-## Setup AWS configuration profile
+## Running with Docker Compose at localhost:
+- `cd projectPets && docker-compose up -d`
+- List pets at http://localhost/project-pets/pets
+- Feed pets at http://localhost/project-pets/pets/1/feed/2
+- `docker-compose down` to stop running!
+
+## Setup AWS configuration profile:
 - Create a deployment user in IAM: `simplify-user`
 - Setup IAM Role Policy using: `policy-deployment.json`
+- Setup IAM Role Policy using: `policy-services.json`
 - Setup IAM Role Policy using: `policy-execute-api.json`
 - Configure your machine `aws configure --profile simplify-eu`
+(See [Pets Project](https://github.com/simplify-framework/pets-project-template) for more information)
 
-## You are in the pets project directory
+## Run as AWS Lambda functions:
 - `npm install` to install project dependancies and tools
 - `npm run stack-deploy` to provision code containers (AWS Lambda empty functions)
 - `npm run push-code` to deploy and run code as declared in .env variables (ENV_*)
@@ -59,7 +67,7 @@ Initial code based on [openapi-codegen](https://github.com/Mermade/openapi-codeg
   + ENV_functionName_ENFORCEMENT_PACKAGE=specific-package-name-with-version (`enforce` mode only)
 - `npm run stack-destroy` to provision code containers (AWS Lambda empty functions)
 
-## Microservices architecture in AWS:
+## Serverless architecture in AWS:
 + AWS API Gateway REST API
   + AWS Lambda function   (service #1)
     - AWS Secret Manager  (key vault)

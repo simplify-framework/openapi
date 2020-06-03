@@ -382,9 +382,8 @@ function convertMethodOperation(op, verb, path, pathItem, obj, api) {
             });
         }
     }
-    operation.pathParams.map(p => {
-        operation.replacedPathName = operation.path.replace(/{/g, ':').replace(/}/g, '')
-    })
+    operation.replacedPathName = operation.path.replace(/{/g, ':').replace(/}/g, '')
+    operation.pythonPathName = operation.path.replace(/{/g, '<').replace(/}/g, '>')
     operation.queryParams = convertArray(operation.queryParams);
     operation.headerParams = convertArray(operation.headerParams);
     operation.pathParams = convertArray(operation.pathParams);
@@ -441,6 +440,8 @@ function convertToServices(source, obj, defaults) {
                 if (!pathEntry) {
                     pathEntry = {};
                     pathEntry.path = p;
+                    const multiPaths = pathEntry.path.split('/')
+                    pathEntry.resourcePath = `/${multiPaths.length > 1 ? multiPaths[1]: '/'}`
                     const split = p.replace(/^\//, '').split(/\//g);
                     const defaultServiceName = split.map(v => v.replace(/{([^}]+)}/g, (v, v1) => `By${v1[0].toUpperCase()}${v1.slice(1)}`).replace(/^./, (v) => `${v[0].toUpperCase()}${v.slice(1)}`)).join('').toCamelCase().split(' ').join('').split('-').join('')
                     serviceMetas[p].serviceModelName = serviceMetas[p].serviceModelName || defaultServiceName;
@@ -478,7 +479,8 @@ function convertToServices(source, obj, defaults) {
             service = {
                 ...serviceMetas[pathEntry.path],
                 serviceHystrixStream: pathEntry.serviceHystrixStream,
-                serviceEntries: [pathEntry]
+                serviceEntries: [pathEntry],
+                resourceEntries: [{ path : pathEntry.resourcePath}]
             }
             service = serviceRuntimeTemplateParse(service)
             service.serviceModels = [service.serviceModelName]
@@ -492,6 +494,12 @@ function convertToServices(source, obj, defaults) {
                 service.serviceEntries.push(serviceOperations)
             } else {
                 serviceOperations.operations.push({...pathEntry.operations[0], ...pathEntry.serviceMeta})
+            }
+            let resourcePathExisted = service.resourceEntries.find(function (e, i, a) {
+                return (e.path === pathEntry.resourcePath);
+            });
+            if (!resourcePathExisted) {
+                service.resourceEntries.push({ path: pathEntry.resourcePath })
             }
             service.serviceModels = convertArray(service.serviceEntries.filter((v, i, a) => a.findIndex(t => (t.serviceModelName === v.serviceModelName)) === i))
             serviceOperations.hasOptions = serviceOperations.operations.some(op => op.httpMethodLowerCase == 'post' || op.httpMethodLowerCase == 'put' || op.httpMethodLowerCase == 'patch')
